@@ -18,9 +18,18 @@ export interface Route {
   routeType?: string;
 }
 
+export interface MotionPath {
+  playerId: string;
+  fromX: number;
+  fromY: number;
+  toX: number;
+  toY: number;
+}
+
 export interface CanvasData {
   players: CanvasPlayer[];
   routes: Route[];
+  motions: MotionPath[];
   meta: {
     formation: string;
     playType: string;

@@ -14,7 +14,7 @@ import { getFormationById } from "@/engine/constants";
 import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
 import { generateKeyframes } from "@/engine/animation-engine";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
-import type { CanvasData, FormationTemplate, Route, AnimationData } from "@/engine/types";
+import type { CanvasData, FormationTemplate, Route, AnimationData, MotionPath } from "@/engine/types";
 import type { AnimationState } from "@/engine/animation-engine";
 import type { RouteTemplate } from "@/engine/routes-library";
 import type { PlayTemplate } from "@/engine/plays-library";
@@ -29,6 +29,7 @@ import {
   X,
   Play,
   Square,
+  MoveRight,
 } from "lucide-react";
 
 const PlayCanvas = dynamic(
@@ -46,6 +47,10 @@ export default function DesignerPage() {
   const [dirty, setDirty] = useState(false);
   const [side, setSide] = useState<"offense" | "defense">("offense");
   const [formationPanelOpen, setFormationPanelOpen] = useState(false);
+
+  // Motion mode state
+  const [motionMode, setMotionMode] = useState(false);
+  const [motionPlayerId, setMotionPlayerId] = useState<string | null>(null);
 
   // New state for route picker, play library, game format, print
   const [routePickerOpen, setRoutePickerOpen] = useState(false);
@@ -104,6 +109,7 @@ export default function DesignerPage() {
       const newData: CanvasData = {
         players: formation.players.map((p) => ({ ...p })),
         routes: [],
+        motions: [],
         meta: {
           formation: formation.id,
           playType,
@@ -114,6 +120,7 @@ export default function DesignerPage() {
       setSide(formation.side);
       setSelectedPlayerId(null);
       setDrawingRoute(false);
+      setMotionMode(false);
       setDirty(true);
     },
     [canvasData, playType, pushHistory],
@@ -237,6 +244,7 @@ export default function DesignerPage() {
       const newData: CanvasData = {
         players,
         routes,
+        motions: [],
         meta: {
           formation: formation.id,
           playType: template.playType,
@@ -265,12 +273,28 @@ export default function DesignerPage() {
   useKeyboardShortcuts([
     {
       key: "d",
-      handler: () => setDrawingRoute((d) => !d),
+      handler: () => {
+        setDrawingRoute((d) => !d);
+        setMotionMode(false);
+        setMotionPlayerId(null);
+      },
       ignoreInputs: true,
     },
     {
       key: "v",
       handler: () => setDrawingRoute(false),
+      ignoreInputs: true,
+    },
+    {
+      key: "m",
+      handler: () => {
+        if (!hasFormation || previewMode) return;
+        setMotionMode((m) => !m);
+        if (!motionMode) {
+          setDrawingRoute(false);
+        }
+        setMotionPlayerId(null);
+      },
       ignoreInputs: true,
     },
     {
@@ -282,6 +306,9 @@ export default function DesignerPage() {
           setPlayLibraryOpen(false);
         } else if (printPanelOpen) {
           setPrintPanelOpen(false);
+        } else if (motionMode) {
+          setMotionMode(false);
+          setMotionPlayerId(null);
         } else if (drawingRoute) {
           setDrawingRoute(false);
         } else if (selectedPlayerId) {
@@ -403,9 +430,29 @@ export default function DesignerPage() {
           />
         </div>
 
-        {/* Preview toggle button */}
+        {/* Motion + Preview toggle buttons */}
         {hasFormation && (
-          <div className="absolute right-4 top-4 z-20">
+          <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
+            {!previewMode && (
+              <button
+                onClick={() => {
+                  setMotionMode((m) => !m);
+                  if (!motionMode) {
+                    setDrawingRoute(false);
+                  }
+                  setMotionPlayerId(null);
+                }}
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg transition-colors ${
+                  motionMode
+                    ? "bg-cyan-600 text-white hover:bg-cyan-500"
+                    : "border border-zinc-700 bg-zinc-800/80 text-zinc-300 backdrop-blur-xl hover:bg-zinc-700 hover:text-white"
+                }`}
+                title={motionMode ? "Exit Motion Mode (M)" : "Motion Tool (M)"}
+              >
+                <MoveRight className="h-4 w-4" />
+                {motionMode ? "Exit Motion" : "Motion"}
+              </button>
+            )}
             <button
               onClick={handleTogglePreview}
               className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg transition-colors ${
@@ -452,6 +499,32 @@ export default function DesignerPage() {
           )}
         </AnimatePresence>
 
+        {/* Motion mode indicator */}
+        <AnimatePresence>
+          {motionMode && !previewMode && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.15 }}
+              className="absolute inset-x-0 top-20 z-10 flex justify-center"
+            >
+              <div className="flex items-center gap-2 rounded-full bg-cyan-600/90 px-4 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm">
+                <MoveRight className="h-3 w-3" />
+                {motionPlayerId
+                  ? "Click the field to set motion destination"
+                  : "Click a player to set as motion man"
+                }
+                {" "}
+                <kbd className="rounded bg-white/20 px-1.5 py-0.5 text-[10px]">
+                  Esc
+                </kbd>{" "}
+                to cancel
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Canvas */}
         <div className="h-full">
           {hasFormation ? (
@@ -463,6 +536,9 @@ export default function DesignerPage() {
               drawingRoute={previewMode ? false : drawingRoute}
               readOnly={previewMode}
               animationState={animationState}
+              motionMode={previewMode ? false : motionMode}
+              motionPlayerId={motionPlayerId}
+              onMotionPlayerSelect={setMotionPlayerId}
             />
           ) : (
             /* Empty state */

@@ -4,6 +4,7 @@ export function createEmptyCanvasData(): CanvasData {
   return {
     players: [],
     routes: [],
+    motions: [],
     meta: { formation: "", playType: "", side: "offense" },
   };
 }
@@ -34,6 +35,11 @@ export function deserializeCanvas(json: unknown): CanvasData {
       parsed.meta === null
     ) {
       return createEmptyCanvasData();
+    }
+
+    // Backward compat: add motions array if missing
+    if (!Array.isArray(parsed.motions)) {
+      parsed.motions = [];
     }
 
     return parsed as CanvasData;

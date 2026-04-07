@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState, useEffect, useCallback } from "react";
-import { Stage, Layer, Line, Circle } from "react-konva";
+import { Stage, Layer, Line, Circle, Group } from "react-konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import FieldRenderer from "./field-renderer";
 import PlayerNode from "./player-node";
@@ -11,7 +11,8 @@ import type { AnimationState } from "./animation-engine";
 import Ball from "./ball";
 import ReadIndicator from "./read-indicator";
 import { getReadOrder } from "./animation-engine";
-import type { CanvasData, CanvasPlayer, Route } from "./types";
+import type { CanvasData, CanvasPlayer, Route, MotionPath } from "./types";
+import MotionArrow from "./motion-arrow";
 
 interface PlayCanvasProps {
   canvasData: CanvasData;
@@ -22,6 +23,14 @@ interface PlayCanvasProps {
   readOnly?: boolean;
   /** When provided, canvas enters animation playback mode */
   animationState?: AnimationState | null;
+  /** When true, clicking a player then a field position creates a motion path */
+  motionMode?: boolean;
+  /** The player currently selected for motion (managed externally) */
+  motionPlayerId?: string | null;
+  /** Callback when motion mode interaction occurs */
+  onMotionPlayerSelect?: (id: string | null) => void;
+  /** When set, only this player and their route are rendered at full brightness */
+  highlightPlayerId?: string;
 }
 
 export function PlayCanvas({
@@ -32,6 +41,10 @@ export function PlayCanvas({
   drawingRoute,
   readOnly = false,
   animationState = null,
+  motionMode = false,
+  motionPlayerId = null,
+  onMotionPlayerSelect,
+  highlightPlayerId,
 }: PlayCanvasProps) {
   const isAnimating = !!animationState;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -128,6 +141,13 @@ export function PlayCanvas({
 
   const handleSelectPlayer = useCallback(
     (id: string) => {
+      if (motionMode) {
+        // In motion mode, clicking a player selects them as motion man
+        onMotionPlayerSelect?.(id);
+        onSelectPlayer(id);
+        return;
+      }
+
       if (drawingRoute) {
         // In drawing mode, clicking a player starts a route from that player
         if (!drawingPlayerId) {
@@ -184,7 +204,7 @@ export function PlayCanvas({
       // Normal (non-drawing) mode
       onSelectPlayer(id);
     },
-    [drawingRoute, drawingPlayerId, canvasData, onChange, onSelectPlayer],
+    [drawingRoute, drawingPlayerId, canvasData, onChange, onSelectPlayer, motionMode, onMotionPlayerSelect],
   );
 
   /** Finish the current route being drawn — detect route type and clear state */
@@ -229,6 +249,46 @@ export function PlayCanvas({
       // Only handle clicks on the stage/field itself (empty area)
       if (e.target !== e.currentTarget) return;
 
+      // Motion mode: clicking the field sets the destination for the motion player
+      if (motionMode && motionPlayerId) {
+        const pos = pointerToField(e);
+        if (!pos) return;
+
+        const player = canvasData.players.find((p) => p.id === motionPlayerId);
+        if (!player) return;
+
+        // Create motion path from current position to new position
+        const motion: MotionPath = {
+          playerId: motionPlayerId,
+          fromX: player.x,
+          fromY: player.y,
+          toX: pos.x,
+          toY: pos.y,
+        };
+
+        // Move the player to the new position and add the motion path
+        const updatedPlayers = canvasData.players.map((p) =>
+          p.id === motionPlayerId ? { ...p, x: pos.x, y: pos.y } : p,
+        );
+
+        // Remove existing motion for this player, add new one
+        const updatedMotions = [
+          ...(canvasData.motions ?? []).filter(
+            (m) => m.playerId !== motionPlayerId,
+          ),
+          motion,
+        ];
+
+        onChange({
+          ...canvasData,
+          players: updatedPlayers,
+          motions: updatedMotions,
+        });
+
+        onMotionPlayerSelect?.(null);
+        return;
+      }
+
       if (drawingRoute && drawingPlayerId) {
         // Add a waypoint to the route being drawn
         const pos = pointerToField(e);
@@ -264,6 +324,9 @@ export function PlayCanvas({
       onChange,
       onSelectPlayer,
       pointerToField,
+      motionMode,
+      motionPlayerId,
+      onMotionPlayerSelect,
     ],
   );
 
@@ -316,12 +379,14 @@ export function PlayCanvas({
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
-    if (drawingRoute) {
+    if (motionMode) {
+      container.style.cursor = motionPlayerId ? "crosshair" : "pointer";
+    } else if (drawingRoute) {
       container.style.cursor = drawingPlayerId ? "crosshair" : "pointer";
     } else {
       container.style.cursor = "default";
     }
-  }, [drawingRoute, drawingPlayerId]);
+  }, [drawingRoute, drawingPlayerId, motionMode, motionPlayerId]);
 
   // Compute the preview line from last waypoint to cursor
   const previewLine = (() => {
@@ -355,19 +420,41 @@ export function PlayCanvas({
 
         {/* Layer 2: Interactive layer (routes + players + preview) */}
         <Layer scaleX={scaleX} scaleY={scaleY}>
+          {/* Motion arrows (pre-snap motion) */}
+          {(canvasData.motions ?? []).map((motion) => (
+            <MotionArrow
+              key={`motion-${motion.playerId}`}
+              motion={motion}
+              opacity={
+                highlightPlayerId
+                  ? motion.playerId === highlightPlayerId
+                    ? 1
+                    : 0.15
+                  : 1
+              }
+            />
+          ))}
+
           {/* Routes rendered below players */}
           {canvasData.routes.map((route) => {
             const player = canvasData.players.find(
               (p) => p.id === route.playerId,
             );
+            const routeOpacity =
+              highlightPlayerId
+                ? route.playerId === highlightPlayerId
+                  ? 1
+                  : 0.15
+                : 1;
             return (
-              <RouteLine
-                key={`route-${route.playerId}`}
-                route={route}
-                isSelected={route.playerId === selectedPlayerId}
-                side={player?.side}
-                showWaypoints={route.playerId === drawingPlayerId}
-              />
+              <Group key={`route-${route.playerId}`} opacity={routeOpacity}>
+                <RouteLine
+                  route={route}
+                  isSelected={route.playerId === selectedPlayerId}
+                  side={player?.side}
+                  showWaypoints={route.playerId === drawingPlayerId}
+                />
+              </Group>
             );
           })}
 
@@ -398,25 +485,34 @@ export function PlayCanvas({
           )}
 
           {/* Players */}
-          {canvasData.players.map((player: CanvasPlayer) => (
-            <PlayerNode
-              key={player.id}
-              player={player}
-              isSelected={player.id === selectedPlayerId}
-              onSelect={handleSelectPlayer}
-              onDragEnd={handlePlayerDragEnd}
-              animatedPosition={
-                isAnimating
-                  ? animationState.playerPositions.get(player.id)
-                  : undefined
-              }
-              ghostPosition={
-                isAnimating
-                  ? prevPositionsRef.current.get(player.id)
-                  : undefined
-              }
-            />
-          ))}
+          {canvasData.players.map((player: CanvasPlayer) => {
+            const playerOpacity =
+              highlightPlayerId
+                ? player.id === highlightPlayerId
+                  ? 1
+                  : 0.3
+                : 1;
+            return (
+              <Group key={player.id} opacity={playerOpacity}>
+                <PlayerNode
+                  player={player}
+                  isSelected={player.id === selectedPlayerId}
+                  onSelect={handleSelectPlayer}
+                  onDragEnd={handlePlayerDragEnd}
+                  animatedPosition={
+                    isAnimating
+                      ? animationState.playerPositions.get(player.id)
+                      : undefined
+                  }
+                  ghostPosition={
+                    isAnimating
+                      ? prevPositionsRef.current.get(player.id)
+                      : undefined
+                  }
+                />
+              </Group>
+            );
+          })}
 
           {/* QB Read Progression Indicators */}
           {isAnimating &&

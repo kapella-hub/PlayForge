@@ -19,9 +19,11 @@ interface PlayViewerProps {
   className?: string;
   /** Auto-play the animation once on load */
   autoPlay?: boolean;
+  /** When set, highlights only this player and their route */
+  highlightPlayerId?: string;
 }
 
-export function PlayViewer({ canvasData, className, autoPlay = false }: PlayViewerProps) {
+export function PlayViewer({ canvasData, className, autoPlay = false, highlightPlayerId }: PlayViewerProps) {
   const canvas = deserializeCanvas(canvasData);
   const [animationData, setAnimationData] = useState<AnimationData | null>(null);
   const [animationState, setAnimationState] = useState<AnimationState | null>(null);
@@ -50,6 +52,7 @@ export function PlayViewer({ canvasData, className, autoPlay = false }: PlayView
         drawingRoute={false}
         readOnly
         animationState={animationState}
+        highlightPlayerId={highlightPlayerId}
       />
 
       {/* Animation controls at bottom */}

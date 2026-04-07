@@ -3,6 +3,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import type { PlayType, Prisma } from "@prisma/client";
 
 export async function getPlay(id: string) {
@@ -83,4 +84,35 @@ export async function deletePlay(id: string, playbookId: string) {
   await db.play.delete({
     where: { id },
   });
+
+  revalidatePath(`/playbooks/${playbookId}`);
+}
+
+export async function duplicatePlay(playId: string, newName?: string) {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/login");
+
+  const original = await db.play.findUnique({
+    where: { id: playId },
+  });
+
+  if (!original) throw new Error("Play not found");
+
+  const play = await db.play.create({
+    data: {
+      playbookId: original.playbookId,
+      name: newName ?? `${original.name} (Copy)`,
+      formation: original.formation,
+      playType: original.playType,
+      situationTags: original.situationTags,
+      canvasData: original.canvasData ?? {},
+      animationData: original.animationData ?? {},
+      notes: original.notes,
+      thumbnailUrl: original.thumbnailUrl,
+      createdById: session.user.id,
+    },
+  });
+
+  revalidatePath(`/playbooks/${original.playbookId}`);
+  return play;
 }

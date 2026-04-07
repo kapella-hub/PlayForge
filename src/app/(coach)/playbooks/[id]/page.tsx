@@ -82,6 +82,7 @@ export default async function PlaybookDetailPage({
               formation={play.formation}
               playType={play.playType}
               thumbnailUrl={play.thumbnailUrl}
+              playbookId={id}
             />
           ))}
         </div>

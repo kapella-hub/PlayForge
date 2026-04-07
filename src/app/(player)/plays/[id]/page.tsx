@@ -1,11 +1,13 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { db } from "@/lib/db";
 import { getPlay } from "@/lib/actions/play-actions";
 import { recordPlayView } from "@/lib/actions/progress-actions";
 import { PlayViewer } from "@/components/play/play-viewer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
 import { ExternalLink } from "lucide-react";
+import { PlayerAssignmentToggle } from "./assignment-toggle";
 
 export const dynamic = "force-dynamic";
 
@@ -24,6 +26,50 @@ export default async function PlayDetailPage({
   // Record view for spaced repetition tracking
   await recordPlayView(id);
 
+  // Find the player's position from their membership in the playbook's org
+  let playerPosition: string | null = null;
+  if (play.playbook) {
+    const membership = await db.membership.findFirst({
+      where: {
+        userId: session.user.id,
+        orgId: play.playbook.orgId,
+      },
+    });
+    playerPosition = membership?.position ?? null;
+  }
+
+  // Find the canvas player matching this player's position
+  const canvasData = play.canvasData as Record<string, unknown> | null;
+  const canvasPlayers = (canvasData?.players ?? []) as Array<{
+    id: string;
+    label: string;
+    x: number;
+    y: number;
+    side: string;
+  }>;
+  const canvasRoutes = (canvasData?.routes ?? []) as Array<{
+    playerId: string;
+    routeType?: string;
+  }>;
+
+  // Match player position to a canvas player
+  const matchedPlayer = playerPosition
+    ? canvasPlayers.find(
+        (p) =>
+          p.label.toUpperCase() === playerPosition!.toUpperCase() ||
+          p.id.toUpperCase() === playerPosition!.toUpperCase(),
+      )
+    : null;
+
+  // Build assignment description
+  let assignmentDescription: string | null = null;
+  if (matchedPlayer) {
+    const route = canvasRoutes.find((r) => r.playerId === matchedPlayer.id);
+    if (route?.routeType) {
+      assignmentDescription = `You run a ${route.routeType.toLowerCase()} route from the ${matchedPlayer.label} position`;
+    }
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -34,11 +80,21 @@ export default async function PlayDetailPage({
           <Badge variant="outline" className="text-[10px]">
             {play.playType.replace("_", " ")}
           </Badge>
+          {playerPosition && (
+            <Badge variant="outline" className="border-indigo-500/40 text-indigo-400 text-[10px]">
+              Your position: {playerPosition}
+            </Badge>
+          )}
         </div>
       </div>
 
-      {/* Play Viewer */}
-      <PlayViewer canvasData={play.canvasData} />
+      {/* Play Viewer with assignment toggle */}
+      <PlayerAssignmentToggle
+        canvasData={play.canvasData}
+        matchedPlayerId={matchedPlayer?.id ?? null}
+        assignmentDescription={assignmentDescription}
+        playerNotes={play.notes}
+      />
 
       {/* Situation Tags */}
       {play.situationTags.length > 0 && (

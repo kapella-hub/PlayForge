@@ -17,6 +17,7 @@ describe("serialization", () => {
           routeType: "post",
         },
       ],
+      motions: [],
       meta: { formation: "shotgun-2x2", playType: "pass", side: "offense" },
     };
     const json = serializeCanvas(data);
@@ -28,7 +29,18 @@ describe("serialization", () => {
     const empty = createEmptyCanvasData();
     expect(empty.players).toEqual([]);
     expect(empty.routes).toEqual([]);
+    expect(empty.motions).toEqual([]);
     expect(empty.meta.formation).toBe("");
+  });
+
+  it("adds motions array for backward compat when missing", () => {
+    const legacy = JSON.stringify({
+      players: [{ id: "QB", label: "QB", x: 500, y: 400, side: "offense" }],
+      routes: [],
+      meta: { formation: "shotgun-2x2", playType: "pass", side: "offense" },
+    });
+    const parsed = deserializeCanvas(legacy);
+    expect(parsed.motions).toEqual([]);
   });
 
   it("handles null/undefined gracefully", () => {
