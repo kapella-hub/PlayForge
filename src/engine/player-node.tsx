@@ -10,6 +10,10 @@ interface PlayerNodeProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDragEnd: (id: string, x: number, y: number) => void;
+  /** When provided, overrides player.x/y for animation playback */
+  animatedPosition?: { x: number; y: number };
+  /** Previous position for motion trail ghost effect */
+  ghostPosition?: { x: number; y: number };
 }
 
 /** Get gradient fill colors based on side and position */
@@ -53,32 +57,65 @@ export default function PlayerNode({
   isSelected,
   onSelect,
   onDragEnd,
+  animatedPosition,
+  ghostPosition,
 }: PlayerNodeProps) {
   const colors = getPlayerColors(player, isSelected);
   const R = FIELD.PLAYER_RADIUS;
+  const isAnimating = !!animatedPosition;
+  const posX = animatedPosition?.x ?? player.x;
+  const posY = animatedPosition?.y ?? player.y;
 
   const handleDragEnd = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
     onDragEnd(player.id, node.x(), node.y());
   };
 
+  // Check if ghost is far enough from current to render
+  const showGhost =
+    ghostPosition &&
+    isAnimating &&
+    (Math.abs(ghostPosition.x - posX) > 1 ||
+      Math.abs(ghostPosition.y - posY) > 1);
+
   return (
-    <Group
-      x={player.x}
-      y={player.y}
-      draggable
-      onClick={() => onSelect(player.id)}
-      onTap={() => onSelect(player.id)}
-      onDragEnd={handleDragEnd}
-      onMouseEnter={(e) => {
-        const stage = e.target.getStage();
-        if (stage) stage.container().style.cursor = "pointer";
-      }}
-      onMouseLeave={(e) => {
-        const stage = e.target.getStage();
-        if (stage) stage.container().style.cursor = "default";
-      }}
-    >
+    <>
+      {/* Motion trail ghost */}
+      {showGhost && (
+        <Group x={ghostPosition.x} y={ghostPosition.y} listening={false}>
+          <Circle
+            radius={R}
+            fillRadialGradientStartPoint={{ x: -3, y: -3 }}
+            fillRadialGradientStartRadius={0}
+            fillRadialGradientEndPoint={{ x: 0, y: 0 }}
+            fillRadialGradientEndRadius={R}
+            fillRadialGradientColorStops={[
+              0, colors.inner,
+              1, colors.outer,
+            ]}
+            opacity={0.2}
+          />
+        </Group>
+      )}
+
+      <Group
+        x={posX}
+        y={posY}
+        draggable={!isAnimating}
+        onClick={() => onSelect(player.id)}
+        onTap={() => onSelect(player.id)}
+        onDragEnd={handleDragEnd}
+        onMouseEnter={(e) => {
+          if (isAnimating) return;
+          const stage = e.target.getStage();
+          if (stage) stage.container().style.cursor = "pointer";
+        }}
+        onMouseLeave={(e) => {
+          if (isAnimating) return;
+          const stage = e.target.getStage();
+          if (stage) stage.container().style.cursor = "default";
+        }}
+      >
       {/* Selection glow ring (only when selected) */}
       {isSelected && (
         <Circle
@@ -132,6 +169,7 @@ export default function PlayerNode({
         shadowBlur={2}
         shadowOffsetY={1}
       />
-    </Group>
+      </Group>
+    </>
   );
 }

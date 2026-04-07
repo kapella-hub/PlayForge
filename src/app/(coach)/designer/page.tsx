@@ -8,11 +8,14 @@ import { AssignmentPanel } from "@/components/play/assignment-panel";
 import { RoutePicker } from "@/components/play/route-picker";
 import { PlayLibrary } from "@/components/play/play-library";
 import { PrintLayout } from "@/components/play/print-layout";
+import { AnimationControls } from "@/components/play/animation-controls";
 import { createEmptyCanvasData } from "@/engine/serialization";
 import { getFormationById } from "@/engine/constants";
 import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
+import { generateKeyframes } from "@/engine/animation-engine";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
-import type { CanvasData, FormationTemplate, Route } from "@/engine/types";
+import type { CanvasData, FormationTemplate, Route, AnimationData } from "@/engine/types";
+import type { AnimationState } from "@/engine/animation-engine";
 import type { RouteTemplate } from "@/engine/routes-library";
 import type { PlayTemplate } from "@/engine/plays-library";
 import type { GameFormat } from "@/engine/constants";
@@ -24,6 +27,8 @@ import {
   Route as RouteIcon,
   Printer,
   X,
+  Play,
+  Square,
 } from "lucide-react";
 
 const PlayCanvas = dynamic(
@@ -48,6 +53,32 @@ export default function DesignerPage() {
   const [gameFormat, setGameFormat] = useState<GameFormat>("11v11");
   const [printPanelOpen, setPrintPanelOpen] = useState(false);
   const [printMode, setPrintMode] = useState<"playbook" | "wristband">("playbook");
+
+  // Animation preview state
+  const [previewMode, setPreviewMode] = useState(false);
+  const [animationData, setAnimationData] = useState<AnimationData | null>(null);
+  const [animationState, setAnimationState] = useState<AnimationState | null>(null);
+
+  const handleTogglePreview = useCallback(() => {
+    if (previewMode) {
+      // Exit preview
+      setPreviewMode(false);
+      setAnimationData(null);
+      setAnimationState(null);
+    } else {
+      // Enter preview: generate keyframes from current canvas
+      if (canvasData.players.length === 0) return;
+      const data = generateKeyframes(canvasData);
+      setAnimationData(data);
+      setPreviewMode(true);
+      setDrawingRoute(false);
+      setSelectedPlayerId(null);
+    }
+  }, [previewMode, canvasData]);
+
+  const handleAnimationFrame = useCallback((state: AnimationState) => {
+    setAnimationState(state);
+  }, []);
 
   // Undo / redo stacks
   const undoRef = useRef<CanvasData[]>([]);
@@ -305,6 +336,15 @@ export default function DesignerPage() {
       handler: () => setPlayLibraryOpen((v) => !v),
       ignoreInputs: true,
     },
+    {
+      key: "p",
+      handler: () => {
+        if (canvasData.players.length > 0) {
+          handleTogglePreview();
+        }
+      },
+      ignoreInputs: true,
+    },
   ]);
 
   const selectedPlayer =
@@ -363,9 +403,36 @@ export default function DesignerPage() {
           />
         </div>
 
+        {/* Preview toggle button */}
+        {hasFormation && (
+          <div className="absolute right-4 top-4 z-20">
+            <button
+              onClick={handleTogglePreview}
+              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg transition-colors ${
+                previewMode
+                  ? "bg-amber-600 text-white hover:bg-amber-500"
+                  : "border border-zinc-700 bg-zinc-800/80 text-zinc-300 backdrop-blur-xl hover:bg-zinc-700 hover:text-white"
+              }`}
+              title={previewMode ? "Exit Preview (P)" : "Preview Animation (P)"}
+            >
+              {previewMode ? (
+                <>
+                  <Square className="h-4 w-4" />
+                  Exit Preview
+                </>
+              ) : (
+                <>
+                  <Play className="h-4 w-4" />
+                  Preview
+                </>
+              )}
+            </button>
+          </div>
+        )}
+
         {/* Drawing mode indicator */}
         <AnimatePresence>
-          {drawingRoute && (
+          {drawingRoute && !previewMode && (
             <motion.div
               initial={{ opacity: 0, y: -8 }}
               animate={{ opacity: 1, y: 0 }}
@@ -393,7 +460,9 @@ export default function DesignerPage() {
               onChange={handleCanvasChange}
               selectedPlayerId={selectedPlayerId}
               onSelectPlayer={setSelectedPlayerId}
-              drawingRoute={drawingRoute}
+              drawingRoute={previewMode ? false : drawingRoute}
+              readOnly={previewMode}
+              animationState={animationState}
             />
           ) : (
             /* Empty state */
@@ -474,6 +543,26 @@ export default function DesignerPage() {
                 onSelect={handleFormationSelect}
                 onClose={() => setFormationPanelOpen(false)}
                 gameFormat={gameFormat}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* ── Animation controls (floating bottom) ── */}
+        <AnimatePresence>
+          {previewMode && animationData && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 20 }}
+              transition={{ duration: 0.2 }}
+              className="absolute inset-x-0 bottom-4 z-30 flex justify-center px-4 pointer-events-none"
+            >
+              <AnimationControls
+                animationData={animationData}
+                canvasData={canvasData}
+                onFrameUpdate={handleAnimationFrame}
+                isVisible={previewMode}
               />
             </motion.div>
           )}

@@ -7,6 +7,10 @@ import FieldRenderer from "./field-renderer";
 import PlayerNode from "./player-node";
 import RouteLine from "./route-line";
 import { FIELD, detectRouteType } from "./constants";
+import type { AnimationState } from "./animation-engine";
+import Ball from "./ball";
+import ReadIndicator from "./read-indicator";
+import { getReadOrder } from "./animation-engine";
 import type { CanvasData, CanvasPlayer, Route } from "./types";
 
 interface PlayCanvasProps {
@@ -16,6 +20,8 @@ interface PlayCanvasProps {
   onSelectPlayer: (id: string | null) => void;
   drawingRoute: boolean;
   readOnly?: boolean;
+  /** When provided, canvas enters animation playback mode */
+  animationState?: AnimationState | null;
 }
 
 export function PlayCanvas({
@@ -25,9 +31,38 @@ export function PlayCanvas({
   onSelectPlayer,
   drawingRoute,
   readOnly = false,
+  animationState = null,
 }: PlayCanvasProps) {
+  const isAnimating = !!animationState;
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 480 });
+
+  // Track previous positions for ghost trail during animation
+  const prevPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+
+  // Update previous positions when animation state changes
+  useEffect(() => {
+    if (animationState) {
+      // We capture the current positions BEFORE updating, to use as ghost
+      const current = prevPositionsRef.current;
+      const newPrev = new Map<string, { x: number; y: number }>();
+      for (const [id, pos] of animationState.playerPositions) {
+        const prev = current.get(id);
+        if (prev) {
+          newPrev.set(id, prev);
+        } else {
+          newPrev.set(id, pos);
+        }
+      }
+      // Schedule update for next render
+      requestAnimationFrame(() => {
+        prevPositionsRef.current = new Map(animationState.playerPositions);
+      });
+    }
+  }, [animationState]);
+
+  // Compute read order for read indicators
+  const readOrder = isAnimating ? getReadOrder(canvasData) : [];
 
   /** The player we are actively drawing a route for (null when not mid-draw) */
   const [drawingPlayerId, setDrawingPlayerId] = useState<string | null>(null);
@@ -370,8 +405,49 @@ export function PlayCanvas({
               isSelected={player.id === selectedPlayerId}
               onSelect={handleSelectPlayer}
               onDragEnd={handlePlayerDragEnd}
+              animatedPosition={
+                isAnimating
+                  ? animationState.playerPositions.get(player.id)
+                  : undefined
+              }
+              ghostPosition={
+                isAnimating
+                  ? prevPositionsRef.current.get(player.id)
+                  : undefined
+              }
             />
           ))}
+
+          {/* QB Read Progression Indicators */}
+          {isAnimating &&
+            readOrder.map((playerId, index) => {
+              const pos = animationState.playerPositions.get(playerId);
+              if (!pos) return null;
+              const readNum = index + 1;
+              const activeRead = animationState.activeRead ?? 0;
+              let state: "active" | "past" | "future";
+              if (readNum === activeRead) state = "active";
+              else if (readNum < activeRead) state = "past";
+              else state = "future";
+              return (
+                <ReadIndicator
+                  key={`read-${playerId}`}
+                  x={pos.x}
+                  y={pos.y}
+                  readNumber={readNum}
+                  state={state}
+                />
+              );
+            })}
+
+          {/* Ball animation */}
+          {isAnimating && animationState.ballPosition && (
+            <Ball
+              position={animationState.ballPosition}
+              visible={animationState.ballPosition.visible}
+              rotation={0}
+            />
+          )}
         </Layer>
       </Stage>
     </div>
