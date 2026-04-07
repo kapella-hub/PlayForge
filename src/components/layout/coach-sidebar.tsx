@@ -17,6 +17,7 @@ import {
   ChevronLeft,
   Menu,
 } from "lucide-react";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 const navItems = [
   {
@@ -145,6 +146,13 @@ export function CoachSidebar() {
           </div>
         ))}
       </nav>
+
+      {/* Theme toggle */}
+      <div className="border-t border-zinc-800 px-3 py-3">
+        <Tooltip label="Toggle theme" show={collapsed}>
+          <ThemeToggle />
+        </Tooltip>
+      </div>
     </div>
   );
 

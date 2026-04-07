@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { CoachSidebar } from "@/components/layout/coach-sidebar";
 import { UserMenu } from "@/components/layout/user-menu";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PageTransition } from "@/components/ui/page-transition";
 
 export const dynamic = "force-dynamic";
@@ -29,7 +30,10 @@ export default async function CoachLayout({
 
       <div className="lg:pl-[240px]">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-end border-b border-zinc-800 bg-[var(--background)]/80 px-6 backdrop-blur-md">
-          <UserMenu user={session.user} />
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            <UserMenu user={session.user} />
+          </div>
         </header>
 
         <main className="p-6">

@@ -12,6 +12,7 @@ import { PrintLayout } from "@/components/play/print-layout";
 import { AnimationControls } from "@/components/play/animation-controls";
 import { AIGenerator } from "@/components/play/ai-generator";
 import { FilmLinkEditor } from "@/components/play/film-link";
+import { VersionHistory } from "@/components/play/version-history";
 import { createEmptyCanvasData } from "@/engine/serialization";
 import { mirrorPlay } from "@/engine/mirror";
 import { getFormationById } from "@/engine/constants";
@@ -45,6 +46,7 @@ import {
   Sparkles,
   FlipHorizontal,
   Film,
+  History,
 } from "lucide-react";
 
 const PlayCanvas = dynamic(
@@ -78,6 +80,9 @@ export default function DesignerPage() {
 
   // AI generator state
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
+
+  // Version history state
+  const [versionHistoryOpen, setVersionHistoryOpen] = useState(false);
 
   // Film link state
   const [filmUrl, setFilmUrl] = useState("");
@@ -597,6 +602,22 @@ export default function DesignerPage() {
               </div>
             )}
 
+            {/* History button */}
+            {searchParams.get("playId") && (
+              <button
+                onClick={() => setVersionHistoryOpen((v) => !v)}
+                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg transition-colors ${
+                  versionHistoryOpen
+                    ? "bg-indigo-600 text-white hover:bg-indigo-500"
+                    : "border border-zinc-700 bg-zinc-800/80 text-zinc-300 backdrop-blur-xl hover:bg-zinc-700 hover:text-white"
+                }`}
+                title="Version History"
+              >
+                <History className="h-4 w-4" />
+                History
+              </button>
+            )}
+
             {/* Export button */}
             <button
               onClick={handleExport}
@@ -828,6 +849,21 @@ export default function DesignerPage() {
           onApply={handleAIApply}
           gameFormat={gameFormat}
         />
+
+        {/* ── Version History panel ── */}
+        {searchParams.get("playId") && (
+          <VersionHistory
+            playId={searchParams.get("playId")!}
+            isOpen={versionHistoryOpen}
+            onClose={() => setVersionHistoryOpen(false)}
+            onRestore={(canvasData) => {
+              const canvas = deserializeCanvas(canvasData);
+              pushHistory(canvasData as CanvasData);
+              setCanvasData(canvas);
+              setDirty(true);
+            }}
+          />
+        )}
 
         {/* ── Animation controls (floating bottom) ── */}
         <AnimatePresence>

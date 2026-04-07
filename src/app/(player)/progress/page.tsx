@@ -1,9 +1,11 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { getUserMembership } from "@/lib/membership";
 import { getPlayerProgress } from "@/lib/actions/progress-actions";
+import { getPlayerRank } from "@/lib/actions/analytics-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { BarChart3 } from "lucide-react";
+import { BarChart3, Trophy } from "lucide-react";
 import {
   BADGES,
   getEarnedBadges,
@@ -91,7 +93,13 @@ export default async function ProgressPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
 
-  const progress = await getPlayerProgress(session.user.id);
+  const membership = await getUserMembership(session.user.id);
+  const [progress, rankInfo] = await Promise.all([
+    getPlayerProgress(session.user.id),
+    membership
+      ? getPlayerRank(membership.orgId, session.user.id)
+      : Promise.resolve(null),
+  ]);
 
   const counts = {
     mastered: progress.filter((p) => p.masteryLevel === "mastered").length,
@@ -187,6 +195,26 @@ export default async function ProgressPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Rank */}
+        {rankInfo && rankInfo.rank !== null && (
+          <Card>
+            <CardContent className="flex items-center gap-3 p-4">
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-600/20">
+                <Trophy className="h-5 w-5 text-amber-400" />
+              </div>
+              <div>
+                <p className="text-sm font-semibold text-white">
+                  Your Rank: #{rankInfo.rank} of {rankInfo.total}
+                </p>
+                <p className="text-[10px] text-zinc-500">
+                  Composite score: {rankInfo.compositeScore} — based on mastery,
+                  quizzes, study time, and streaks
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Badges */}
         <Card>

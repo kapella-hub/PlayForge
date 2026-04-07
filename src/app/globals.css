@@ -19,6 +19,25 @@
   --warning: #f59e0b;
 }
 
+.light {
+  --background: #f8fafc;
+  --foreground: #0f172a;
+  --card: #ffffff;
+  --card-foreground: #0f172a;
+  --primary: #4f46e5;
+  --primary-foreground: #ffffff;
+  --secondary: #f1f5f9;
+  --secondary-foreground: #0f172a;
+  --muted: #e2e8f0;
+  --muted-foreground: #64748b;
+  --accent: #4f46e5;
+  --destructive: #dc2626;
+  --border: #e2e8f0;
+  --ring: #4f46e5;
+  --success: #16a34a;
+  --warning: #d97706;
+}
+
 html {
   scroll-behavior: smooth;
 }

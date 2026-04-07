@@ -4,11 +4,13 @@ import { getUserMembership, isCoachRole } from "@/lib/membership";
 import {
   getTeamAnalytics,
   getInstallProgress,
+  getLeaderboard,
 } from "@/lib/actions/analytics-actions";
 import { getActiveGamePlan } from "@/lib/actions/game-plan-actions";
 import { StatCard } from "@/components/analytics/stat-card";
 import { MasteryHeatmap } from "@/components/analytics/mastery-heatmap";
 import { InstallTracker } from "@/components/analytics/install-tracker";
+import { Leaderboard } from "@/components/analytics/leaderboard";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
@@ -22,11 +24,13 @@ export default async function AnalyticsPage() {
 
   const orgId = membership.orgId;
 
-  const [analytics, installProgress, activeGamePlan] = await Promise.all([
-    getTeamAnalytics(orgId),
-    getInstallProgress(orgId),
-    getActiveGamePlan(orgId),
-  ]);
+  const [analytics, installProgress, activeGamePlan, leaderboardData] =
+    await Promise.all([
+      getTeamAnalytics(orgId),
+      getInstallProgress(orgId),
+      getActiveGamePlan(orgId),
+      getLeaderboard(orgId),
+    ]);
 
   // Extract unique plays from player progress data for heatmap
   const playsMap = new Map<string, { id: string; name: string }>();
@@ -119,6 +123,16 @@ export default async function AnalyticsPage() {
             players={analytics.playerMasteryData}
             plays={uniquePlays}
           />
+        </CardContent>
+      </Card>
+
+      {/* Leaderboard */}
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>Player Leaderboard</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Leaderboard orgId={orgId} initialData={leaderboardData} />
         </CardContent>
       </Card>
     </div>

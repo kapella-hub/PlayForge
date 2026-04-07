@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { auth } from "@/lib/auth";
 
 export async function getTeamAnalytics(orgId: string) {
   const [memberships, playbooks, activeGamePlan, recentAttempts] =
@@ -187,5 +188,124 @@ export async function getInstallProgress(orgId: string) {
   return {
     gamePlanName: activeGamePlan.name,
     plays,
+  };
+}
+
+export interface LeaderboardEntry {
+  userId: string;
+  name: string;
+  positionGroup: string | null;
+  playsMastered: number;
+  quizAverage: number;
+  studyTimeSec: number;
+  streak: number;
+  compositeScore: number;
+  rank: number;
+}
+
+export async function getLeaderboard(
+  orgId: string,
+  positionGroup?: string | null,
+): Promise<LeaderboardEntry[]> {
+  const memberships = await db.membership.findMany({
+    where: {
+      orgId,
+      role: "player",
+      ...(positionGroup ? { positionGroup } : {}),
+    },
+    include: {
+      user: {
+        include: {
+          playerProgress: true,
+          quizAttempts: true,
+        },
+      },
+    },
+  });
+
+  const entries: Omit<LeaderboardEntry, "rank">[] = memberships.map((m) => {
+    const progress = m.user.playerProgress;
+    const playsMastered = progress.filter(
+      (p) => p.masteryLevel === "mastered",
+    ).length;
+
+    const allScores = m.user.quizAttempts.map((a) => a.score);
+    const quizAverage =
+      allScores.length > 0
+        ? allScores.reduce((sum, s) => sum + s, 0) / allScores.length
+        : 0;
+
+    const studyTimeSec = progress.reduce((sum, p) => sum + p.timeSpentSec, 0);
+
+    // Calculate streak from view dates
+    const viewDates = progress
+      .filter((p) => p.lastViewedAt)
+      .map((p) => new Date(p.lastViewedAt!).toISOString().slice(0, 10));
+    const uniqueDays = [...new Set(viewDates)].sort().reverse();
+
+    let streak = 0;
+    if (uniqueDays.length > 0) {
+      const today = new Date().toISOString().slice(0, 10);
+      const yesterday = new Date(Date.now() - 86400000)
+        .toISOString()
+        .slice(0, 10);
+      if (uniqueDays[0] === today || uniqueDays[0] === yesterday) {
+        streak = 1;
+        for (let i = 1; i < uniqueDays.length; i++) {
+          const prev = new Date(uniqueDays[i - 1]).getTime();
+          const curr = new Date(uniqueDays[i]).getTime();
+          if (Math.abs((prev - curr) / 86400000 - 1) < 0.5) {
+            streak++;
+          } else {
+            break;
+          }
+        }
+      }
+    }
+
+    // Composite score: mastery 40%, quiz avg 30%, study time 20%, streak 10%
+    const maxStudyTime = 3600; // normalize to 1 hour cap
+    const maxStreak = 30; // normalize to 30 day cap
+    const totalPlays = progress.length || 1;
+
+    const masteryPct = playsMastered / totalPlays;
+    const quizPct = quizAverage; // already 0-1
+    const studyPct = Math.min(studyTimeSec / maxStudyTime, 1);
+    const streakPct = Math.min(streak / maxStreak, 1);
+
+    const compositeScore = Math.round(
+      (masteryPct * 0.4 + quizPct * 0.3 + studyPct * 0.2 + streakPct * 0.1) *
+        100,
+    );
+
+    return {
+      userId: m.user.id,
+      name: m.user.name ?? m.user.email,
+      positionGroup: m.positionGroup,
+      playsMastered,
+      quizAverage: Math.round(quizAverage * 100),
+      studyTimeSec,
+      streak,
+      compositeScore,
+    };
+  });
+
+  // Sort by composite score descending
+  entries.sort((a, b) => b.compositeScore - a.compositeScore);
+
+  return entries.map((entry, idx) => ({
+    ...entry,
+    rank: idx + 1,
+  }));
+}
+
+export async function getPlayerRank(orgId: string, userId: string) {
+  const leaderboard = await getLeaderboard(orgId);
+  const total = leaderboard.length;
+  const entry = leaderboard.find((e) => e.userId === userId);
+  return {
+    rank: entry?.rank ?? null,
+    total,
+    compositeScore: entry?.compositeScore ?? 0,
   };
 }

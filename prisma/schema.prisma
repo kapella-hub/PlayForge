@@ -117,6 +117,7 @@ model User {
   createdQuizzes Quiz[]        @relation("QuizCreator")
   quizAttempts   QuizAttempt[]
   playerProgress PlayerProgress[]
+  playVersions   PlayVersion[] @relation("VersionCreator")
 }
 
 model Organization {
@@ -186,6 +187,7 @@ model Play {
   gamePlanPlays  GamePlanPlay[]
   quizQuestions  QuizQuestion[]
   playerProgress PlayerProgress[]
+  versions       PlayVersion[]
 }
 
 model PlayAssignment {
@@ -291,4 +293,18 @@ model PlayerProgress {
   play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
 
   @@unique([userId, playId])
+}
+
+model PlayVersion {
+  id            String   @id @default(cuid())
+  playId        String
+  version       Int
+  canvasData    Json
+  animationData Json     @default("{}")
+  notes         String?
+  createdById   String
+  createdAt     DateTime @default(now())
+
+  play      Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+  createdBy User @relation("VersionCreator", fields: [createdById], references: [id])
 }
