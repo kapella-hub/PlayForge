@@ -1,0 +1,293 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Tier {
+  youth
+  high_school
+  college
+  pro
+}
+
+enum MemberRole {
+  owner
+  coach
+  coordinator
+  player
+}
+
+enum Side {
+  offense
+  defense
+  special_teams
+}
+
+enum Visibility {
+  private
+  shared
+}
+
+enum PlayType {
+  run
+  pass
+  play_action
+  screen
+  special
+}
+
+enum AssignmentType {
+  route
+  block
+  blitz
+  coverage
+  spy
+}
+
+enum QuestionType {
+  multiple_choice
+  tap_field
+  identify_route
+  situation_match
+  assignment_recall
+}
+
+enum MasteryLevel {
+  new_play
+  learning
+  reviewing
+  mastered
+}
+
+// --- NextAuth required models ---
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+// --- App models ---
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  emailVerified DateTime?
+  name          String?
+  image         String?
+  createdAt     DateTime  @default(now())
+
+  accounts       Account[]
+  sessions       Session[]
+  memberships    Membership[]
+  createdPlaybooks Playbook[]  @relation("PlaybookCreator")
+  createdPlays   Play[]        @relation("PlayCreator")
+  createdGamePlans GamePlan[]  @relation("GamePlanCreator")
+  createdQuizzes Quiz[]        @relation("QuizCreator")
+  quizAttempts   QuizAttempt[]
+  playerProgress PlayerProgress[]
+}
+
+model Organization {
+  id         String   @id @default(cuid())
+  name       String
+  slug       String   @unique
+  logoUrl    String?
+  tier       Tier     @default(high_school)
+  inviteCode String   @unique
+  createdAt  DateTime @default(now())
+
+  memberships Membership[]
+  playbooks   Playbook[]
+  gamePlans   GamePlan[]
+  quizzes     Quiz[]
+}
+
+model Membership {
+  id            String     @id @default(cuid())
+  userId        String
+  orgId         String
+  role          MemberRole @default(player)
+  positionGroup String?
+  position      String?
+
+  user User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, orgId])
+}
+
+model Playbook {
+  id          String     @id @default(cuid())
+  orgId       String
+  name        String
+  description String?
+  side        Side
+  visibility  Visibility @default(private)
+  createdById String
+  createdAt   DateTime   @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy User         @relation("PlaybookCreator", fields: [createdById], references: [id])
+  plays     Play[]
+}
+
+model Play {
+  id            String   @id @default(cuid())
+  playbookId    String
+  name          String
+  formation     String
+  playType      PlayType
+  situationTags String[]
+  canvasData    Json     @default("{}")
+  animationData Json     @default("{}")
+  notes         String?
+  filmUrl       String?
+  thumbnailUrl  String?
+  createdById   String
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  playbook       Playbook         @relation(fields: [playbookId], references: [id], onDelete: Cascade)
+  createdBy      User             @relation("PlayCreator", fields: [createdById], references: [id])
+  assignments    PlayAssignment[]
+  gamePlanPlays  GamePlanPlay[]
+  quizQuestions  QuizQuestion[]
+  playerProgress PlayerProgress[]
+}
+
+model PlayAssignment {
+  id             String         @id @default(cuid())
+  playId         String
+  position       String
+  assignmentType AssignmentType
+  routeType      String?
+  blockType      String?
+  readOrder      Int?
+  description    String?
+
+  play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+}
+
+model GamePlan {
+  id          String   @id @default(cuid())
+  orgId       String
+  name        String
+  week        Int?
+  opponent    String?
+  isActive    Boolean  @default(false)
+  createdById String
+  createdAt   DateTime @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy User         @relation("GamePlanCreator", fields: [createdById], references: [id])
+  plays     GamePlanPlay[]
+  quizzes   Quiz[]
+}
+
+model GamePlanPlay {
+  id            String  @id @default(cuid())
+  gamePlanId    String
+  playId        String
+  sortOrder     Int
+  situationNote String?
+
+  gamePlan GamePlan @relation(fields: [gamePlanId], references: [id], onDelete: Cascade)
+  play     Play     @relation(fields: [playId], references: [id], onDelete: Cascade)
+
+  @@unique([gamePlanId, playId])
+}
+
+model Quiz {
+  id          String    @id @default(cuid())
+  orgId       String
+  name        String
+  gamePlanId  String?
+  dueDate     DateTime?
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  gamePlan  GamePlan?    @relation(fields: [gamePlanId], references: [id])
+  createdBy User         @relation("QuizCreator", fields: [createdById], references: [id])
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id            String       @id @default(cuid())
+  quizId        String
+  playId        String
+  questionType  QuestionType
+  questionText  String
+  options       Json?
+  correctZone   Json?
+  correctAnswer String?
+  sortOrder     Int
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+}
+
+model QuizAttempt {
+  id          String    @id @default(cuid())
+  quizId      String
+  userId      String
+  score       Float
+  answers     Json
+  startedAt   DateTime  @default(now())
+  completedAt DateTime?
+
+  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  user User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PlayerProgress {
+  id            String       @id @default(cuid())
+  userId        String
+  playId        String
+  views         Int          @default(0)
+  timeSpentSec  Int          @default(0)
+  lastViewedAt  DateTime?
+  masteryLevel  MasteryLevel @default(new_play)
+  easeFactor    Float        @default(2.5)
+  intervalDays  Float        @default(0)
+  nextReviewAt  DateTime     @default(now())
+  quizScores    Float[]
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, playId])
+}
