@@ -10,8 +10,11 @@ import {
   Loader2,
   Check,
   Circle,
+  BookOpen,
+  Printer,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GAME_FORMATS, type GameFormat } from "@/engine/constants";
 
 interface PlayToolbarProps {
   name: string;
@@ -28,6 +31,10 @@ interface PlayToolbarProps {
   dirty: boolean;
   canUndo: boolean;
   canRedo: boolean;
+  onOpenLibrary?: () => void;
+  onOpenPrint?: () => void;
+  gameFormat?: GameFormat;
+  onGameFormatChange?: (format: GameFormat) => void;
 }
 
 const playTypes = [
@@ -36,6 +43,13 @@ const playTypes = [
   { value: "play_action", label: "PA" },
   { value: "screen", label: "Screen" },
 ] as const;
+
+const formatOptions: { value: GameFormat; label: string }[] = (
+  Object.keys(GAME_FORMATS) as GameFormat[]
+).map((k) => ({
+  value: k,
+  label: k,
+}));
 
 export function PlayToolbar({
   name,
@@ -52,6 +66,10 @@ export function PlayToolbar({
   dirty,
   canUndo,
   canRedo,
+  onOpenLibrary,
+  onOpenPrint,
+  gameFormat,
+  onGameFormatChange,
 }: PlayToolbarProps) {
   const nameInputRef = useRef<HTMLInputElement>(null);
   const [nameEditing, setNameEditing] = useState(false);
@@ -86,6 +104,24 @@ export function PlayToolbar({
 
       {/* ── Center section: play type segmented control + tools ── */}
       <div className="flex flex-1 items-center justify-center gap-4">
+        {/* Game format selector */}
+        {gameFormat && onGameFormatChange && (
+          <>
+            <select
+              value={gameFormat}
+              onChange={(e) => onGameFormatChange(e.target.value as GameFormat)}
+              className="rounded-lg border border-zinc-700/50 bg-zinc-800/80 px-2 py-1.5 text-xs font-medium text-zinc-300 outline-none transition-colors hover:border-zinc-600 focus:border-indigo-500/50"
+            >
+              {formatOptions.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+            <div className="h-5 w-px bg-zinc-700/50" />
+          </>
+        )}
+
         {/* Play type segmented control */}
         <div className="flex rounded-lg bg-zinc-800/80 p-0.5">
           {playTypes.map((pt) => (
@@ -140,6 +176,27 @@ export function PlayToolbar({
             disabled={!canRedo}
             tooltip="Redo (Cmd+Shift+Z)"
           />
+        </div>
+
+        {/* Divider */}
+        <div className="h-5 w-px bg-zinc-700/50" />
+
+        {/* Library & Print */}
+        <div className="flex items-center gap-0.5">
+          {onOpenLibrary && (
+            <ToolButton
+              icon={<BookOpen className="h-4 w-4" />}
+              onClick={onOpenLibrary}
+              tooltip="Play Library (L)"
+            />
+          )}
+          {onOpenPrint && (
+            <ToolButton
+              icon={<Printer className="h-4 w-4" />}
+              onClick={onOpenPrint}
+              tooltip="Print"
+            />
+          )}
         </div>
       </div>
 

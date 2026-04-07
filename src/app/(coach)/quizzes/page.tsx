@@ -4,7 +4,8 @@ import { getUserMembership } from "@/lib/membership";
 import { getQuizzes } from "@/lib/actions/quiz-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { FileQuestion } from "lucide-react";
+import { FileQuestion, Plus } from "lucide-react";
+import Link from "next/link";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,13 @@ export default async function CoachQuizzesPage() {
             Manage quizzes for your players.
           </p>
         </div>
+        <Link
+          href="/quizzes/create"
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+        >
+          <Plus className="h-4 w-4" />
+          Create Quiz
+        </Link>
       </div>
 
       {quizzes.length === 0 ? (

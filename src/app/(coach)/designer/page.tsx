@@ -5,12 +5,26 @@ import dynamic from "next/dynamic";
 import { PlayToolbar } from "@/components/play/play-toolbar";
 import { FormationPicker } from "@/components/play/formation-picker";
 import { AssignmentPanel } from "@/components/play/assignment-panel";
+import { RoutePicker } from "@/components/play/route-picker";
+import { PlayLibrary } from "@/components/play/play-library";
+import { PrintLayout } from "@/components/play/print-layout";
 import { createEmptyCanvasData } from "@/engine/serialization";
 import { getFormationById } from "@/engine/constants";
+import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
 import type { CanvasData, FormationTemplate, Route } from "@/engine/types";
+import type { RouteTemplate } from "@/engine/routes-library";
+import type { PlayTemplate } from "@/engine/plays-library";
+import type { GameFormat } from "@/engine/constants";
 import { motion, AnimatePresence } from "framer-motion";
-import { LayoutGrid, Pen } from "lucide-react";
+import {
+  LayoutGrid,
+  Pen,
+  BookOpen,
+  Route as RouteIcon,
+  Printer,
+  X,
+} from "lucide-react";
 
 const PlayCanvas = dynamic(
   () => import("@/engine/play-canvas").then((mod) => ({ default: mod.PlayCanvas })),
@@ -27,6 +41,13 @@ export default function DesignerPage() {
   const [dirty, setDirty] = useState(false);
   const [side, setSide] = useState<"offense" | "defense">("offense");
   const [formationPanelOpen, setFormationPanelOpen] = useState(false);
+
+  // New state for route picker, play library, game format, print
+  const [routePickerOpen, setRoutePickerOpen] = useState(false);
+  const [playLibraryOpen, setPlayLibraryOpen] = useState(false);
+  const [gameFormat, setGameFormat] = useState<GameFormat>("11v11");
+  const [printPanelOpen, setPrintPanelOpen] = useState(false);
+  const [printMode, setPrintMode] = useState<"playbook" | "wristband">("playbook");
 
   // Undo / redo stacks
   const undoRef = useRef<CanvasData[]>([]);
@@ -128,6 +149,87 @@ export default function DesignerPage() {
     setDirty(true);
   }, []);
 
+  // ── Route picker handler ──
+  const handleRouteSelect = useCallback(
+    (template: RouteTemplate) => {
+      if (!selectedPlayerId) return;
+      const player = canvasData.players.find((p) => p.id === selectedPlayerId);
+      if (!player) return;
+
+      pushHistory(canvasData);
+      const waypoints = applyRouteTemplate(player.x, player.y, template);
+      const newRoute: Route = {
+        playerId: selectedPlayerId,
+        waypoints,
+        type: template.category === "block" ? "thick" : "solid",
+        routeType: template.name,
+      };
+
+      setCanvasData({
+        ...canvasData,
+        routes: [
+          ...canvasData.routes.filter((r) => r.playerId !== selectedPlayerId),
+          newRoute,
+        ],
+      });
+      setRoutePickerOpen(false);
+      setDirty(true);
+    },
+    [selectedPlayerId, canvasData, pushHistory],
+  );
+
+  // ── Play library import handler ──
+  const handleImportPlay = useCallback(
+    (template: PlayTemplate) => {
+      const formation = getFormationById(template.formation);
+      if (!formation) return;
+
+      pushHistory(canvasData);
+
+      const players = formation.players.map((p) => ({ ...p }));
+      const routes: Route[] = [];
+
+      for (const routeAssignment of template.routes) {
+        const player = players.find((p) => p.id === routeAssignment.playerId);
+        const routeTemplate = getRouteById(routeAssignment.routeId);
+        if (!player || !routeTemplate) continue;
+
+        const waypoints = applyRouteTemplate(player.x, player.y, routeTemplate);
+        routes.push({
+          playerId: routeAssignment.playerId,
+          waypoints,
+          type: routeAssignment.lineType ?? "solid",
+          routeType: routeTemplate.name,
+        });
+      }
+
+      const newData: CanvasData = {
+        players,
+        routes,
+        meta: {
+          formation: formation.id,
+          playType: template.playType,
+          side: formation.side,
+        },
+      };
+
+      setCanvasData(newData);
+      setPlayName(template.name);
+      setPlayType(template.playType);
+      setSide(formation.side);
+      setSelectedPlayerId(null);
+      setDrawingRoute(false);
+      setPlayLibraryOpen(false);
+      setDirty(true);
+    },
+    [canvasData, pushHistory],
+  );
+
+  // ── Print handler ──
+  const handlePrint = useCallback(() => {
+    window.print();
+  }, []);
+
   // ── Keyboard shortcuts ──
   useKeyboardShortcuts([
     {
@@ -143,7 +245,13 @@ export default function DesignerPage() {
     {
       key: "Escape",
       handler: () => {
-        if (drawingRoute) {
+        if (routePickerOpen) {
+          setRoutePickerOpen(false);
+        } else if (playLibraryOpen) {
+          setPlayLibraryOpen(false);
+        } else if (printPanelOpen) {
+          setPrintPanelOpen(false);
+        } else if (drawingRoute) {
           setDrawingRoute(false);
         } else if (selectedPlayerId) {
           setSelectedPlayerId(null);
@@ -183,6 +291,20 @@ export default function DesignerPage() {
       handler: () => setFormationPanelOpen((v) => !v),
       ignoreInputs: true,
     },
+    {
+      key: "r",
+      handler: () => {
+        if (selectedPlayerId && canvasData.players.length > 0) {
+          setRoutePickerOpen((v) => !v);
+        }
+      },
+      ignoreInputs: true,
+    },
+    {
+      key: "l",
+      handler: () => setPlayLibraryOpen((v) => !v),
+      ignoreInputs: true,
+    },
   ]);
 
   const selectedPlayer =
@@ -198,8 +320,23 @@ export default function DesignerPage() {
 
   const hasFormation = canvasData.players.length > 0;
 
+  const printPlays = [
+    {
+      name: playName,
+      formation: formationName,
+      canvasData: "",
+      notes: canvasData.routes
+        .map((r) => {
+          const player = canvasData.players.find((p) => p.id === r.playerId);
+          return player ? `${player.label}: ${r.routeType ?? "Custom Route"}` : null;
+        })
+        .filter(Boolean)
+        .join("\n"),
+    },
+  ];
+
   return (
-    <div className="fixed inset-0 top-16 flex flex-col lg:pl-[240px]">
+    <div className="fixed inset-0 top-16 flex flex-col lg:pl-[240px]" data-print-hide>
       {/* ── Canvas area (takes maximum space) ── */}
       <div className="relative flex-1">
         {/* Floating toolbar over canvas */}
@@ -219,6 +356,10 @@ export default function DesignerPage() {
             dirty={dirty}
             canUndo={undoRef.current.length > 0}
             canRedo={redoRef.current.length > 0}
+            onOpenLibrary={() => setPlayLibraryOpen(true)}
+            onOpenPrint={() => setPrintPanelOpen(true)}
+            gameFormat={gameFormat}
+            onGameFormatChange={setGameFormat}
           />
         </div>
 
@@ -265,15 +406,28 @@ export default function DesignerPage() {
                 <p className="mb-4 text-sm text-zinc-500">
                   Choose from offense or defense formations to place players on the field.
                 </p>
-                <button
-                  onClick={() => setFormationPanelOpen(true)}
-                  className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
-                >
-                  <LayoutGrid className="h-4 w-4" />
-                  Open Formations
-                </button>
+                <div className="flex items-center justify-center gap-3">
+                  <button
+                    onClick={() => setFormationPanelOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+                  >
+                    <LayoutGrid className="h-4 w-4" />
+                    Open Formations
+                  </button>
+                  <button
+                    onClick={() => setPlayLibraryOpen(true)}
+                    className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-5 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                  >
+                    <BookOpen className="h-4 w-4" />
+                    Play Library
+                  </button>
+                </div>
                 <p className="mt-3 text-[11px] text-zinc-600">
-                  or press <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">F</kbd>
+                  or press{" "}
+                  <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">F</kbd>
+                  {" "}for formations,{" "}
+                  <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">L</kbd>
+                  {" "}for play library
                 </p>
               </div>
             </div>
@@ -319,6 +473,7 @@ export default function DesignerPage() {
                 selectedId={canvasData.meta.formation}
                 onSelect={handleFormationSelect}
                 onClose={() => setFormationPanelOpen(false)}
+                gameFormat={gameFormat}
               />
             </motion.div>
           )}
@@ -334,6 +489,18 @@ export default function DesignerPage() {
               onDeleteRoute={handleDeleteRoute}
               onUpdateRouteType={handleUpdateRouteType}
             />
+
+            {/* Pick Route from Library button */}
+            <button
+              onClick={() => setRoutePickerOpen(true)}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-4 py-2.5 text-xs font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:border-indigo-500/40 hover:bg-zinc-800 hover:text-white"
+            >
+              <RouteIcon className="h-3.5 w-3.5" />
+              Pick Route from Library
+              <kbd className="ml-1 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-500">
+                R
+              </kbd>
+            </button>
           </div>
         )}
 
@@ -347,6 +514,105 @@ export default function DesignerPage() {
             <LayoutGrid className="h-5 w-5" />
           </button>
         )}
+      </div>
+
+      {/* ── Route Picker Modal ── */}
+      <RoutePicker
+        isOpen={routePickerOpen}
+        onClose={() => setRoutePickerOpen(false)}
+        onSelectRoute={handleRouteSelect}
+      />
+
+      {/* ── Play Library Modal ── */}
+      <PlayLibrary
+        isOpen={playLibraryOpen}
+        onClose={() => setPlayLibraryOpen(false)}
+        onImportPlay={handleImportPlay}
+      />
+
+      {/* ── Print Panel Modal ── */}
+      <AnimatePresence>
+        {printPanelOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.15 }}
+              className="w-full max-w-md rounded-2xl border border-zinc-700/60 bg-zinc-900 p-6 shadow-2xl"
+            >
+              <div className="mb-4 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-zinc-100">Print Play</h2>
+                <button
+                  onClick={() => setPrintPanelOpen(false)}
+                  className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Mode selector */}
+              <div className="mb-4 flex rounded-lg bg-zinc-800/80 p-0.5">
+                <button
+                  onClick={() => setPrintMode("playbook")}
+                  className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
+                    printMode === "playbook"
+                      ? "bg-indigo-600 text-white"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Playbook
+                </button>
+                <button
+                  onClick={() => setPrintMode("wristband")}
+                  className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
+                    printMode === "wristband"
+                      ? "bg-indigo-600 text-white"
+                      : "text-zinc-400 hover:text-zinc-200"
+                  }`}
+                >
+                  Wristband
+                </button>
+              </div>
+
+              {/* Preview info */}
+              <div className="mb-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+                <p className="text-xs text-zinc-400">
+                  {printMode === "playbook" ? (
+                    <>Full-page layout with play name, diagram, and route assignments. One play per page.</>
+                  ) : (
+                    <>Compact 4x4 grid for wristband cards. Play name and mini diagram per cell.</>
+                  )}
+                </p>
+                <div className="mt-2 text-xs text-zinc-500">
+                  <span className="font-medium text-zinc-300">{playName}</span>
+                  {formationName && <> &middot; {formationName}</>}
+                  {" "}&middot; {canvasData.routes.length} route(s)
+                </div>
+              </div>
+
+              {/* Print button */}
+              <button
+                onClick={handlePrint}
+                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+              >
+                <Printer className="h-4 w-4" />
+                Print
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ── Off-screen print layout (shown only during print) ── */}
+      <div className="hidden print:block">
+        <PrintLayout plays={printPlays} mode={printMode} />
       </div>
     </div>
   );

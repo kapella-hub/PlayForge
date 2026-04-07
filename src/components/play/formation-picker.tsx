@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { FORMATIONS } from "@/engine/constants";
+import {
+  FORMATIONS,
+  GAME_FORMATS,
+  getFormationsByFormat,
+  type GameFormat,
+} from "@/engine/constants";
 import type { FormationTemplate, CanvasPlayer } from "@/engine/types";
 import { cn } from "@/lib/utils";
 import { Check, Search, X } from "lucide-react";
@@ -11,6 +16,8 @@ interface FormationPickerProps {
   selectedId: string;
   onSelect: (formation: FormationTemplate) => void;
   onClose: () => void;
+  /** When provided, formations are filtered to those matching the game format player count */
+  gameFormat?: GameFormat;
 }
 
 /** Renders a tiny schematic of player positions as an SVG minimap */
@@ -70,23 +77,41 @@ export function FormationPicker({
   selectedId,
   onSelect,
   onClose,
+  gameFormat,
 }: FormationPickerProps) {
   const [search, setSearch] = useState("");
 
   const formations = useMemo(() => {
-    const filtered = FORMATIONS.filter((f) => f.side === side);
-    if (!search.trim()) return filtered;
+    let pool: FormationTemplate[];
+
+    if (gameFormat && side === "offense") {
+      // Filter by game format player count for offense
+      pool = getFormationsByFormat(gameFormat);
+    } else {
+      pool = FORMATIONS.filter((f) => f.side === side);
+    }
+
+    if (!search.trim()) return pool;
     const q = search.toLowerCase();
-    return filtered.filter((f) => f.name.toLowerCase().includes(q));
-  }, [side, search]);
+    return pool.filter((f) => f.name.toLowerCase().includes(q));
+  }, [side, search, gameFormat]);
+
+  const formatLabel = gameFormat ? GAME_FORMATS[gameFormat].label : null;
 
   return (
     <div className="flex h-full flex-col">
       {/* Header */}
       <div className="flex items-center justify-between px-1 pb-3">
-        <h3 className="text-sm font-semibold text-zinc-200">
-          {side === "offense" ? "Offense" : "Defense"} Formations
-        </h3>
+        <div>
+          <h3 className="text-sm font-semibold text-zinc-200">
+            {side === "offense" ? "Offense" : "Defense"} Formations
+          </h3>
+          {formatLabel && side === "offense" && (
+            <p className="mt-0.5 text-[10px] text-zinc-500">
+              Showing {formatLabel} formations
+            </p>
+          )}
+        </div>
         <button
           onClick={onClose}
           className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"

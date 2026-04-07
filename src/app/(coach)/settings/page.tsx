@@ -4,6 +4,8 @@ import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { getOrganization } from "@/lib/actions/roster-actions";
 import { InviteCodeCard } from "@/components/roster/invite-code-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { FileText, ChevronRight } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -64,6 +66,24 @@ export default async function SettingsPage() {
 
         {/* Invite Code */}
         <InviteCodeCard code={organization.inviteCode} orgId={orgId} />
+
+        {/* Team Files */}
+        <Link href="/settings/files">
+          <Card className="transition-colors hover:border-zinc-700">
+            <CardContent className="flex items-center gap-4 p-5">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10">
+                <FileText className="h-5 w-5 text-indigo-400" />
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-zinc-100">Team Files</p>
+                <p className="text-xs text-zinc-500">
+                  Manage links to team rules, schedules, goals, and videos.
+                </p>
+              </div>
+              <ChevronRight className="h-5 w-5 text-zinc-600" />
+            </CardContent>
+          </Card>
+        </Link>
       </div>
     </div>
   );
