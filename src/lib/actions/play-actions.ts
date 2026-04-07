@@ -3,7 +3,7 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { redirect } from "next/navigation";
-import type { PlayType } from "@prisma/client";
+import type { PlayType, Prisma } from "@prisma/client";
 
 export async function getPlay(id: string) {
   const play = await db.play.findUnique({
@@ -58,8 +58,8 @@ export async function updatePlay(
     name?: string;
     formation?: string;
     playType?: PlayType;
-    canvasData?: unknown;
-    animationData?: unknown;
+    canvasData?: Prisma.InputJsonValue;
+    animationData?: Prisma.InputJsonValue;
     notes?: string;
     thumbnailUrl?: string;
     situationTags?: string[];

@@ -75,7 +75,7 @@ export function PlayCanvas({
   );
 
   const handleStageClick = useCallback(
-    (e: KonvaEventObject<MouseEvent>) => {
+    (e: KonvaEventObject<MouseEvent | TouchEvent>) => {
       // Only handle clicks on the stage itself (empty area)
       if (e.target !== e.currentTarget) return;
 
