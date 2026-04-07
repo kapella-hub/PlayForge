@@ -1,0 +1,222 @@
+import type { FormationTemplate } from "./types";
+
+export const FIELD = {
+  WIDTH: 1000,
+  HEIGHT: 600,
+  PADDING: 50,
+  YARD_LINE_SPACING: 30,
+  LINE_OF_SCRIMMAGE_Y: 350,
+  PLAYER_RADIUS: 16,
+  COLORS: {
+    FIELD: "#2d5a27",
+    LINES: "#ffffff",
+    OFFENSE: "#3b82f6",
+    DEFENSE: "#ef4444",
+    SELECTED: "#f59e0b",
+    LOS: "#f59e0b",
+    ROUTE: "#60a5fa",
+    ROUTE_DASHED: "#94a3b8",
+    ROUTE_BLOCK: "#f97316",
+    ENDZONE: "#1a4a1a",
+  },
+} as const;
+
+const LOS = FIELD.LINE_OF_SCRIMMAGE_Y;
+
+export const FORMATIONS: FormationTemplate[] = [
+  // ── Offense ──────────────────────────────────────────
+  {
+    id: "shotgun-2x2",
+    name: "Shotgun 2x2",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 70, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 110, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 320, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 680, y: LOS, side: "offense" },
+      { id: "lt", label: "LT", x: 400, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 440, y: LOS, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 560, y: LOS, side: "offense" },
+      { id: "rt", label: "RT", x: 600, y: LOS, side: "offense" },
+    ],
+  },
+  {
+    id: "i-form",
+    name: "I-Formation",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 30, side: "offense" },
+      { id: "fb", label: "FB", x: 500, y: LOS + 70, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 110, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "te", label: "TE", x: 640, y: LOS, side: "offense" },
+      { id: "lt", label: "LT", x: 400, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 440, y: LOS, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 560, y: LOS, side: "offense" },
+      { id: "rt", label: "RT", x: 600, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+    ],
+  },
+  {
+    id: "singleback",
+    name: "Singleback",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 30, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 70, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "te", label: "TE", x: 640, y: LOS, side: "offense" },
+      { id: "lt", label: "LT", x: 400, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 440, y: LOS, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 560, y: LOS, side: "offense" },
+      { id: "rt", label: "RT", x: 600, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 320, y: LOS, side: "offense" },
+    ],
+  },
+  {
+    id: "pistol",
+    name: "Pistol",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 320, y: LOS, side: "offense" },
+      { id: "te", label: "TE", x: 640, y: LOS, side: "offense" },
+      { id: "lt", label: "LT", x: 400, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 440, y: LOS, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 560, y: LOS, side: "offense" },
+      { id: "rt", label: "RT", x: 600, y: LOS, side: "offense" },
+    ],
+  },
+  {
+    id: "empty",
+    name: "Empty",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 70, side: "offense" },
+      { id: "wr1", label: "X", x: 100, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 900, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 280, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 720, y: LOS, side: "offense" },
+      { id: "slot3", label: "A", x: 680, y: LOS + 10, side: "offense" },
+      { id: "lt", label: "LT", x: 400, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 440, y: LOS, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 560, y: LOS, side: "offense" },
+      { id: "rt", label: "RT", x: 600, y: LOS, side: "offense" },
+    ],
+  },
+  {
+    id: "shotgun-trips",
+    name: "Shotgun Trips",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 70, side: "offense" },
+      { id: "rb", label: "RB", x: 430, y: LOS + 70, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 750, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 700, y: LOS + 10, side: "offense" },
+      { id: "lt", label: "LT", x: 400, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 440, y: LOS, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 560, y: LOS, side: "offense" },
+      { id: "rt", label: "RT", x: 600, y: LOS, side: "offense" },
+    ],
+  },
+
+  // ── Defense ──────────────────────────────────────────
+  {
+    id: "4-3",
+    name: "4-3 Defense",
+    side: "defense",
+    players: [
+      { id: "de1", label: "DE", x: 380, y: LOS - 20, side: "defense" },
+      { id: "dt1", label: "DT", x: 460, y: LOS - 20, side: "defense" },
+      { id: "dt2", label: "DT", x: 540, y: LOS - 20, side: "defense" },
+      { id: "de2", label: "DE", x: 620, y: LOS - 20, side: "defense" },
+      { id: "wlb", label: "WLB", x: 350, y: LOS - 60, side: "defense" },
+      { id: "mlb", label: "MLB", x: 500, y: LOS - 60, side: "defense" },
+      { id: "slb", label: "SLB", x: 650, y: LOS - 60, side: "defense" },
+      { id: "cb1", label: "CB", x: 150, y: LOS - 40, side: "defense" },
+      { id: "cb2", label: "CB", x: 850, y: LOS - 40, side: "defense" },
+      { id: "fs", label: "FS", x: 500, y: LOS - 130, side: "defense" },
+      { id: "ss", label: "SS", x: 650, y: LOS - 100, side: "defense" },
+    ],
+  },
+  {
+    id: "3-4",
+    name: "3-4 Defense",
+    side: "defense",
+    players: [
+      { id: "de1", label: "DE", x: 400, y: LOS - 20, side: "defense" },
+      { id: "nt", label: "NT", x: 500, y: LOS - 20, side: "defense" },
+      { id: "de2", label: "DE", x: 600, y: LOS - 20, side: "defense" },
+      { id: "olb1", label: "OLB", x: 330, y: LOS - 40, side: "defense" },
+      { id: "ilb1", label: "ILB", x: 460, y: LOS - 60, side: "defense" },
+      { id: "ilb2", label: "ILB", x: 540, y: LOS - 60, side: "defense" },
+      { id: "olb2", label: "OLB", x: 670, y: LOS - 40, side: "defense" },
+      { id: "cb1", label: "CB", x: 150, y: LOS - 40, side: "defense" },
+      { id: "cb2", label: "CB", x: 850, y: LOS - 40, side: "defense" },
+      { id: "fs", label: "FS", x: 500, y: LOS - 130, side: "defense" },
+      { id: "ss", label: "SS", x: 650, y: LOS - 100, side: "defense" },
+    ],
+  },
+  {
+    id: "nickel",
+    name: "Nickel Defense",
+    side: "defense",
+    players: [
+      { id: "de1", label: "DE", x: 380, y: LOS - 20, side: "defense" },
+      { id: "dt1", label: "DT", x: 470, y: LOS - 20, side: "defense" },
+      { id: "dt2", label: "DT", x: 530, y: LOS - 20, side: "defense" },
+      { id: "de2", label: "DE", x: 620, y: LOS - 20, side: "defense" },
+      { id: "mlb1", label: "MLB", x: 450, y: LOS - 60, side: "defense" },
+      { id: "mlb2", label: "MLB", x: 550, y: LOS - 60, side: "defense" },
+      { id: "cb1", label: "CB", x: 150, y: LOS - 40, side: "defense" },
+      { id: "cb2", label: "CB", x: 850, y: LOS - 40, side: "defense" },
+      { id: "ncb", label: "NCB", x: 320, y: LOS - 50, side: "defense" },
+      { id: "fs", label: "FS", x: 500, y: LOS - 130, side: "defense" },
+      { id: "ss", label: "SS", x: 650, y: LOS - 100, side: "defense" },
+    ],
+  },
+  {
+    id: "dime",
+    name: "Dime Defense",
+    side: "defense",
+    players: [
+      { id: "de1", label: "DE", x: 400, y: LOS - 20, side: "defense" },
+      { id: "dt1", label: "DT", x: 480, y: LOS - 20, side: "defense" },
+      { id: "dt2", label: "DT", x: 520, y: LOS - 20, side: "defense" },
+      { id: "de2", label: "DE", x: 600, y: LOS - 20, side: "defense" },
+      { id: "mlb", label: "MLB", x: 500, y: LOS - 60, side: "defense" },
+      { id: "cb1", label: "CB", x: 150, y: LOS - 40, side: "defense" },
+      { id: "cb2", label: "CB", x: 850, y: LOS - 40, side: "defense" },
+      { id: "ncb1", label: "NCB", x: 300, y: LOS - 50, side: "defense" },
+      { id: "ncb2", label: "NCB", x: 700, y: LOS - 50, side: "defense" },
+      { id: "fs", label: "FS", x: 500, y: LOS - 130, side: "defense" },
+      { id: "ss", label: "SS", x: 650, y: LOS - 100, side: "defense" },
+    ],
+  },
+];
+
+export function getFormationById(
+  id: string,
+): FormationTemplate | undefined {
+  return FORMATIONS.find((f) => f.id === id);
+}
+
+export function getFormationsBySide(
+  side: "offense" | "defense",
+): FormationTemplate[] {
+  return FORMATIONS.filter((f) => f.side === side);
+}
