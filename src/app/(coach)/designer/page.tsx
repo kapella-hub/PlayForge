@@ -11,7 +11,9 @@ import { PlayLibrary } from "@/components/play/play-library";
 import { PrintLayout } from "@/components/play/print-layout";
 import { AnimationControls } from "@/components/play/animation-controls";
 import { AIGenerator } from "@/components/play/ai-generator";
+import { FilmLinkEditor } from "@/components/play/film-link";
 import { createEmptyCanvasData } from "@/engine/serialization";
+import { mirrorPlay } from "@/engine/mirror";
 import { getFormationById } from "@/engine/constants";
 import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
 import { getPlay, createPlay, updatePlay } from "@/lib/actions/play-actions";
@@ -41,6 +43,8 @@ import {
   Download,
   Shield,
   Sparkles,
+  FlipHorizontal,
+  Film,
 } from "lucide-react";
 
 const PlayCanvas = dynamic(
@@ -75,6 +79,10 @@ export default function DesignerPage() {
   // AI generator state
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
+  // Film link state
+  const [filmUrl, setFilmUrl] = useState("");
+  const [filmTimestamp, setFilmTimestamp] = useState<number | null>(null);
+
   // Coverage overlay state
   const [coverageOverlay, setCoverageOverlay] = useState<string>("");
   const canvasRef = useRef<PlayCanvasHandle>(null);
@@ -91,6 +99,8 @@ export default function DesignerPage() {
       setPlayName(play.name);
       setPlayType(play.playType);
       if (canvas.meta.side) setSide(canvas.meta.side as "offense" | "defense");
+      if (play.filmUrl) setFilmUrl(play.filmUrl);
+      if (play.filmTimestamp) setFilmTimestamp(play.filmTimestamp);
       setDirty(false);
     });
     return () => { cancelled = true; };
@@ -182,6 +192,13 @@ export default function DesignerPage() {
     setDirty(true);
   }, [canvasData]);
 
+  const handleMirror = useCallback(() => {
+    if (canvasData.players.length === 0) return;
+    pushHistory(canvasData);
+    setCanvasData(mirrorPlay(canvasData));
+    setDirty(true);
+  }, [canvasData, pushHistory]);
+
   const handleSave = useCallback(async () => {
     setSaving(true);
     try {
@@ -198,6 +215,8 @@ export default function DesignerPage() {
           playType: playType as "run" | "pass" | "play_action" | "screen" | "special",
           canvasData: JSON.parse(JSON.stringify(canvasData)),
           situationTags,
+          filmUrl: filmUrl || null,
+          filmTimestamp: filmTimestamp ?? null,
         });
         toast.success("Play saved");
       } else if (playbookId) {
@@ -225,7 +244,7 @@ export default function DesignerPage() {
     } finally {
       setSaving(false);
     }
-  }, [playName, playType, canvasData, searchParams, toast]);
+  }, [playName, playType, canvasData, searchParams, toast, filmUrl, filmTimestamp]);
 
   const handleDeleteRoute = useCallback(() => {
     if (!selectedPlayerId) return;
@@ -409,6 +428,11 @@ export default function DesignerPage() {
       ignoreInputs: true,
     },
     {
+      key: "h",
+      handler: handleMirror,
+      ignoreInputs: true,
+    },
+    {
       key: "a",
       handler: () => setAiPanelOpen((v) => !v),
       ignoreInputs: true,
@@ -545,6 +569,7 @@ export default function DesignerPage() {
             onOpenLibrary={() => setPlayLibraryOpen(true)}
             onOpenAI={() => setAiPanelOpen((v) => !v)}
             onOpenPrint={() => setPrintPanelOpen(true)}
+            onMirror={handleMirror}
             gameFormat={gameFormat}
             onGameFormatChange={setGameFormat}
           />
@@ -581,6 +606,18 @@ export default function DesignerPage() {
               <Download className="h-4 w-4" />
               Export
             </button>
+
+            {/* Mirror button */}
+            {!previewMode && (
+              <button
+                onClick={handleMirror}
+                className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2 text-sm font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-700 hover:text-white"
+                title="Mirror Play (H)"
+              >
+                <FlipHorizontal className="h-4 w-4" />
+                Mirror
+              </button>
+            )}
 
             {!previewMode && (
               <button
@@ -835,6 +872,28 @@ export default function DesignerPage() {
                 R
               </kbd>
             </button>
+          </div>
+        )}
+
+        {/* ── Film Link editor (floating bottom-right when no player selected) ── */}
+        {hasFormation && !selectedPlayer && !previewMode && (
+          <div className="absolute bottom-4 right-4 z-20 w-64 rounded-2xl border border-white/[0.06] bg-zinc-900/95 p-4 shadow-2xl backdrop-blur-xl">
+            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-300">
+              <Film className="h-3.5 w-3.5" />
+              Film Clip
+            </div>
+            <FilmLinkEditor
+              filmUrl={filmUrl}
+              filmTimestamp={filmTimestamp}
+              onFilmUrlChange={(url) => {
+                setFilmUrl(url);
+                setDirty(true);
+              }}
+              onFilmTimestampChange={(ts) => {
+                setFilmTimestamp(ts);
+                setDirty(true);
+              }}
+            />
           </div>
         )}
 

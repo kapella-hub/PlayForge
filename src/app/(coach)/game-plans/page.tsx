@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserMembership } from "@/lib/membership";
 import { getGamePlans } from "@/lib/actions/game-plan-actions";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardList } from "lucide-react";
@@ -39,8 +40,8 @@ export default async function GamePlansPage() {
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {gamePlans.map((gp) => (
+            <Link key={gp.id} href={`/game-plans/${gp.id}`}>
             <Card
-              key={gp.id}
               className={`transition-colors hover:border-zinc-700 ${
                 gp.isActive ? "border-indigo-500" : ""
               }`}
@@ -67,6 +68,7 @@ export default async function GamePlansPage() {
                 </div>
               </CardContent>
             </Card>
+            </Link>
           ))}
         </div>
       )}

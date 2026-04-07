@@ -5,8 +5,8 @@ import { useState, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { DropdownMenu, DropdownItem } from "@/components/ui/dropdown-menu";
-import { duplicatePlay, deletePlay } from "@/lib/actions/play-actions";
-import { MoreVertical, Pencil, Copy, Trash2 } from "lucide-react";
+import { duplicatePlay, deletePlay, mirrorPlayAction } from "@/lib/actions/play-actions";
+import { MoreVertical, Pencil, Copy, Trash2, FlipHorizontal } from "lucide-react";
 
 interface PlayCardProps {
   id: string;
@@ -31,6 +31,12 @@ export function PlayCard({
   const handleDuplicate = () => {
     startTransition(async () => {
       await duplicatePlay(id);
+    });
+  };
+
+  const handleMirror = () => {
+    startTransition(async () => {
+      await mirrorPlayAction(id);
     });
   };
 
@@ -95,6 +101,10 @@ export function PlayCard({
           <DropdownItem onClick={handleDuplicate}>
             <Copy className="h-3.5 w-3.5" />
             {isPending ? "Duplicating..." : "Duplicate"}
+          </DropdownItem>
+          <DropdownItem onClick={handleMirror}>
+            <FlipHorizontal className="h-3.5 w-3.5" />
+            {isPending ? "Mirroring..." : "Mirror"}
           </DropdownItem>
           <DropdownItem onClick={handleDelete} variant="destructive">
             <Trash2 className="h-3.5 w-3.5" />

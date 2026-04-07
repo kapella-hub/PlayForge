@@ -6,8 +6,8 @@ import { recordPlayView } from "@/lib/actions/progress-actions";
 import { PlayViewer } from "@/components/play/play-viewer";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent } from "@/components/ui/card";
-import { ExternalLink } from "lucide-react";
 import { PlayerAssignmentToggle } from "./assignment-toggle";
+import { FilmLinkDisplay } from "@/components/play/film-link";
 
 export const dynamic = "force-dynamic";
 
@@ -132,15 +132,10 @@ export default async function PlayDetailPage({
 
       {/* Film Link */}
       {play.filmUrl && (
-        <a
-          href={play.filmUrl}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-400 hover:text-indigo-300"
-        >
-          <ExternalLink className="h-4 w-4" />
-          Watch Film
-        </a>
+        <FilmLinkDisplay
+          filmUrl={play.filmUrl}
+          filmTimestamp={play.filmTimestamp ?? null}
+        />
       )}
     </div>
   );

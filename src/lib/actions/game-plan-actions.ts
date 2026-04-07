@@ -96,3 +96,40 @@ export async function removePlayFromGamePlan(
     where: { gamePlanId_playId: { gamePlanId, playId } },
   });
 }
+
+export async function getGamePlan(id: string) {
+  return db.gamePlan.findUnique({
+    where: { id },
+    include: {
+      plays: {
+        include: { play: true },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+}
+
+export async function reorderGamePlanPlays(
+  gamePlanId: string,
+  playIds: string[],
+) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  // Update sortOrder for each play based on array index
+  await Promise.all(
+    playIds.map((playId, index) =>
+      db.gamePlanPlay.update({
+        where: { gamePlanId_playId: { gamePlanId, playId } },
+        data: { sortOrder: index },
+      }),
+    ),
+  );
+}
+
+export async function deleteGamePlan(id: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error("Unauthorized");
+
+  return db.gamePlan.delete({ where: { id } });
+}

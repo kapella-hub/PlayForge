@@ -13,6 +13,7 @@ import {
   BookOpen,
   Printer,
   Sparkles,
+  FlipHorizontal,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GAME_FORMATS, type GameFormat } from "@/engine/constants";
@@ -35,6 +36,7 @@ interface PlayToolbarProps {
   onOpenLibrary?: () => void;
   onOpenAI?: () => void;
   onOpenPrint?: () => void;
+  onMirror?: () => void;
   gameFormat?: GameFormat;
   onGameFormatChange?: (format: GameFormat) => void;
 }
@@ -71,6 +73,7 @@ export function PlayToolbar({
   onOpenLibrary,
   onOpenAI,
   onOpenPrint,
+  onMirror,
   gameFormat,
   onGameFormatChange,
 }: PlayToolbarProps) {
@@ -198,6 +201,13 @@ export function PlayToolbar({
               icon={<Sparkles className="h-4 w-4" />}
               onClick={onOpenAI}
               tooltip="AI Generator (A)"
+            />
+          )}
+          {onMirror && (
+            <ToolButton
+              icon={<FlipHorizontal className="h-4 w-4" />}
+              onClick={onMirror}
+              tooltip="Mirror Play (H)"
             />
           )}
           {onOpenPrint && (
