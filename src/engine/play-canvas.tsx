@@ -1,11 +1,13 @@
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useRef, useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { Stage, Layer, Line, Circle, Group } from "react-konva";
+import type Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
 import FieldRenderer from "./field-renderer";
 import PlayerNode from "./player-node";
 import RouteLine from "./route-line";
+import { CoverageOverlay } from "./coverage-zone";
 import { FIELD, detectRouteType } from "./constants";
 import type { AnimationState } from "./animation-engine";
 import Ball from "./ball";
@@ -31,9 +33,15 @@ interface PlayCanvasProps {
   onMotionPlayerSelect?: (id: string | null) => void;
   /** When set, only this player and their route are rendered at full brightness */
   highlightPlayerId?: string;
+  /** Coverage scheme id to overlay on the field */
+  coverageOverlay?: string;
 }
 
-export function PlayCanvas({
+export interface PlayCanvasHandle {
+  getStageRef: () => React.RefObject<Konva.Stage | null>;
+}
+
+export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function PlayCanvas({
   canvasData,
   onChange,
   selectedPlayerId,
@@ -45,10 +53,16 @@ export function PlayCanvas({
   motionPlayerId = null,
   onMotionPlayerSelect,
   highlightPlayerId,
-}: PlayCanvasProps) {
+  coverageOverlay,
+}, ref) {
   const isAnimating = !!animationState;
   const containerRef = useRef<HTMLDivElement>(null);
+  const stageRef = useRef<Konva.Stage>(null);
   const [dimensions, setDimensions] = useState({ width: 800, height: 480 });
+
+  useImperativeHandle(ref, () => ({
+    getStageRef: () => stageRef,
+  }));
 
   // Track previous positions for ghost trail during animation
   const prevPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
@@ -402,6 +416,7 @@ export function PlayCanvas({
   return (
     <div ref={containerRef} className="w-full overflow-hidden rounded-lg">
       <Stage
+        ref={stageRef}
         width={dimensions.width}
         height={dimensions.height}
         onClick={handleStageClick}
@@ -417,6 +432,13 @@ export function PlayCanvas({
             height={dimensions.height}
           />
         </Layer>
+
+        {/* Layer 1.5: Coverage overlay (between field and players) */}
+        {coverageOverlay && (
+          <Layer listening={false} scaleX={scaleX} scaleY={scaleY}>
+            <CoverageOverlay schemeId={coverageOverlay} />
+          </Layer>
+        )}
 
         {/* Layer 2: Interactive layer (routes + players + preview) */}
         <Layer scaleX={scaleX} scaleY={scaleY}>
@@ -548,4 +570,4 @@ export function PlayCanvas({
       </Stage>
     </div>
   );
-}
+});

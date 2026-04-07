@@ -13,9 +13,12 @@ import { createEmptyCanvasData } from "@/engine/serialization";
 import { getFormationById } from "@/engine/constants";
 import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
 import { generateKeyframes } from "@/engine/animation-engine";
+import { exportPlayAsImage } from "@/engine/export";
+import { COVERAGE_SCHEMES } from "@/engine/coverage-zone";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
 import type { CanvasData, FormationTemplate, Route, AnimationData, MotionPath } from "@/engine/types";
 import type { AnimationState } from "@/engine/animation-engine";
+import type { PlayCanvasHandle } from "@/engine/play-canvas";
 import type { RouteTemplate } from "@/engine/routes-library";
 import type { PlayTemplate } from "@/engine/plays-library";
 import type { GameFormat } from "@/engine/constants";
@@ -30,6 +33,8 @@ import {
   Play,
   Square,
   MoveRight,
+  Download,
+  Shield,
 } from "lucide-react";
 
 const PlayCanvas = dynamic(
@@ -58,6 +63,10 @@ export default function DesignerPage() {
   const [gameFormat, setGameFormat] = useState<GameFormat>("11v11");
   const [printPanelOpen, setPrintPanelOpen] = useState(false);
   const [printMode, setPrintMode] = useState<"playbook" | "wristband">("playbook");
+
+  // Coverage overlay state
+  const [coverageOverlay, setCoverageOverlay] = useState<string>("");
+  const canvasRef = useRef<PlayCanvasHandle>(null);
 
   // Animation preview state
   const [previewMode, setPreviewMode] = useState(false);
@@ -264,6 +273,14 @@ export default function DesignerPage() {
     [canvasData, pushHistory],
   );
 
+  // ── Export handler ──
+  const handleExport = useCallback(() => {
+    const handle = canvasRef.current;
+    if (!handle) return;
+    const stageRef = handle.getStageRef();
+    exportPlayAsImage(stageRef, playName);
+  }, [playName]);
+
   // ── Print handler ──
   const handlePrint = useCallback(() => {
     window.print();
@@ -430,9 +447,38 @@ export default function DesignerPage() {
           />
         </div>
 
-        {/* Motion + Preview toggle buttons */}
+        {/* Motion + Preview + Coverage + Export buttons */}
         {hasFormation && (
           <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
+            {/* Coverage overlay dropdown */}
+            {!previewMode && (
+              <div className="relative">
+                <select
+                  value={coverageOverlay}
+                  onChange={(e) => setCoverageOverlay(e.target.value)}
+                  className="inline-flex appearance-none items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-3 py-2 pl-8 text-sm font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-700 hover:text-white"
+                >
+                  <option value="">No Coverage</option>
+                  {COVERAGE_SCHEMES.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
+                    </option>
+                  ))}
+                </select>
+                <Shield className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
+              </div>
+            )}
+
+            {/* Export button */}
+            <button
+              onClick={handleExport}
+              className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2 text-sm font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-700 hover:text-white"
+              title="Export as PNG"
+            >
+              <Download className="h-4 w-4" />
+              Export
+            </button>
+
             {!previewMode && (
               <button
                 onClick={() => {
@@ -529,6 +575,7 @@ export default function DesignerPage() {
         <div className="h-full">
           {hasFormation ? (
             <PlayCanvas
+              ref={canvasRef}
               canvasData={canvasData}
               onChange={handleCanvasChange}
               selectedPlayerId={selectedPlayerId}
@@ -539,6 +586,7 @@ export default function DesignerPage() {
               motionMode={previewMode ? false : motionMode}
               motionPlayerId={motionPlayerId}
               onMotionPlayerSelect={setMotionPlayerId}
+              coverageOverlay={coverageOverlay || undefined}
             />
           ) : (
             /* Empty state */

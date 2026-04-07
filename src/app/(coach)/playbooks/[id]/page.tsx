@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getPlaysByPlaybook } from "@/lib/actions/play-actions";
-import { PlayCard } from "@/components/play/play-card";
+import { PlaybookFilters } from "@/components/play/playbook-filters";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, FileText } from "lucide-react";
@@ -62,7 +62,7 @@ export default async function PlaybookDetailPage({
         )}
       </div>
 
-      {/* Plays grid */}
+      {/* Plays with filters */}
       {plays.length === 0 ? (
         <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
           <FileText className="mb-4 h-12 w-12 text-zinc-700" />
@@ -73,19 +73,18 @@ export default async function PlaybookDetailPage({
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {plays.map((play) => (
-            <PlayCard
-              key={play.id}
-              id={play.id}
-              name={play.name}
-              formation={play.formation}
-              playType={play.playType}
-              thumbnailUrl={play.thumbnailUrl}
-              playbookId={id}
-            />
-          ))}
-        </div>
+        <PlaybookFilters
+          plays={plays.map((p) => ({
+            id: p.id,
+            name: p.name,
+            formation: p.formation,
+            playType: p.playType,
+            thumbnailUrl: p.thumbnailUrl,
+            situationTags: p.situationTags ?? [],
+            createdAt: p.createdAt,
+          }))}
+          playbookId={id}
+        />
       )}
     </div>
   );
