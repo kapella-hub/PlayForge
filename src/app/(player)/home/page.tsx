@@ -8,6 +8,7 @@ import { getActiveGamePlan } from "@/lib/actions/game-plan-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, FileQuestion, Trophy } from "lucide-react";
+import { calculateXP, getLevel, type PlayerStats } from "@/lib/gamification";
 import {
   PlayerStagger,
   PlayerCard,
@@ -37,6 +38,25 @@ export default async function PlayerHomePage() {
   const totalPlays = progress.length;
   const masteryPct = totalPlays > 0 ? Math.round((masteredCount / totalPlays) * 100) : 0;
 
+  // Gamification stats
+  const totalViews = progress.reduce((sum, p) => sum + p.views, 0);
+  const totalQuizzes = progress.reduce((sum, p) => sum + p.quizScores.length, 0);
+  const playerStats: PlayerStats = {
+    totalViews,
+    totalQuizzes,
+    averageScore: 0,
+    currentStreak: 0,
+    longestStreak: 0,
+    playsMastered: masteredCount,
+    totalPlays,
+    daysActive: 0,
+  };
+  const xp = calculateXP(playerStats);
+  const levelInfo = getLevel(xp);
+  const xpProgress = levelInfo.nextLevelXP > 0
+    ? Math.min(100, Math.round((xp / levelInfo.nextLevelXP) * 100))
+    : 100;
+
   const hasContent = dueForReview.length > 0 || quizzes.length > 0 || totalPlays > 0;
 
   // All items from getDueForReview are past their review date
@@ -47,12 +67,33 @@ export default async function PlayerHomePage() {
       {/* Greeting */}
       <PlayerCard>
         <div className="mb-2">
-          <PlayerTimeGreeting firstName={firstName} />
+          <div className="flex items-center gap-2">
+            <PlayerTimeGreeting firstName={firstName} />
+            {totalPlays > 0 && (
+              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600/20 px-2.5 py-0.5 text-xs font-medium text-indigo-400">
+                Lv.{levelInfo.level} {levelInfo.title}
+              </span>
+            )}
+          </div>
           <p className="text-sm text-zinc-500">
             {hasContent
               ? "Here\u2019s what\u2019s on your plate today."
               : "Your study feed is empty. Check back when your coach assigns plays."}
           </p>
+          {totalPlays > 0 && (
+            <div className="mt-2">
+              <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                <span>{xp} XP</span>
+                <span>{levelInfo.nextLevelXP} XP</span>
+              </div>
+              <div className="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  style={{ width: `${xpProgress}%` }}
+                />
+              </div>
+            </div>
+          )}
         </div>
       </PlayerCard>
 

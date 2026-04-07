@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { Suspense, useState, useRef, useCallback, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
@@ -87,13 +87,55 @@ function InviteCodeInput({
 }
 
 export default function JoinPage() {
+  return (
+    <Suspense>
+      <JoinPageContent />
+    </Suspense>
+  );
+}
+
+function JoinPageContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState<"code" | "profile">("code");
   const [inviteCode, setInviteCode] = useState("");
   const [orgName, setOrgName] = useState("");
   const [form, setForm] = useState({ name: "", email: "", position: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [autoSubmitted, setAutoSubmitted] = useState(false);
+
+  // Auto-fill and auto-verify from QR code URL param
+  useEffect(() => {
+    const codeParam = searchParams.get("code");
+    if (codeParam && codeParam.length === CODE_LENGTH && !autoSubmitted) {
+      const cleanCode = codeParam.replace(/[^A-Z0-9]/gi, "").toUpperCase().slice(0, CODE_LENGTH);
+      if (cleanCode.length === CODE_LENGTH) {
+        setInviteCode(cleanCode);
+        setAutoSubmitted(true);
+        // Auto-verify the code
+        (async () => {
+          setLoading(true);
+          setError(null);
+          try {
+            const res = await fetch(`/api/auth/verify-invite?code=${cleanCode}`);
+            if (res.ok) {
+              const data = await res.json();
+              setOrgName(data.orgName);
+              setStep("profile");
+            } else {
+              const data = await res.json();
+              setError(data.error || "Invalid invite code.");
+            }
+          } catch {
+            setError("An unexpected error occurred. Please try again.");
+          } finally {
+            setLoading(false);
+          }
+        })();
+      }
+    }
+  }, [searchParams, autoSubmitted]);
 
   async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();

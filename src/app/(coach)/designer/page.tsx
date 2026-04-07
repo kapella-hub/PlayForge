@@ -9,6 +9,7 @@ import { RoutePicker } from "@/components/play/route-picker";
 import { PlayLibrary } from "@/components/play/play-library";
 import { PrintLayout } from "@/components/play/print-layout";
 import { AnimationControls } from "@/components/play/animation-controls";
+import { AIGenerator } from "@/components/play/ai-generator";
 import { createEmptyCanvasData } from "@/engine/serialization";
 import { getFormationById } from "@/engine/constants";
 import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
@@ -35,6 +36,7 @@ import {
   MoveRight,
   Download,
   Shield,
+  Sparkles,
 } from "lucide-react";
 
 const PlayCanvas = dynamic(
@@ -63,6 +65,9 @@ export default function DesignerPage() {
   const [gameFormat, setGameFormat] = useState<GameFormat>("11v11");
   const [printPanelOpen, setPrintPanelOpen] = useState(false);
   const [printMode, setPrintMode] = useState<"playbook" | "wristband">("playbook");
+
+  // AI generator state
+  const [aiPanelOpen, setAiPanelOpen] = useState(false);
 
   // Coverage overlay state
   const [coverageOverlay, setCoverageOverlay] = useState<string>("");
@@ -273,6 +278,21 @@ export default function DesignerPage() {
     [canvasData, pushHistory],
   );
 
+  // ── AI play apply handler ──
+  const handleAIApply = useCallback(
+    (aiCanvasData: CanvasData, name: string) => {
+      pushHistory(canvasData);
+      setCanvasData(aiCanvasData);
+      setPlayName(name);
+      setPlayType(aiCanvasData.meta.playType || "pass");
+      setSide(aiCanvasData.meta.side || "offense");
+      setSelectedPlayerId(null);
+      setDrawingRoute(false);
+      setDirty(true);
+    },
+    [canvasData, pushHistory],
+  );
+
   // ── Export handler ──
   const handleExport = useCallback(() => {
     const handle = canvasRef.current;
@@ -315,9 +335,16 @@ export default function DesignerPage() {
       ignoreInputs: true,
     },
     {
+      key: "a",
+      handler: () => setAiPanelOpen((v) => !v),
+      ignoreInputs: true,
+    },
+    {
       key: "Escape",
       handler: () => {
-        if (routePickerOpen) {
+        if (aiPanelOpen) {
+          setAiPanelOpen(false);
+        } else if (routePickerOpen) {
           setRoutePickerOpen(false);
         } else if (playLibraryOpen) {
           setPlayLibraryOpen(false);
@@ -441,6 +468,7 @@ export default function DesignerPage() {
             canUndo={undoRef.current.length > 0}
             canRedo={redoRef.current.length > 0}
             onOpenLibrary={() => setPlayLibraryOpen(true)}
+            onOpenAI={() => setAiPanelOpen((v) => !v)}
             onOpenPrint={() => setPrintPanelOpen(true)}
             gameFormat={gameFormat}
             onGameFormatChange={setGameFormat}
@@ -615,12 +643,21 @@ export default function DesignerPage() {
                     Play Library
                   </button>
                 </div>
+                <button
+                    onClick={() => setAiPanelOpen(true)}
+                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-600/10 px-5 py-2.5 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-600/20 hover:text-violet-200"
+                  >
+                    <Sparkles className="h-4 w-4" />
+                    AI Generator
+                  </button>
                 <p className="mt-3 text-[11px] text-zinc-600">
                   or press{" "}
                   <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">F</kbd>
                   {" "}for formations,{" "}
                   <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">L</kbd>
-                  {" "}for play library
+                  {" "}for play library,{" "}
+                  <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">A</kbd>
+                  {" "}for AI
                 </p>
               </div>
             </div>
@@ -671,6 +708,14 @@ export default function DesignerPage() {
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* ── AI Generator panel ── */}
+        <AIGenerator
+          isOpen={aiPanelOpen}
+          onClose={() => setAiPanelOpen(false)}
+          onApply={handleAIApply}
+          gameFormat={gameFormat}
+        />
 
         {/* ── Animation controls (floating bottom) ── */}
         <AnimatePresence>

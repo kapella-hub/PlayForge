@@ -4,6 +4,13 @@ import { getPlayerProgress } from "@/lib/actions/progress-actions";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BarChart3 } from "lucide-react";
+import {
+  BADGES,
+  getEarnedBadges,
+  calculateXP,
+  getLevel,
+  type PlayerStats,
+} from "@/lib/gamification";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +28,65 @@ const MASTERY_LABELS: Record<string, string> = {
   new_play: "New",
 };
 
+function computeStreak(
+  progress: { lastViewedAt: Date | null }[],
+): { current: number; longest: number; daysActive: number } {
+  const viewDates = progress
+    .filter((p) => p.lastViewedAt)
+    .map((p) => {
+      const d = new Date(p.lastViewedAt!);
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    });
+
+  const uniqueDays = [...new Set(viewDates)].sort().reverse();
+  const daysActive = uniqueDays.length;
+
+  if (uniqueDays.length === 0) return { current: 0, longest: 0, daysActive: 0 };
+
+  // Parse dates back for streak calculation
+  const parseDayKey = (key: string) => {
+    const [y, m, d] = key.split("-").map(Number);
+    return new Date(y, m, d);
+  };
+
+  let current = 1;
+  let longest = 1;
+  let streak = 1;
+
+  const today = new Date();
+  const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  const isActiveToday = uniqueDays[0] === todayKey;
+
+  // Check if streak is current (active today or yesterday)
+  if (!isActiveToday) {
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yKey = `${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`;
+    if (uniqueDays[0] !== yKey) {
+      current = 0;
+    }
+  }
+
+  for (let i = 1; i < uniqueDays.length; i++) {
+    const prev = parseDayKey(uniqueDays[i - 1]);
+    const curr = parseDayKey(uniqueDays[i]);
+    const diff = (prev.getTime() - curr.getTime()) / (1000 * 60 * 60 * 24);
+
+    if (Math.abs(diff - 1) < 0.5) {
+      streak++;
+      if (i < 10 && current > 0) current = streak; // Only count recent for current
+    } else {
+      streak = 1;
+    }
+    longest = Math.max(longest, streak);
+  }
+
+  if (current === 0) current = 0;
+  longest = Math.max(longest, current);
+
+  return { current, longest, daysActive };
+}
+
 export default async function ProgressPage() {
   const session = await auth();
   if (!session?.user?.id) redirect("/login");
@@ -35,6 +101,40 @@ export default async function ProgressPage() {
   };
 
   const total = progress.length;
+  const totalViews = progress.reduce((sum, p) => sum + p.views, 0);
+  const totalQuizzes = progress.reduce(
+    (sum, p) => sum + p.quizScores.length,
+    0,
+  );
+  const allScores = progress.flatMap((p) => p.quizScores);
+  const averageScore =
+    allScores.length > 0
+      ? allScores.reduce((a, b) => a + b, 0) / allScores.length
+      : 0;
+
+  const { current: currentStreak, longest: longestStreak, daysActive } =
+    computeStreak(progress);
+
+  const stats: PlayerStats = {
+    totalViews,
+    totalQuizzes,
+    averageScore,
+    currentStreak,
+    longestStreak,
+    playsMastered: counts.mastered,
+    totalPlays: total,
+    daysActive,
+  };
+
+  const xp = calculateXP(stats);
+  const levelInfo = getLevel(xp);
+  const earnedBadges = getEarnedBadges(stats);
+  const earnedIds = new Set(earnedBadges.map((b) => b.id));
+  const lockedBadges = BADGES.filter((b) => !earnedIds.has(b.id));
+  const xpProgress =
+    levelInfo.nextLevelXP > 0
+      ? Math.min(100, Math.round((xp / levelInfo.nextLevelXP) * 100))
+      : 100;
 
   return (
     <div>
@@ -43,6 +143,91 @@ export default async function ProgressPage() {
         <p className="text-sm text-zinc-500">
           Track your mastery across all plays.
         </p>
+      </div>
+
+      {/* XP & Level Section */}
+      <div className="mb-6 space-y-4">
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+                  {levelInfo.level}
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-white">
+                    {levelInfo.title}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">
+                    Level {levelInfo.level} &middot; {xp} XP
+                  </p>
+                </div>
+              </div>
+              {currentStreak > 0 && (
+                <div className="flex items-center gap-1 rounded-full bg-amber-900/30 px-3 py-1">
+                  <span className="text-sm">{"\uD83D\uDD25"}</span>
+                  <span className="text-xs font-semibold text-amber-400">
+                    {currentStreak} day streak
+                  </span>
+                </div>
+              )}
+            </div>
+            {/* XP Progress bar */}
+            <div className="mt-3">
+              <div className="flex items-center justify-between text-[10px] text-zinc-500">
+                <span>{xp} XP</span>
+                <span>{levelInfo.nextLevelXP} XP</span>
+              </div>
+              <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+                <div
+                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  style={{ width: `${xpProgress}%` }}
+                />
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Badges */}
+        <Card>
+          <CardContent className="p-4">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              Badges Earned ({earnedBadges.length}/{BADGES.length})
+            </h2>
+            {earnedBadges.length > 0 && (
+              <div className="mb-3 grid grid-cols-5 gap-2">
+                {earnedBadges.map((badge) => (
+                  <div
+                    key={badge.id}
+                    className="flex flex-col items-center gap-1 rounded-lg bg-zinc-800/50 p-2"
+                    title={badge.description}
+                  >
+                    <span className="text-xl">{badge.icon}</span>
+                    <span className="text-center text-[9px] leading-tight text-zinc-300">
+                      {badge.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {lockedBadges.length > 0 && (
+              <div className="grid grid-cols-5 gap-2">
+                {lockedBadges.map((badge) => (
+                  <div
+                    key={badge.id}
+                    className="flex flex-col items-center gap-1 rounded-lg bg-zinc-800/20 p-2 opacity-40"
+                    title={badge.description}
+                  >
+                    <span className="text-xl">?</span>
+                    <span className="text-center text-[9px] leading-tight text-zinc-500">
+                      {badge.name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
       </div>
 
       {total === 0 ? (

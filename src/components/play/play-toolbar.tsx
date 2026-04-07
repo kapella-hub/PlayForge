@@ -12,6 +12,7 @@ import {
   Circle,
   BookOpen,
   Printer,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GAME_FORMATS, type GameFormat } from "@/engine/constants";
@@ -32,6 +33,7 @@ interface PlayToolbarProps {
   canUndo: boolean;
   canRedo: boolean;
   onOpenLibrary?: () => void;
+  onOpenAI?: () => void;
   onOpenPrint?: () => void;
   gameFormat?: GameFormat;
   onGameFormatChange?: (format: GameFormat) => void;
@@ -67,6 +69,7 @@ export function PlayToolbar({
   canUndo,
   canRedo,
   onOpenLibrary,
+  onOpenAI,
   onOpenPrint,
   gameFormat,
   onGameFormatChange,
@@ -188,6 +191,13 @@ export function PlayToolbar({
               icon={<BookOpen className="h-4 w-4" />}
               onClick={onOpenLibrary}
               tooltip="Play Library (L)"
+            />
+          )}
+          {onOpenAI && (
+            <ToolButton
+              icon={<Sparkles className="h-4 w-4" />}
+              onClick={onOpenAI}
+              tooltip="AI Generator (A)"
             />
           )}
           {onOpenPrint && (
