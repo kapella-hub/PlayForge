@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { CoachSidebar } from "@/components/layout/coach-sidebar";
 import { UserMenu } from "@/components/layout/user-menu";
+import { PageTransition } from "@/components/ui/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -31,7 +32,9 @@ export default async function CoachLayout({
           <UserMenu user={session.user} />
         </header>
 
-        <main className="p-6">{children}</main>
+        <main className="p-6">
+          <PageTransition>{children}</PageTransition>
+        </main>
       </div>
     </div>
   );

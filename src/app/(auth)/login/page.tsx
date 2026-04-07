@@ -6,6 +6,7 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
 
 const isDev = process.env.NODE_ENV !== "production";
@@ -55,9 +56,13 @@ export default function LoginPage() {
       transition={{ duration: 0.4 }}
     >
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-xl font-bold text-white">
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-xl font-bold text-white shadow-lg shadow-indigo-600/25"
+        >
           PF
-        </div>
+        </motion.div>
         <h1 className="text-2xl font-bold text-white">Welcome back</h1>
         <p className="mt-1 text-sm text-zinc-500">Sign in to PlayForge</p>
       </div>
@@ -88,7 +93,7 @@ export default function LoginPage() {
                   />
                 </div>
                 <Button type="submit" className="w-full" disabled={loading}>
-                  {loading ? "Signing in..." : "Sign in with Email"}
+                  {loading ? <><Spinner size="sm" className="mr-2" /> Signing in...</> : "Sign in with Email"}
                 </Button>
               </form>
 
@@ -112,7 +117,7 @@ export default function LoginPage() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
             </svg>
-            {loading ? "Signing in..." : "Continue with Google"}
+            {loading ? <><Spinner size="sm" className="mr-2" /> Signing in...</> : "Continue with Google"}
           </Button>
 
           <div className="mt-6 text-center text-sm text-zinc-500">

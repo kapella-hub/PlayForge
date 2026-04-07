@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
+import { Spinner } from "@/components/ui/spinner";
 import { motion } from "framer-motion";
 
 export default function SignupPage() {
@@ -44,9 +45,13 @@ export default function SignupPage() {
       transition={{ duration: 0.4 }}
     >
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-xl font-bold text-white">
+        <motion.div
+          animate={{ y: [0, -6, 0] }}
+          transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-xl font-bold text-white shadow-lg shadow-indigo-600/25"
+        >
           PF
-        </div>
+        </motion.div>
         <h1 className="text-2xl font-bold text-white">Create your account</h1>
         <p className="mt-1 text-sm text-zinc-500">Start building your playbook</p>
       </div>
@@ -98,7 +103,7 @@ export default function SignupPage() {
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "Creating account..." : "Create Account"}
+              {loading ? <><Spinner size="sm" className="mr-2" /> Creating account...</> : "Create Account"}
             </Button>
           </form>
 

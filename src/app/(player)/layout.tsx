@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { PlayerTabs } from "@/components/layout/player-tabs";
 import { UserMenu } from "@/components/layout/user-menu";
+import { PageTransition } from "@/components/ui/page-transition";
 
 export const dynamic = "force-dynamic";
 
@@ -29,7 +30,9 @@ export default async function PlayerLayout({
         <UserMenu user={session.user} />
       </header>
 
-      <main className="px-4 py-4">{children}</main>
+      <main className="px-4 py-4">
+        <PageTransition>{children}</PageTransition>
+      </main>
 
       <PlayerTabs />
     </div>

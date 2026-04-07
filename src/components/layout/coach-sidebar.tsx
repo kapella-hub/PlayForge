@@ -31,7 +31,7 @@ const navItems = [
   {
     label: "Team",
     items: [
-      { name: "Roster", href: "/roster", icon: Users },
+      { name: "Roster", href: "/roster", icon: Users, badge: true },
       { name: "Quizzes", href: "/quizzes", icon: FileQuestion },
       { name: "Analytics", href: "/analytics", icon: BarChart3 },
     ],
@@ -41,6 +41,34 @@ const navItems = [
     items: [{ name: "Organization", href: "/settings", icon: Settings }],
   },
 ];
+
+function Tooltip({ children, label, show }: { children: React.ReactNode; label: string; show: boolean }) {
+  const [hovered, setHovered] = useState(false);
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {children}
+      <AnimatePresence>
+        {show && hovered && (
+          <motion.div
+            initial={{ opacity: 0, x: -4 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -4 }}
+            transition={{ duration: 0.15 }}
+            className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg whitespace-nowrap pointer-events-none"
+          >
+            {label}
+            <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-zinc-800" />
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
 
 export function CoachSidebar() {
   const pathname = usePathname();
@@ -67,10 +95,10 @@ export function CoachSidebar() {
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-white"
+          className="hidden lg:flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
         >
           <ChevronLeft
-            className={cn("h-4 w-4 transition-transform", collapsed && "rotate-180")}
+            className={cn("h-4 w-4 transition-transform duration-200", collapsed && "rotate-180")}
           />
         </button>
       </div>
@@ -88,22 +116,29 @@ export function CoachSidebar() {
               {group.items.map((item) => {
                 const isActive =
                   pathname === item.href || pathname.startsWith(item.href + "/");
+                const hasBadge = "badge" in item && item.badge;
                 return (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    aria-label={item.name}
-                    onClick={() => setMobileOpen(false)}
-                    className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
-                      isActive
-                        ? "bg-indigo-600 text-white"
-                        : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
-                    )}
-                  >
-                    <item.icon className="h-5 w-5 flex-shrink-0" />
-                    {!collapsed && <span>{item.name}</span>}
-                  </Link>
+                  <Tooltip key={item.href} label={item.name} show={collapsed}>
+                    <Link
+                      href={item.href}
+                      aria-label={item.name}
+                      onClick={() => setMobileOpen(false)}
+                      className={cn(
+                        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                        isActive
+                          ? "bg-indigo-600 text-white"
+                          : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                      )}
+                    >
+                      <span className="relative flex-shrink-0">
+                        <item.icon className="h-5 w-5" />
+                        {hasBadge && (
+                          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-400" />
+                        )}
+                      </span>
+                      {!collapsed && <span>{item.name}</span>}
+                    </Link>
+                  </Tooltip>
                 );
               })}
             </div>
@@ -150,7 +185,7 @@ export function CoachSidebar() {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 border-r border-zinc-800 bg-[#111122] transition-all duration-300",
+          "hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 border-r border-zinc-800 bg-[#111122] transition-[width] duration-300 ease-in-out",
           collapsed ? "lg:w-[72px]" : "lg:w-[240px]"
         )}
       >
