@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   title: "PlayForge — Interactive Football Playbook",
   description:
     "Build, animate, and share football plays. Help your team learn with interactive quizzes and spaced repetition.",
+  other: {
+    "theme-color": "#6366f1",
+    "apple-mobile-web-app-capable": "yes",
+    "apple-mobile-web-app-status-bar-style": "black-translucent",
+  },
 };
 
 export default function RootLayout({
