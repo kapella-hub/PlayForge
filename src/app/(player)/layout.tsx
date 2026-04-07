@@ -4,6 +4,7 @@ import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { PlayerTabs } from "@/components/layout/player-tabs";
 import { UserMenu } from "@/components/layout/user-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NotificationBell } from "@/components/ui/notification-bell";
 import { PageTransition } from "@/components/ui/page-transition";
 
 export const dynamic = "force-dynamic";
@@ -29,6 +30,7 @@ export default async function PlayerLayout({
       <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-800 bg-[var(--background)]/80 px-4 backdrop-blur-md">
         <span className="text-base font-bold text-indigo-400">PlayForge</span>
         <div className="flex items-center gap-2">
+          <NotificationBell />
           <ThemeToggle />
           <UserMenu user={session.user} />
         </div>

@@ -10,6 +10,7 @@ import {
   BookOpen,
   Target,
   PenTool,
+  ClipboardList,
   Users,
   FileQuestion,
   BarChart3,
@@ -18,6 +19,7 @@ import {
   Menu,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { NotificationBell } from "@/components/ui/notification-bell";
 
 const navItems = [
   {
@@ -26,6 +28,7 @@ const navItems = [
       { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
       { name: "Playbooks", href: "/playbooks", icon: BookOpen },
       { name: "Game Plans", href: "/game-plans", icon: Target },
+      { name: "Practice", href: "/practice", icon: ClipboardList },
       { name: "Play Designer", href: "/designer", icon: PenTool },
     ],
   },
@@ -147,8 +150,11 @@ export function CoachSidebar() {
         ))}
       </nav>
 
-      {/* Theme toggle */}
-      <div className="border-t border-zinc-800 px-3 py-3">
+      {/* Notifications & Theme toggle */}
+      <div className="border-t border-zinc-800 px-3 py-3 space-y-1">
+        <Tooltip label="Notifications" show={collapsed}>
+          <NotificationBell />
+        </Tooltip>
         <Tooltip label="Toggle theme" show={collapsed}>
           <ThemeToggle />
         </Tooltip>

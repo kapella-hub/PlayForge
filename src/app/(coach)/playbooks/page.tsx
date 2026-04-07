@@ -2,11 +2,12 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { getUserMembership } from "@/lib/membership";
-import { getPlaybooks } from "@/lib/actions/playbook-actions";
+import { getPlaybooks, getSharedPlaybooks } from "@/lib/actions/playbook-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { BookOpen, Plus } from "lucide-react";
+import { BookOpen, Plus, Share2 } from "lucide-react";
+import { ImportPlaybookButton } from "./import-button";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,10 @@ export default async function PlaybooksPage() {
   const membership = await getUserMembership(session.user.id);
   if (!membership) redirect("/login");
 
-  const playbooks = await getPlaybooks(membership.orgId);
+  const [playbooks, sharedPlaybooks] = await Promise.all([
+    getPlaybooks(membership.orgId),
+    getSharedPlaybooks(membership.orgId),
+  ]);
 
   return (
     <div>
@@ -72,6 +76,61 @@ export default async function PlaybooksPage() {
               </Card>
             </Link>
           ))}
+        </div>
+      )}
+
+      {/* Shared with you */}
+      {sharedPlaybooks.length > 0 && (
+        <div className="mt-12">
+          <div className="mb-4 flex items-center gap-2">
+            <Share2 className="h-4 w-4 text-zinc-500" />
+            <h2 className="text-lg font-semibold text-white">
+              Shared with you
+            </h2>
+          </div>
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {sharedPlaybooks.map((share) => (
+              <Card
+                key={share.id}
+                className="transition-colors hover:border-zinc-700"
+              >
+                <CardHeader>
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="truncate">{share.playbook.name}</span>
+                    <div className="flex items-center gap-1.5 ml-2 shrink-0">
+                      <Badge
+                        variant={
+                          share.playbook.side === "offense"
+                            ? "default"
+                            : "destructive"
+                        }
+                      >
+                        {share.playbook.side}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="border-indigo-500/50 text-indigo-400"
+                      >
+                        Shared
+                      </Badge>
+                    </div>
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-zinc-500">
+                    {share.playbook._count.plays} play
+                    {share.playbook._count.plays !== 1 ? "s" : ""}
+                  </p>
+                  <p className="mt-1 text-xs text-zinc-600">
+                    From {share.playbook.org.name}
+                  </p>
+                  <div className="mt-3">
+                    <ImportPlaybookButton shareId={share.id} />
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
         </div>
       )}
     </div>

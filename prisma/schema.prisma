@@ -118,6 +118,8 @@ model User {
   quizAttempts   QuizAttempt[]
   playerProgress PlayerProgress[]
   playVersions   PlayVersion[] @relation("VersionCreator")
+  createdPracticePlans PracticePlan[] @relation("PracticePlanCreator")
+  sharedPlaybooks PlaybookShare[] @relation("PlaybookSharer")
 }
 
 model Organization {
@@ -129,10 +131,12 @@ model Organization {
   inviteCode String   @unique
   createdAt  DateTime @default(now())
 
-  memberships Membership[]
-  playbooks   Playbook[]
-  gamePlans   GamePlan[]
-  quizzes     Quiz[]
+  memberships    Membership[]
+  playbooks      Playbook[]
+  gamePlans      GamePlan[]
+  quizzes        Quiz[]
+  practicePlans  PracticePlan[]
+  sharedPlaybooks PlaybookShare[] @relation("SharedPlaybooks")
 }
 
 model Membership {
@@ -162,6 +166,7 @@ model Playbook {
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   createdBy User         @relation("PlaybookCreator", fields: [createdById], references: [id])
   plays     Play[]
+  shares    PlaybookShare[]
 }
 
 model Play {
@@ -307,4 +312,44 @@ model PlayVersion {
 
   play      Play @relation(fields: [playId], references: [id], onDelete: Cascade)
   createdBy User @relation("VersionCreator", fields: [createdById], references: [id])
+}
+
+model PracticePlan {
+  id          String    @id @default(cuid())
+  orgId       String
+  name        String
+  date        DateTime?
+  notes       String?
+  createdById String
+  createdAt   DateTime  @default(now())
+
+  org       Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy User           @relation("PracticePlanCreator", fields: [createdById], references: [id])
+  periods   PracticePeriod[]
+}
+
+model PracticePeriod {
+  id             String   @id @default(cuid())
+  practicePlanId String
+  name           String
+  durationMin    Int
+  sortOrder      Int
+  playIds        String[]
+  notes          String?
+
+  practicePlan PracticePlan @relation(fields: [practicePlanId], references: [id], onDelete: Cascade)
+}
+
+model PlaybookShare {
+  id              String   @id @default(cuid())
+  playbookId      String
+  sharedWithOrgId String
+  sharedById      String
+  createdAt       DateTime @default(now())
+
+  playbook   Playbook     @relation(fields: [playbookId], references: [id], onDelete: Cascade)
+  sharedWith Organization @relation("SharedPlaybooks", fields: [sharedWithOrgId], references: [id], onDelete: Cascade)
+  sharedBy   User         @relation("PlaybookSharer", fields: [sharedById], references: [id])
+
+  @@unique([playbookId, sharedWithOrgId])
 }

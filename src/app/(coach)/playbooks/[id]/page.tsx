@@ -6,6 +6,7 @@ import { getPlaysByPlaybook } from "@/lib/actions/play-actions";
 import { PlaybookFilters } from "@/components/play/playbook-filters";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { SharePlaybook } from "@/components/play/share-playbook";
 import { ArrowLeft, Plus, FileText } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -22,6 +23,13 @@ export default async function PlaybookDetailPage({
 
   const playbook = await db.playbook.findUnique({
     where: { id },
+    include: {
+      shares: {
+        include: {
+          sharedWith: { select: { name: true, slug: true } },
+        },
+      },
+    },
   });
 
   if (!playbook) redirect("/playbooks");
@@ -49,12 +57,22 @@ export default async function PlaybookDetailPage({
               {playbook.side}
             </Badge>
           </div>
-          <Link href={`/designer?playbookId=${id}`}>
-            <Button size="sm">
-              <Plus className="mr-1.5 h-4 w-4" />
-              New Play
-            </Button>
-          </Link>
+          <div className="flex items-center gap-2">
+            <SharePlaybook
+              playbookId={id}
+              existingShares={playbook.shares.map((s) => ({
+                id: s.id,
+                sharedWith: s.sharedWith,
+                createdAt: s.createdAt,
+              }))}
+            />
+            <Link href={`/designer?playbookId=${id}`}>
+              <Button size="sm">
+                <Plus className="mr-1.5 h-4 w-4" />
+                New Play
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {playbook.description && (
