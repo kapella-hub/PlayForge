@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { PlayerTabs } from "@/components/layout/player-tabs";
 import { UserMenu } from "@/components/layout/user-menu";
 
@@ -14,6 +15,11 @@ export default async function PlayerLayout({
 
   if (!session?.user) {
     redirect("/login");
+  }
+
+  const membership = await getUserMembership(session.user.id);
+  if (membership && isCoachRole(membership.role)) {
+    redirect("/dashboard");
   }
 
   return (

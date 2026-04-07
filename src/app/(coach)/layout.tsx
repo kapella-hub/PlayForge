@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { auth } from "@/lib/auth";
+import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { CoachSidebar } from "@/components/layout/coach-sidebar";
 import { UserMenu } from "@/components/layout/user-menu";
 
@@ -14,6 +15,11 @@ export default async function CoachLayout({
 
   if (!session?.user) {
     redirect("/login");
+  }
+
+  const membership = await getUserMembership(session.user.id);
+  if (!membership || !isCoachRole(membership.role)) {
+    redirect("/home");
   }
 
   return (

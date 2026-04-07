@@ -86,11 +86,13 @@ export function CoachSidebar() {
             )}
             <div className="space-y-1">
               {group.items.map((item) => {
-                const isActive = pathname === item.href;
+                const isActive =
+                  pathname === item.href || pathname.startsWith(item.href + "/");
                 return (
                   <Link
                     key={item.href}
                     href={item.href}
+                    aria-label={item.name}
                     onClick={() => setMobileOpen(false)}
                     className={cn(
                       "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",

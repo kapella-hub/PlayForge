@@ -12,19 +12,29 @@ export default function SignupPage() {
   const router = useRouter();
   const [form, setForm] = useState({ name: "", email: "", orgName: "" });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSignup(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch("/api/auth/signup", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
-    if (res.ok) {
-      router.push("/login");
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        const data = await res.json();
+        setError(data.error || "Signup failed. Please try again.");
+      }
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -43,6 +53,12 @@ export default function SignupPage() {
 
       <Card>
         <CardContent className="pt-6">
+          {error && (
+            <div className="mb-4 rounded-md bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
               <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-zinc-300">

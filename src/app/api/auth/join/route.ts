@@ -4,52 +4,67 @@ import { db } from "@/lib/db";
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
-  const { name, email, position, inviteCode } = await req.json();
+  try {
+    const { name, email, position, inviteCode } = await req.json();
 
-  if (!name || !email || !position || !inviteCode) {
-    return NextResponse.json(
-      { error: "Missing required fields" },
-      { status: 400 }
-    );
-  }
+    if (!name || !email || !position || !inviteCode) {
+      return NextResponse.json(
+        { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
 
-  const org = await db.organization.findUnique({
-    where: { inviteCode: inviteCode.toUpperCase() },
-  });
-
-  if (!org) {
-    return NextResponse.json(
-      { error: "Invalid invite code" },
-      { status: 404 }
-    );
-  }
-
-  let user = await db.user.findUnique({ where: { email } });
-  if (!user) {
-    user = await db.user.create({
-      data: { name, email },
+    const org = await db.organization.findUnique({
+      where: { inviteCode: inviteCode.toUpperCase() },
     });
-  }
 
-  const existingMembership = await db.membership.findUnique({
-    where: { userId_orgId: { userId: user.id, orgId: org.id } },
-  });
+    if (!org) {
+      return NextResponse.json(
+        { error: "Invalid invite code" },
+        { status: 404 }
+      );
+    }
 
-  if (existingMembership) {
+    const result = await db.$transaction(async (tx) => {
+      const user = await tx.user.upsert({
+        where: { email },
+        update: {},
+        create: { name, email },
+      });
+
+      const existingMembership = await tx.membership.findUnique({
+        where: { userId_orgId: { userId: user.id, orgId: org.id } },
+      });
+
+      if (existingMembership) {
+        return { alreadyMember: true } as const;
+      }
+
+      await tx.membership.create({
+        data: {
+          userId: user.id,
+          orgId: org.id,
+          role: "player",
+          position,
+        },
+      });
+
+      return { userId: user.id, orgId: org.id } as const;
+    });
+
+    if ("alreadyMember" in result) {
+      return NextResponse.json(
+        { error: "Already a member of this team" },
+        { status: 409 }
+      );
+    }
+
+    return NextResponse.json(result, { status: 201 });
+  } catch (error) {
+    console.error("Join error:", error);
     return NextResponse.json(
-      { error: "Already a member of this team" },
-      { status: 409 }
+      { error: "Internal server error" },
+      { status: 500 }
     );
   }
-
-  await db.membership.create({
-    data: {
-      userId: user.id,
-      orgId: org.id,
-      role: "player",
-      position,
-    },
-  });
-
-  return NextResponse.json({ userId: user.id, orgId: org.id }, { status: 201 });
 }

@@ -15,31 +15,50 @@ export default function JoinPage() {
   const [orgName, setOrgName] = useState("");
   const [form, setForm] = useState({ name: "", email: "", position: "" });
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleVerifyCode(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch(`/api/auth/verify-invite?code=${inviteCode}`);
-    if (res.ok) {
-      const data = await res.json();
-      setOrgName(data.orgName);
-      setStep("profile");
+    setError(null);
+    try {
+      const res = await fetch(`/api/auth/verify-invite?code=${inviteCode}`);
+      if (res.ok) {
+        const data = await res.json();
+        setOrgName(data.orgName);
+        setStep("profile");
+      } else {
+        const data = await res.json();
+        setError(data.error || "Invalid invite code.");
+      }
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault();
     setLoading(true);
-    const res = await fetch("/api/auth/join", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ ...form, inviteCode }),
-    });
-    if (res.ok) {
-      router.push("/login");
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/join", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...form, inviteCode }),
+      });
+      if (res.ok) {
+        router.push("/login");
+      } else {
+        const data = await res.json();
+        setError(data.error || "Failed to join team. Please try again.");
+      }
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   }
 
   return (
@@ -62,6 +81,12 @@ export default function JoinPage() {
 
       <Card>
         <CardContent className="pt-6">
+          {error && (
+            <div className="mb-4 rounded-md bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+              {error}
+            </div>
+          )}
+
           {step === "code" ? (
             <form onSubmit={handleVerifyCode} className="space-y-4">
               <div>

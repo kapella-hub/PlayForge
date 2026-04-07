@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { LogOut } from "lucide-react";
 import { signOut } from "next-auth/react";
@@ -43,7 +44,7 @@ export function UserMenu({ user }: UserMenuProps) {
         className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
       >
         {user.image ? (
-          <img src={user.image} alt="" className="h-9 w-9 rounded-full" />
+          <Image src={user.image} alt={user.name || "Avatar"} width={36} height={36} className="rounded-full" />
         ) : (
           initials
         )}

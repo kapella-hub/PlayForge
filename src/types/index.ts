@@ -55,7 +55,7 @@ export const QuestionType = {
 export type QuestionType = (typeof QuestionType)[keyof typeof QuestionType];
 
 export const MasteryLevel = {
-  NEW: "new",
+  NEW: "new_play",
   LEARNING: "learning",
   REVIEWING: "reviewing",
   MASTERED: "mastered",
