@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { FORMATIONS, FIELD } from "@/engine/constants";
+import { FORMATIONS, FIELD, GAME_FORMATS } from "@/engine/constants";
 
 describe("FORMATIONS", () => {
   it("has at least 6 offensive formations", () => {
@@ -12,9 +12,23 @@ describe("FORMATIONS", () => {
     expect(defensive.length).toBeGreaterThanOrEqual(4);
   });
 
-  it("each formation has exactly 11 players", () => {
-    for (const formation of FORMATIONS) {
+  it("11v11 formations have exactly 11 players", () => {
+    const fullSize = FORMATIONS.filter(
+      (f) => !f.id.match(/^\d+v\d+-/),
+    );
+    for (const formation of fullSize) {
       expect(formation.players).toHaveLength(11);
+    }
+  });
+
+  it("flag football formations have correct player counts", () => {
+    const flagFormats = ["4v4", "5v5", "6v6", "7v7", "8v8", "9v9"] as const;
+    for (const fmt of flagFormats) {
+      const count = GAME_FORMATS[fmt].players;
+      const fmts = FORMATIONS.filter((f) => f.id.startsWith(`${fmt}-`));
+      for (const formation of fmts) {
+        expect(formation.players).toHaveLength(count);
+      }
     }
   });
 

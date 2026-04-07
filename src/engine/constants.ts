@@ -242,7 +242,211 @@ export const FORMATIONS: FormationTemplate[] = [
       { id: "ss", label: "SS", x: 650, y: LOS - 100, side: "defense" },
     ],
   },
+  // ── Flag Football: 4v4 ────────────────────────────────────────────
+  {
+    id: "4v4-spread",
+    name: "4v4 Spread",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "wr1", label: "X", x: 250, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 750, y: LOS, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
+  {
+    id: "4v4-diamond",
+    name: "4v4 Diamond",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "wr1", label: "X", x: 350, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 650, y: LOS, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 100, side: "offense" },
+    ],
+  },
+
+  // ── Flag Football: 5v5 ────────────────────────────────────────────
+  {
+    id: "5v5-spread",
+    name: "5v5 Spread",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "wr1", label: "X", x: 200, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 800, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 400, y: LOS, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
+  {
+    id: "5v5-stack",
+    name: "5v5 Stack",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "wr1", label: "X", x: 200, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 800, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 200, y: LOS + 25, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
+  {
+    id: "5v5-trips",
+    name: "5v5 Trips",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "wr1", label: "X", x: 200, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 750, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 650, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 700, y: LOS + 15, side: "offense" },
+    ],
+  },
+
+  // ── Flag Football: 6v6 ────────────────────────────────────────────
+  {
+    id: "6v6-spread",
+    name: "6v6 Spread",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 200, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 800, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 350, y: LOS, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
+  {
+    id: "6v6-trips",
+    name: "6v6 Trips",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 200, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 800, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 700, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 750, y: LOS + 15, side: "offense" },
+    ],
+  },
+
+  // ── Flag Football: 7v7 ────────────────────────────────────────────
+  {
+    id: "7v7-spread",
+    name: "7v7 Spread",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 330, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 670, y: LOS, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
+  {
+    id: "7v7-trips",
+    name: "7v7 Trips",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 750, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 800, y: LOS + 15, side: "offense" },
+      { id: "rb", label: "RB", x: 430, y: LOS + 50, side: "offense" },
+    ],
+  },
+  {
+    id: "7v7-empty",
+    name: "7v7 Empty",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 300, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 700, y: LOS, side: "offense" },
+      { id: "slot3", label: "A", x: 600, y: LOS + 10, side: "offense" },
+    ],
+  },
+  {
+    id: "7v7-bunch",
+    name: "7v7 Bunch",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 750, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 720, y: LOS + 20, side: "offense" },
+      { id: "slot2", label: "Y", x: 780, y: LOS + 20, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
+
+  // ── Flag Football: 8v8 ────────────────────────────────────────────
+  {
+    id: "8v8-spread",
+    name: "8v8 Spread",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 450, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 550, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 300, y: LOS, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
+
+  // ── Flag Football: 9v9 ────────────────────────────────────────────
+  {
+    id: "9v9-spread",
+    name: "9v9 Spread",
+    side: "offense",
+    players: [
+      { id: "qb", label: "QB", x: 500, y: LOS + 50, side: "offense" },
+      { id: "c", label: "C", x: 500, y: LOS, side: "offense" },
+      { id: "lg", label: "LG", x: 450, y: LOS, side: "offense" },
+      { id: "rg", label: "RG", x: 550, y: LOS, side: "offense" },
+      { id: "wr1", label: "X", x: 150, y: LOS, side: "offense" },
+      { id: "wr2", label: "Z", x: 850, y: LOS, side: "offense" },
+      { id: "slot1", label: "H", x: 300, y: LOS, side: "offense" },
+      { id: "slot2", label: "Y", x: 700, y: LOS, side: "offense" },
+      { id: "rb", label: "RB", x: 500, y: LOS + 90, side: "offense" },
+    ],
+  },
 ];
+
+// ── Game Formats ───────────────────────────────────────────────────
+
+export const GAME_FORMATS = {
+  "4v4": { players: 4, label: "4 on 4" },
+  "5v5": { players: 5, label: "5 on 5" },
+  "6v6": { players: 6, label: "6 on 6" },
+  "7v7": { players: 7, label: "7 on 7" },
+  "8v8": { players: 8, label: "8 on 8" },
+  "9v9": { players: 9, label: "9 on 9" },
+  "11v11": { players: 11, label: "11 on 11" },
+} as const;
+
+export type GameFormat = keyof typeof GAME_FORMATS;
+
+/** Get formations compatible with a given game format (by player count) */
+export function getFormationsByFormat(format: GameFormat): FormationTemplate[] {
+  const count = GAME_FORMATS[format].players;
+  return FORMATIONS.filter(
+    (f) => f.side === "offense" && f.players.length === count,
+  );
+}
 
 export function getFormationById(
   id: string,
