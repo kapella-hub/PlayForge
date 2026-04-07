@@ -1,19 +1,28 @@
+import { redirect } from "next/navigation";
+import { auth } from "@/lib/auth";
 import { CoachSidebar } from "@/components/layout/coach-sidebar";
+import { UserMenu } from "@/components/layout/user-menu";
 
-export default function CoachLayout({
+export const dynamic = "force-dynamic";
+
+export default async function CoachLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const session = await auth();
+
+  if (!session?.user) {
+    redirect("/login");
+  }
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
       <CoachSidebar />
 
-      {/* Main content area */}
       <div className="lg:pl-[240px]">
-        {/* Top bar */}
         <header className="sticky top-0 z-20 flex h-16 items-center justify-end border-b border-zinc-800 bg-[var(--background)]/80 px-6 backdrop-blur-md">
-          {/* UserMenu will be added when auth is wired up */}
+          <UserMenu user={session.user} />
         </header>
 
         <main className="p-6">{children}</main>
