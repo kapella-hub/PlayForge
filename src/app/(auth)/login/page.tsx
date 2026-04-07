@@ -4,28 +4,45 @@ import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { motion } from "framer-motion";
+
+const isDev = process.env.NODE_ENV !== "production";
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [devEmail, setDevEmail] = useState("");
 
   async function handleGoogleSignIn() {
     setLoading(true);
     setError(null);
     try {
-      const result = await signIn("google", {
-        callbackUrl: "/dashboard",
+      await signIn("google", { callbackUrl: "/" });
+    } catch {
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
+    }
+  }
+
+  async function handleDevLogin(e: React.FormEvent) {
+    e.preventDefault();
+    setLoading(true);
+    setError(null);
+    try {
+      const result = await signIn("dev-credentials", {
+        email: devEmail,
         redirect: false,
+        callbackUrl: "/",
       });
       if (result?.error) {
-        setError("Sign-in failed. Please try again.");
+        setError("User not found. Try signing up first.");
       } else if (result?.url) {
         window.location.href = result.url;
       }
     } catch {
-      setError("An unexpected error occurred. Please try again.");
+      setError("Sign-in failed.");
     } finally {
       setLoading(false);
     }
@@ -51,6 +68,36 @@ export default function LoginPage() {
             <div className="mb-4 rounded-md bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
               {error}
             </div>
+          )}
+
+          {/* Dev-only email login */}
+          {isDev && (
+            <>
+              <form onSubmit={handleDevLogin} className="space-y-3">
+                <div>
+                  <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                    Email
+                  </label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="coach@school.edu"
+                    value={devEmail}
+                    onChange={(e) => setDevEmail(e.target.value)}
+                    required
+                  />
+                </div>
+                <Button type="submit" className="w-full" disabled={loading}>
+                  {loading ? "Signing in..." : "Sign in with Email"}
+                </Button>
+              </form>
+
+              <div className="my-5 flex items-center gap-3">
+                <div className="h-px flex-1 bg-zinc-800" />
+                <span className="text-xs text-zinc-500">OR</span>
+                <div className="h-px flex-1 bg-zinc-800" />
+              </div>
+            </>
           )}
 
           <Button
