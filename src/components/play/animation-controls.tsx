@@ -18,6 +18,8 @@ interface AnimationControlsProps {
   canvasData: CanvasData;
   onFrameUpdate: (state: AnimationState) => void;
   isVisible: boolean;
+  /** When true, automatically start playback after mount */
+  autoPlay?: boolean;
 }
 
 const STEP_SIZE = 0.1; // seconds
@@ -27,6 +29,7 @@ export function AnimationControls({
   canvasData,
   onFrameUpdate,
   isVisible,
+  autoPlay = false,
 }: AnimationControlsProps) {
   const [time, setTime] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -106,6 +109,17 @@ export function AnimationControls({
     if (!isPlaying) {
       emitFrame(time);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Auto-play: start playback after a short delay on mount
+  useEffect(() => {
+    if (!autoPlay) return;
+    const timer = setTimeout(() => {
+      setIsPlaying(true);
+    }, 400);
+    return () => clearTimeout(timer);
+    // Only run once on mount
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

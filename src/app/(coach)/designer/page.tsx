@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { PlayToolbar } from "@/components/play/play-toolbar";
 import { FormationPicker } from "@/components/play/formation-picker";
 import { AssignmentPanel } from "@/components/play/assignment-panel";
@@ -13,6 +14,9 @@ import { AIGenerator } from "@/components/play/ai-generator";
 import { createEmptyCanvasData } from "@/engine/serialization";
 import { getFormationById } from "@/engine/constants";
 import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
+import { getPlay, createPlay, updatePlay } from "@/lib/actions/play-actions";
+import { deserializeCanvas } from "@/engine/serialization";
+import { useToast } from "@/components/ui/toast";
 import { generateKeyframes } from "@/engine/animation-engine";
 import { exportPlayAsImage } from "@/engine/export";
 import { COVERAGE_SCHEMES } from "@/engine/coverage-zone";
@@ -45,6 +49,8 @@ const PlayCanvas = dynamic(
 );
 
 export default function DesignerPage() {
+  const searchParams = useSearchParams();
+  const toast = useToast();
   const [canvasData, setCanvasData] = useState<CanvasData>(createEmptyCanvasData);
   const [playName, setPlayName] = useState("Untitled Play");
   const [playType, setPlayType] = useState("pass");
@@ -72,6 +78,24 @@ export default function DesignerPage() {
   // Coverage overlay state
   const [coverageOverlay, setCoverageOverlay] = useState<string>("");
   const canvasRef = useRef<PlayCanvasHandle>(null);
+
+  // Load existing play if playId search param is present
+  useEffect(() => {
+    const playId = searchParams.get("playId");
+    if (!playId) return;
+    let cancelled = false;
+    getPlay(playId).then((play) => {
+      if (cancelled || !play) return;
+      const canvas = deserializeCanvas(play.canvasData);
+      setCanvasData(canvas);
+      setPlayName(play.name);
+      setPlayType(play.playType);
+      if (canvas.meta.side) setSide(canvas.meta.side as "offense" | "defense");
+      setDirty(false);
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Animation preview state
   const [previewMode, setPreviewMode] = useState(false);
@@ -158,14 +182,50 @@ export default function DesignerPage() {
     setDirty(true);
   }, [canvasData]);
 
-  const handleSave = useCallback(() => {
+  const handleSave = useCallback(async () => {
     setSaving(true);
-    console.log("Saving play:", { playName, playType, canvasData });
-    setTimeout(() => {
-      setSaving(false);
+    try {
+      const playId = searchParams.get("playId");
+      const playbookId = searchParams.get("playbookId");
+      const formation = canvasData.meta.formation ?? "";
+      const situationTags = (canvasData.meta as Record<string, unknown>).situationTags as string[] | undefined;
+
+      if (playId) {
+        // Editing existing play
+        await updatePlay(playId, {
+          name: playName,
+          formation,
+          playType: playType as "run" | "pass" | "play_action" | "screen" | "special",
+          canvasData: JSON.parse(JSON.stringify(canvasData)),
+          situationTags,
+        });
+        toast.success("Play saved");
+      } else if (playbookId) {
+        // Creating new play in a playbook
+        await createPlay({
+          playbookId,
+          name: playName,
+          formation,
+          playType: playType as "run" | "pass" | "play_action" | "screen" | "special",
+          canvasData,
+        });
+        toast.success("Play created");
+      } else {
+        // No playbook context — save to localStorage as fallback
+        const key = `playforge-draft-${Date.now()}`;
+        localStorage.setItem(
+          key,
+          JSON.stringify({ name: playName, playType, canvasData }),
+        );
+        toast.info("No playbook selected. Draft saved to browser storage.");
+      }
       setDirty(false);
-    }, 500);
-  }, [playName, playType, canvasData]);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to save play");
+    } finally {
+      setSaving(false);
+    }
+  }, [playName, playType, canvasData, searchParams, toast]);
 
   const handleDeleteRoute = useCallback(() => {
     if (!selectedPlayerId) return;
@@ -190,6 +250,20 @@ export default function DesignerPage() {
       setDirty(true);
     },
     [selectedPlayerId, canvasData, pushHistory],
+  );
+
+  const handleUpdateRouteTypeName = useCallback(
+    (playerId: string, routeType: string) => {
+      pushHistory(canvasData);
+      setCanvasData({
+        ...canvasData,
+        routes: canvasData.routes.map((r) =>
+          r.playerId === playerId ? { ...r, routeType } : r,
+        ),
+      });
+      setDirty(true);
+    },
+    [canvasData, pushHistory],
   );
 
   const handlePlayTypeChange = useCallback((type: string) => {
@@ -341,6 +415,7 @@ export default function DesignerPage() {
     },
     {
       key: "Escape",
+      ignoreInputs: true,
       handler: () => {
         if (aiPanelOpen) {
           setAiPanelOpen(false);
@@ -746,6 +821,7 @@ export default function DesignerPage() {
               onClose={() => setSelectedPlayerId(null)}
               onDeleteRoute={handleDeleteRoute}
               onUpdateRouteType={handleUpdateRouteType}
+              onUpdateRouteTypeName={handleUpdateRouteTypeName}
             />
 
             {/* Pick Route from Library button */}

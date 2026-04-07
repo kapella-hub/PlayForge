@@ -82,9 +82,12 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
         }
       }
       // Schedule update for next render
-      requestAnimationFrame(() => {
-        prevPositionsRef.current = new Map(animationState.playerPositions);
+      const id = requestAnimationFrame(() => {
+        if (animationState) {
+          prevPositionsRef.current = new Map(animationState.playerPositions);
+        }
       });
+      return () => cancelAnimationFrame(id);
     }
   }, [animationState]);
 

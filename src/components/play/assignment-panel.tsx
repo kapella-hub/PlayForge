@@ -11,6 +11,7 @@ interface AssignmentPanelProps {
   onClose: () => void;
   onDeleteRoute: () => void;
   onUpdateRouteType: (type: Route["type"]) => void;
+  onUpdateRouteTypeName?: (playerId: string, routeType: string) => void;
 }
 
 const routeGroups = [
@@ -106,6 +107,7 @@ export function AssignmentPanel({
   onClose,
   onDeleteRoute,
   onUpdateRouteType,
+  onUpdateRouteTypeName,
 }: AssignmentPanelProps) {
   return (
     <AnimatePresence mode="wait">
@@ -206,6 +208,7 @@ export function AssignmentPanel({
                           return (
                             <button
                               key={rt}
+                              onClick={() => onUpdateRouteTypeName?.(player.id, rt.toLowerCase())}
                               className={cn(
                                 "rounded-full px-2.5 py-1 text-[11px] font-medium transition-all",
                                 isActive

@@ -86,6 +86,7 @@ export function PlayViewer({ canvasData, className, autoPlay = false, highlightP
             canvasData={canvas}
             onFrameUpdate={handleAnimationFrame}
             isVisible
+            autoPlay={autoPlay}
           />
         </div>
       )}

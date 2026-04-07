@@ -35,7 +35,7 @@ function computeStreak(
     .filter((p) => p.lastViewedAt)
     .map((p) => {
       const d = new Date(p.lastViewedAt!);
-      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+      return d.toISOString().slice(0, 10);
     });
 
   const uniqueDays = [...new Set(viewDates)].sort().reverse();
@@ -46,7 +46,7 @@ function computeStreak(
   // Parse dates back for streak calculation
   const parseDayKey = (key: string) => {
     const [y, m, d] = key.split("-").map(Number);
-    return new Date(y, m, d);
+    return new Date(y, m - 1, d); // month is 0-indexed in Date constructor
   };
 
   let current = 1;
@@ -54,14 +54,14 @@ function computeStreak(
   let streak = 1;
 
   const today = new Date();
-  const todayKey = `${today.getFullYear()}-${today.getMonth()}-${today.getDate()}`;
+  const todayKey = today.toISOString().slice(0, 10);
   const isActiveToday = uniqueDays[0] === todayKey;
 
   // Check if streak is current (active today or yesterday)
   if (!isActiveToday) {
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    const yKey = `${yesterday.getFullYear()}-${yesterday.getMonth()}-${yesterday.getDate()}`;
+    const yKey = yesterday.toISOString().slice(0, 10);
     if (uniqueDays[0] !== yKey) {
       current = 0;
     }

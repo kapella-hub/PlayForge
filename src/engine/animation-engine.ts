@@ -92,13 +92,12 @@ export function generateKeyframes(canvasData: CanvasData): AnimationData {
       const targetDist = t * totalDist;
 
       // Find the segment this distance falls on
-      let segIdx = 0;
+      let segIdx = distances.length - 2; // default to last segment
       for (let j = 1; j < distances.length; j++) {
         if (distances[j] >= targetDist) {
           segIdx = j - 1;
           break;
         }
-        segIdx = j - 1;
       }
 
       const segStart = distances[segIdx];

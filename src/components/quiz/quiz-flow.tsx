@@ -33,6 +33,8 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [showResult, setShowResult] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const question = questions[currentIndex];
   const totalQuestions = questions.length;
@@ -53,9 +55,19 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
       setShowResult(false);
     } else {
       // Finish quiz
-      const finalAnswers = answers;
-      await submitQuizAttempt({ quizId, answers: finalAnswers });
-      setFinished(true);
+      setSubmitting(true);
+      setSubmitError(null);
+      try {
+        const finalAnswers = answers;
+        await submitQuizAttempt({ quizId, answers: finalAnswers });
+        setFinished(true);
+      } catch (err) {
+        setSubmitError(
+          err instanceof Error ? err.message : "Failed to submit quiz. Please try again.",
+        );
+      } finally {
+        setSubmitting(false);
+      }
     }
   }
 
@@ -128,11 +140,20 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
         />
       )}
 
+      {/* Submit error */}
+      {submitError && (
+        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+          {submitError}
+        </div>
+      )}
+
       {/* Next button */}
       {showResult && (
         <div className="flex justify-end">
-          <Button onClick={handleNext}>
-            {currentIndex < totalQuestions - 1 ? (
+          <Button onClick={handleNext} disabled={submitting}>
+            {submitting ? (
+              "Submitting..."
+            ) : currentIndex < totalQuestions - 1 ? (
               <>
                 Next <ArrowRight className="ml-2 h-4 w-4" />
               </>
