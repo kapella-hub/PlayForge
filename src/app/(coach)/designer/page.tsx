@@ -4,6 +4,7 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { PlayToolbar } from "@/components/play/play-toolbar";
+import { ContextBar } from "@/components/play/context-bar";
 import { FormationPicker } from "@/components/play/formation-picker";
 import { AssignmentPanel } from "@/components/play/assignment-panel";
 import { RoutePicker } from "@/components/play/route-picker";
@@ -22,7 +23,6 @@ import { deserializeCanvas } from "@/engine/serialization";
 import { useToast } from "@/components/ui/toast";
 import { generateKeyframes } from "@/engine/animation-engine";
 import { exportPlayAsImage } from "@/engine/export";
-import { COVERAGE_SCHEMES } from "@/engine/coverage-zone";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
 import type { CanvasData, FormationTemplate, Route, AnimationData, MotionPath } from "@/engine/types";
 import type { AnimationState } from "@/engine/animation-engine";
@@ -38,15 +38,9 @@ import {
   Route as RouteIcon,
   Printer,
   X,
-  Play,
-  Square,
   MoveRight,
-  Download,
-  Shield,
   Sparkles,
-  FlipHorizontal,
   Film,
-  History,
 } from "lucide-react";
 
 const PlayCanvas = dynamic(
@@ -554,8 +548,8 @@ export default function DesignerPage() {
     <div className="fixed inset-0 top-16 flex flex-col lg:pl-[240px]" data-print-hide>
       {/* ── Canvas area (takes maximum space) ── */}
       <div className="relative flex-1">
-        {/* Floating toolbar over canvas */}
-        <div className="absolute inset-x-0 top-0 z-20 px-4 pt-4">
+        {/* Floating toolbar + context bar over canvas */}
+        <div className="absolute inset-x-0 top-0 z-20 flex flex-col gap-2 px-4 pt-4">
           <PlayToolbar
             name={playName}
             onNameChange={setPlayName}
@@ -574,115 +568,30 @@ export default function DesignerPage() {
             onOpenLibrary={() => setPlayLibraryOpen(true)}
             onOpenAI={() => setAiPanelOpen((v) => !v)}
             onOpenPrint={() => setPrintPanelOpen(true)}
-            onMirror={handleMirror}
             gameFormat={gameFormat}
             onGameFormatChange={setGameFormat}
           />
+          <ContextBar
+            coverageOverlay={coverageOverlay}
+            onCoverageChange={setCoverageOverlay}
+            motionMode={motionMode}
+            onToggleMotion={() => {
+              setMotionMode((m) => !m);
+              if (!motionMode) {
+                setDrawingRoute(false);
+              }
+              setMotionPlayerId(null);
+            }}
+            previewMode={previewMode}
+            onTogglePreview={handleTogglePreview}
+            onMirror={handleMirror}
+            onExport={handleExport}
+            showHistory={!!searchParams.get("playId")}
+            versionHistoryOpen={versionHistoryOpen}
+            onToggleHistory={() => setVersionHistoryOpen((v) => !v)}
+            hasFormation={hasFormation}
+          />
         </div>
-
-        {/* Motion + Preview + Coverage + Export buttons */}
-        {hasFormation && (
-          <div className="absolute right-4 top-4 z-20 flex items-center gap-2">
-            {/* Coverage overlay dropdown */}
-            {!previewMode && (
-              <div className="relative">
-                <select
-                  value={coverageOverlay}
-                  onChange={(e) => setCoverageOverlay(e.target.value)}
-                  className="inline-flex appearance-none items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-3 py-2 pl-8 text-sm font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-700 hover:text-white"
-                >
-                  <option value="">No Coverage</option>
-                  {COVERAGE_SCHEMES.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.name}
-                    </option>
-                  ))}
-                </select>
-                <Shield className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-400" />
-              </div>
-            )}
-
-            {/* History button */}
-            {searchParams.get("playId") && (
-              <button
-                onClick={() => setVersionHistoryOpen((v) => !v)}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg transition-colors ${
-                  versionHistoryOpen
-                    ? "bg-indigo-600 text-white hover:bg-indigo-500"
-                    : "border border-zinc-700 bg-zinc-800/80 text-zinc-300 backdrop-blur-xl hover:bg-zinc-700 hover:text-white"
-                }`}
-                title="Version History"
-              >
-                <History className="h-4 w-4" />
-                History
-              </button>
-            )}
-
-            {/* Export button */}
-            <button
-              onClick={handleExport}
-              className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2 text-sm font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-700 hover:text-white"
-              title="Export as PNG"
-            >
-              <Download className="h-4 w-4" />
-              Export
-            </button>
-
-            {/* Mirror button */}
-            {!previewMode && (
-              <button
-                onClick={handleMirror}
-                className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-4 py-2 text-sm font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-700 hover:text-white"
-                title="Mirror Play (H)"
-              >
-                <FlipHorizontal className="h-4 w-4" />
-                Mirror
-              </button>
-            )}
-
-            {!previewMode && (
-              <button
-                onClick={() => {
-                  setMotionMode((m) => !m);
-                  if (!motionMode) {
-                    setDrawingRoute(false);
-                  }
-                  setMotionPlayerId(null);
-                }}
-                className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg transition-colors ${
-                  motionMode
-                    ? "bg-cyan-600 text-white hover:bg-cyan-500"
-                    : "border border-zinc-700 bg-zinc-800/80 text-zinc-300 backdrop-blur-xl hover:bg-zinc-700 hover:text-white"
-                }`}
-                title={motionMode ? "Exit Motion Mode (M)" : "Motion Tool (M)"}
-              >
-                <MoveRight className="h-4 w-4" />
-                {motionMode ? "Exit Motion" : "Motion"}
-              </button>
-            )}
-            <button
-              onClick={handleTogglePreview}
-              className={`inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium shadow-lg transition-colors ${
-                previewMode
-                  ? "bg-amber-600 text-white hover:bg-amber-500"
-                  : "border border-zinc-700 bg-zinc-800/80 text-zinc-300 backdrop-blur-xl hover:bg-zinc-700 hover:text-white"
-              }`}
-              title={previewMode ? "Exit Preview (P)" : "Preview Animation (P)"}
-            >
-              {previewMode ? (
-                <>
-                  <Square className="h-4 w-4" />
-                  Exit Preview
-                </>
-              ) : (
-                <>
-                  <Play className="h-4 w-4" />
-                  Preview
-                </>
-              )}
-            </button>
-          </div>
-        )}
 
         {/* Drawing mode indicator */}
         <AnimatePresence>
@@ -692,7 +601,7 @@ export default function DesignerPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute inset-x-0 top-20 z-10 flex justify-center"
+              className="absolute inset-x-0 top-28 z-10 flex justify-center"
             >
               <div className="flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm">
                 <Pen className="h-3 w-3" />
@@ -714,7 +623,7 @@ export default function DesignerPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute inset-x-0 top-20 z-10 flex justify-center"
+              className="absolute inset-x-0 top-28 z-10 flex justify-center"
             >
               <div className="flex items-center gap-2 rounded-full bg-cyan-600/90 px-4 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm">
                 <MoveRight className="h-3 w-3" />
