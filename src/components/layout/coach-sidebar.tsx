@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
+import * as RadixTooltip from "@radix-ui/react-tooltip";
 import { cn } from "@/lib/utils";
 import {
   LayoutDashboard,
@@ -47,30 +48,21 @@ const navItems = [
 ];
 
 function Tooltip({ children, label, show }: { children: React.ReactNode; label: string; show: boolean }) {
-  const [hovered, setHovered] = useState(false);
-
+  if (!show) return <>{children}</>;
   return (
-    <div
-      className="relative"
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-    >
-      {children}
-      <AnimatePresence>
-        {show && hovered && (
-          <motion.div
-            initial={{ opacity: 0, x: -4 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: -4 }}
-            transition={{ duration: 0.15 }}
-            className="absolute left-full top-1/2 -translate-y-1/2 ml-2 z-50 rounded-md bg-zinc-800 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg whitespace-nowrap pointer-events-none"
-          >
-            {label}
-            <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-zinc-800" />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    <RadixTooltip.Root delayDuration={300}>
+      <RadixTooltip.Trigger asChild>{children}</RadixTooltip.Trigger>
+      <RadixTooltip.Portal>
+        <RadixTooltip.Content
+          side="right"
+          sideOffset={8}
+          className="z-50 rounded-md bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
+        >
+          {label}
+          <RadixTooltip.Arrow className="fill-zinc-900" />
+        </RadixTooltip.Content>
+      </RadixTooltip.Portal>
+    </RadixTooltip.Root>
   );
 }
 
@@ -80,18 +72,20 @@ export function CoachSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
 
   const sidebarContent = (
+    <RadixTooltip.Provider delayDuration={300}>
     <div className="flex h-full flex-col">
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 font-bold text-white text-sm">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white text-sm shadow-[0_10px_24px_rgba(5,150,105,0.25)]">
             PF
           </div>
           {!collapsed && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-lg font-bold text-white"
+              className="text-lg font-semibold text-white"
+              data-display="true"
             >
               PlayForge
             </motion.span>
@@ -99,7 +93,7 @@ export function CoachSidebar() {
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden lg:flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors"
+          className="hidden xl:flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white"
         >
           <ChevronLeft
             className={cn("h-4 w-4 transition-transform duration-200", collapsed && "rotate-180")}
@@ -112,7 +106,7 @@ export function CoachSidebar() {
         {navItems.map((group) => (
           <div key={group.label}>
             {!collapsed && (
-              <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+              <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
                 {group.label}
               </div>
             )}
@@ -130,14 +124,14 @@ export function CoachSidebar() {
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                         isActive
-                          ? "bg-indigo-600 text-white"
-                          : "text-zinc-400 hover:bg-zinc-800 hover:text-white"
+                          ? "bg-emerald-600 text-white shadow-[0_10px_24px_rgba(5,150,105,0.2)]"
+                          : "text-zinc-400 hover:bg-white/[0.05] hover:text-white"
                       )}
                     >
                       <span className="relative flex-shrink-0">
                         <item.icon className="h-5 w-5" />
                         {hasBadge && (
-                          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-amber-400" />
+                          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-orange-400" />
                         )}
                       </span>
                       {!collapsed && <span>{item.name}</span>}
@@ -151,7 +145,7 @@ export function CoachSidebar() {
       </nav>
 
       {/* Notifications & Theme toggle */}
-      <div className="border-t border-zinc-800 px-3 py-3 space-y-1">
+      <div className="space-y-1 border-t border-white/8 px-3 py-3">
         <Tooltip label="Notifications" show={collapsed}>
           <NotificationBell />
         </Tooltip>
@@ -160,6 +154,7 @@ export function CoachSidebar() {
         </Tooltip>
       </div>
     </div>
+    </RadixTooltip.Provider>
   );
 
   return (
@@ -167,7 +162,7 @@ export function CoachSidebar() {
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="fixed left-4 top-4 z-50 flex h-10 w-10 items-center justify-center rounded-lg bg-zinc-800 text-white lg:hidden"
+        className="fixed left-4 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-950/80 text-white shadow-lg backdrop-blur xl:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -181,14 +176,14 @@ export function CoachSidebar() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setMobileOpen(false)}
-              className="fixed inset-0 z-40 bg-black/60 lg:hidden"
+              className="fixed inset-0 z-40 bg-black/60 xl:hidden"
             />
             <motion.aside
               initial={{ x: -280 }}
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-50 w-[280px] bg-[#111122] lg:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[290px] border-r border-white/8 bg-[linear-gradient(180deg,rgba(15,29,26,0.98),rgba(8,17,15,0.98))] xl:hidden"
             >
               {sidebarContent}
             </motion.aside>
@@ -199,8 +194,8 @@ export function CoachSidebar() {
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden lg:flex lg:flex-col lg:fixed lg:inset-y-0 lg:left-0 lg:z-30 border-r border-zinc-800 bg-[#111122] transition-[width] duration-300 ease-in-out",
-          collapsed ? "lg:w-[72px]" : "lg:w-[240px]"
+          "hidden xl:flex xl:fixed xl:inset-y-0 xl:left-0 xl:z-30 xl:flex-col border-r border-white/8 bg-[linear-gradient(180deg,rgba(15,29,26,0.98),rgba(8,17,15,0.98))] transition-[width] duration-300 ease-in-out",
+          collapsed ? "xl:w-[78px]" : "xl:w-[240px]"
         )}
       >
         {sidebarContent}

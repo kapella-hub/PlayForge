@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
+import * as Dialog from "@radix-ui/react-dialog";
 import { useSearchParams } from "next/navigation";
 import { PlayToolbar } from "@/components/play/play-toolbar";
 import { FormationPicker } from "@/components/play/formation-picker";
@@ -869,84 +870,70 @@ export default function DesignerPage() {
       />
 
       {/* ── Print Panel Modal ── */}
-      <AnimatePresence>
-        {printPanelOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.15 }}
-            className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-              className="w-full max-w-md rounded-2xl border border-zinc-700/60 bg-zinc-900 p-6 shadow-2xl"
-            >
-              <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-zinc-100">Print Play</h2>
-                <button
-                  onClick={() => setPrintPanelOpen(false)}
-                  className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
+      <Dialog.Root open={printPanelOpen} onOpenChange={setPrintPanelOpen}>
+        <Dialog.Portal>
+          <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-150" />
+          <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-zinc-700/60 bg-zinc-900 p-6 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 duration-150">
+            <div className="mb-4 flex items-center justify-between">
+              <Dialog.Title className="text-sm font-semibold text-zinc-100">
+                Print Play
+              </Dialog.Title>
+              <Dialog.Close className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300">
+                <X className="h-4 w-4" />
+              </Dialog.Close>
+            </div>
 
-              {/* Mode selector */}
-              <div className="mb-4 flex rounded-lg bg-zinc-800/80 p-0.5">
-                <button
-                  onClick={() => setPrintMode("playbook")}
-                  className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
-                    printMode === "playbook"
-                      ? "bg-indigo-600 text-white"
-                      : "text-zinc-400 hover:text-zinc-200"
-                  }`}
-                >
-                  Playbook
-                </button>
-                <button
-                  onClick={() => setPrintMode("wristband")}
-                  className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
-                    printMode === "wristband"
-                      ? "bg-indigo-600 text-white"
-                      : "text-zinc-400 hover:text-zinc-200"
-                  }`}
-                >
-                  Wristband
-                </button>
-              </div>
-
-              {/* Preview info */}
-              <div className="mb-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-                <p className="text-xs text-zinc-400">
-                  {printMode === "playbook" ? (
-                    <>Full-page layout with play name, diagram, and route assignments. One play per page.</>
-                  ) : (
-                    <>Compact 4x4 grid for wristband cards. Play name and mini diagram per cell.</>
-                  )}
-                </p>
-                <div className="mt-2 text-xs text-zinc-500">
-                  <span className="font-medium text-zinc-300">{playName}</span>
-                  {formationName && <> &middot; {formationName}</>}
-                  {" "}&middot; {canvasData.routes.length} route(s)
-                </div>
-              </div>
-
-              {/* Print button */}
+            {/* Mode selector */}
+            <div className="mb-4 flex rounded-lg bg-zinc-800/80 p-0.5">
               <button
-                onClick={handlePrint}
-                className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+                onClick={() => setPrintMode("playbook")}
+                className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
+                  printMode === "playbook"
+                    ? "bg-indigo-600 text-white"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
               >
-                <Printer className="h-4 w-4" />
-                Print
+                Playbook
               </button>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+              <button
+                onClick={() => setPrintMode("wristband")}
+                className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
+                  printMode === "wristband"
+                    ? "bg-indigo-600 text-white"
+                    : "text-zinc-400 hover:text-zinc-200"
+                }`}
+              >
+                Wristband
+              </button>
+            </div>
+
+            {/* Preview info */}
+            <div className="mb-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
+              <p className="text-xs text-zinc-400">
+                {printMode === "playbook" ? (
+                  <>Full-page layout with play name, diagram, and route assignments. One play per page.</>
+                ) : (
+                  <>Compact 4x4 grid for wristband cards. Play name and mini diagram per cell.</>
+                )}
+              </p>
+              <div className="mt-2 text-xs text-zinc-500">
+                <span className="font-medium text-zinc-300">{playName}</span>
+                {formationName && <> &middot; {formationName}</>}
+                {" "}&middot; {canvasData.routes.length} route(s)
+              </div>
+            </div>
+
+            {/* Print button */}
+            <button
+              onClick={handlePrint}
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+            >
+              <Printer className="h-4 w-4" />
+              Print
+            </button>
+          </Dialog.Content>
+        </Dialog.Portal>
+      </Dialog.Root>
 
       {/* ── Off-screen print layout (shown only during print) ── */}
       <div className="hidden print:block">

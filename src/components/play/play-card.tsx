@@ -92,8 +92,8 @@ export function PlayCard({
             </button>
           }
         >
-          <DropdownItem onClick={() => {}}>
-            <Link href={`/designer?playId=${id}`} className="flex items-center gap-2">
+          <DropdownItem asChild>
+            <Link href={`/designer?playId=${id}`} className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-300 outline-none transition-colors hover:bg-zinc-800 hover:text-white">
               <Pencil className="h-3.5 w-3.5" />
               Edit
             </Link>
