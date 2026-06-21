@@ -4,7 +4,6 @@ import { useState, useCallback, useRef, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { PlayToolbar } from "@/components/play/play-toolbar";
-import { ContextBar } from "@/components/play/context-bar";
 import { FormationPicker } from "@/components/play/formation-picker";
 import { AssignmentPanel } from "@/components/play/assignment-panel";
 import { RoutePicker } from "@/components/play/route-picker";
@@ -545,11 +544,11 @@ export default function DesignerPage() {
   ];
 
   return (
-    <div className="fixed inset-0 top-16 flex flex-col lg:pl-[240px]" data-print-hide>
+    <div className="fixed inset-0 top-16 flex flex-col xl:pl-[240px]" data-print-hide>
       {/* ── Canvas area (takes maximum space) ── */}
       <div className="relative flex-1">
-        {/* Floating toolbar + context bar over canvas */}
-        <div className="absolute inset-x-0 top-0 z-20 flex flex-col gap-2 px-4 pt-4">
+        {/* Floating toolbar over canvas */}
+        <div className="absolute inset-x-0 top-0 z-20 px-3 pt-3 sm:px-4 sm:pt-4">
           <PlayToolbar
             name={playName}
             onNameChange={setPlayName}
@@ -557,7 +556,21 @@ export default function DesignerPage() {
             playType={playType}
             onPlayTypeChange={handlePlayTypeChange}
             drawingRoute={drawingRoute}
-            onToggleDrawing={() => setDrawingRoute((d) => !d)}
+            onToggleDrawing={() => {
+              setDrawingRoute((d) => !d);
+              setMotionMode(false);
+              setMotionPlayerId(null);
+            }}
+            motionMode={motionMode}
+            onToggleMotion={() => {
+              if (!hasFormation || previewMode) return;
+              setMotionMode((m) => !m);
+              if (!motionMode) setDrawingRoute(false);
+              setMotionPlayerId(null);
+            }}
+            previewMode={previewMode}
+            onTogglePreview={handleTogglePreview}
+            hasFormation={hasFormation}
             onSave={handleSave}
             onUndo={handleUndo}
             onRedo={handleRedo}
@@ -565,31 +578,18 @@ export default function DesignerPage() {
             dirty={dirty}
             canUndo={undoRef.current.length > 0}
             canRedo={redoRef.current.length > 0}
+            coverageOverlay={coverageOverlay}
+            onCoverageChange={setCoverageOverlay}
+            onMirror={handleMirror}
+            onExport={handleExport}
             onOpenLibrary={() => setPlayLibraryOpen(true)}
             onOpenAI={() => setAiPanelOpen((v) => !v)}
             onOpenPrint={() => setPrintPanelOpen(true)}
             gameFormat={gameFormat}
             onGameFormatChange={setGameFormat}
-          />
-          <ContextBar
-            coverageOverlay={coverageOverlay}
-            onCoverageChange={setCoverageOverlay}
-            motionMode={motionMode}
-            onToggleMotion={() => {
-              setMotionMode((m) => !m);
-              if (!motionMode) {
-                setDrawingRoute(false);
-              }
-              setMotionPlayerId(null);
-            }}
-            previewMode={previewMode}
-            onTogglePreview={handleTogglePreview}
-            onMirror={handleMirror}
-            onExport={handleExport}
             showHistory={!!searchParams.get("playId")}
             versionHistoryOpen={versionHistoryOpen}
             onToggleHistory={() => setVersionHistoryOpen((v) => !v)}
-            hasFormation={hasFormation}
           />
         </div>
 
@@ -601,9 +601,9 @@ export default function DesignerPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute inset-x-0 top-28 z-10 flex justify-center"
+              className="absolute inset-x-0 top-24 z-10 flex justify-center px-3"
             >
-              <div className="flex items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm">
+              <div className="flex max-w-full items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-1.5 text-center text-xs font-medium text-white shadow-lg backdrop-blur-sm">
                 <Pen className="h-3 w-3" />
                 Drawing Route — Click to add points, Double-click to finish,{" "}
                 <kbd className="rounded bg-white/20 px-1.5 py-0.5 text-[10px]">
@@ -623,9 +623,9 @@ export default function DesignerPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15 }}
-              className="absolute inset-x-0 top-28 z-10 flex justify-center"
+              className="absolute inset-x-0 top-24 z-10 flex justify-center px-3"
             >
-              <div className="flex items-center gap-2 rounded-full bg-cyan-600/90 px-4 py-1.5 text-xs font-medium text-white shadow-lg backdrop-blur-sm">
+              <div className="flex max-w-full items-center gap-2 rounded-full bg-cyan-600/90 px-4 py-1.5 text-center text-xs font-medium text-white shadow-lg backdrop-blur-sm">
                 <MoveRight className="h-3 w-3" />
                 {motionPlayerId
                   ? "Click the field to set motion destination"
@@ -669,17 +669,17 @@ export default function DesignerPage() {
                 <p className="mb-4 text-sm text-zinc-500">
                   Choose from offense or defense formations to place players on the field.
                 </p>
-                <div className="flex items-center justify-center gap-3">
+                <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <button
                     onClick={() => setFormationPanelOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-[0_12px_30px_rgba(5,150,105,0.28)] transition-colors hover:bg-emerald-500"
                   >
                     <LayoutGrid className="h-4 w-4" />
                     Open Formations
                   </button>
                   <button
                     onClick={() => setPlayLibraryOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-800/80 px-5 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-zinc-700 hover:text-white"
+                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white"
                   >
                     <BookOpen className="h-4 w-4" />
                     Play Library
@@ -687,7 +687,7 @@ export default function DesignerPage() {
                 </div>
                 <button
                     onClick={() => setAiPanelOpen(true)}
-                    className="mt-3 inline-flex items-center gap-2 rounded-lg border border-violet-500/30 bg-violet-600/10 px-5 py-2.5 text-sm font-medium text-violet-300 transition-colors hover:bg-violet-600/20 hover:text-violet-200"
+                    className="mt-3 inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-amber-200 transition-colors hover:bg-amber-500/20 hover:text-amber-100"
                   >
                     <Sparkles className="h-4 w-4" />
                     AI Generator
@@ -714,7 +714,7 @@ export default function DesignerPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -16 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute bottom-4 left-4 top-20 z-30 w-64 overflow-hidden rounded-2xl border border-white/[0.06] bg-zinc-900/95 p-4 shadow-2xl backdrop-blur-xl"
+              className="absolute inset-x-3 bottom-3 top-24 z-30 overflow-hidden rounded-[24px] border border-white/[0.08] bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-xl sm:left-4 sm:right-auto sm:w-72"
             >
               {/* Side toggle */}
               <div className="mb-3 flex rounded-lg bg-zinc-800/80 p-0.5">
