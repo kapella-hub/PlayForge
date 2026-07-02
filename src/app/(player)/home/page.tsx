@@ -5,6 +5,7 @@ import { getUserMembership } from "@/lib/membership";
 import { getDueForReview, getPlayerProgress } from "@/lib/actions/progress-actions";
 import { getPlayerQuizzes } from "@/lib/actions/quiz-actions";
 import { getActiveGamePlan } from "@/lib/actions/game-plan-actions";
+import { computeStreak } from "@/lib/streak";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { BookOpen, FileQuestion, Trophy } from "lucide-react";
@@ -41,15 +42,22 @@ export default async function PlayerHomePage() {
   // Gamification stats
   const totalViews = progress.reduce((sum, p) => sum + p.views, 0);
   const totalQuizzes = progress.reduce((sum, p) => sum + p.quizScores.length, 0);
+  const allScores = progress.flatMap((p) => p.quizScores);
+  const averageScore =
+    allScores.length > 0
+      ? allScores.reduce((a, b) => a + b, 0) / allScores.length
+      : 0;
+  const { current: currentStreak, longest: longestStreak, daysActive } =
+    computeStreak(progress);
   const playerStats: PlayerStats = {
     totalViews,
     totalQuizzes,
-    averageScore: 0,
-    currentStreak: 0,
-    longestStreak: 0,
+    averageScore,
+    currentStreak,
+    longestStreak,
     playsMastered: masteredCount,
     totalPlays,
-    daysActive: 0,
+    daysActive,
   };
   const xp = calculateXP(playerStats);
   const levelInfo = getLevel(xp);
