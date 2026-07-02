@@ -35,6 +35,10 @@ describe("updateQuiz", () => {
       where: { id: "q1" },
       data: { name: "New" },
     });
+    // Verify authorization is checked before db mutation
+    expect(mockedRequire.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(db.quiz.update).mock.invocationCallOrder[0]
+    );
   });
 
   it("propagates AuthzError and never touches the db when access is denied", async () => {
@@ -54,6 +58,10 @@ describe("deleteQuiz", () => {
 
     expect(mockedRequire).toHaveBeenCalledWith("q1", { coach: true });
     expect(db.quiz.delete).toHaveBeenCalledWith({ where: { id: "q1" } });
+    // Verify authorization is checked before db mutation
+    expect(mockedRequire.mock.invocationCallOrder[0]).toBeLessThan(
+      vi.mocked(db.quiz.delete).mock.invocationCallOrder[0]
+    );
   });
 
   it("propagates AuthzError and never touches the db when access is denied", async () => {
