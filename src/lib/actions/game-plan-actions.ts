@@ -1,9 +1,15 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
+import {
+  requireOrgAccess,
+  requireGamePlanAccess,
+  requirePlayAccess,
+  AuthzError,
+} from "@/lib/authz";
 
 export async function getGamePlans(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   return db.gamePlan.findMany({
     where: { orgId },
     include: {
@@ -14,6 +20,7 @@ export async function getGamePlans(orgId: string) {
 }
 
 export async function getActiveGamePlan(orgId: string) {
+  await requireOrgAccess(orgId);
   return db.gamePlan.findFirst({
     where: { orgId, isActive: true },
     include: {
@@ -33,8 +40,7 @@ export async function createGamePlan(data: {
   week?: number;
   opponent?: string;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const membership = await requireOrgAccess(data.orgId, { coach: true });
 
   return db.gamePlan.create({
     data: {
@@ -42,31 +48,31 @@ export async function createGamePlan(data: {
       name: data.name,
       week: data.week,
       opponent: data.opponent,
-      createdById: session.user.id,
+      createdById: membership.userId,
     },
   });
 }
 
 export async function setActiveGamePlan(orgId: string, gamePlanId: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const { gamePlan } = await requireGamePlanAccess(gamePlanId, { coach: true });
 
-  // Deactivate all game plans for this org
+  // Deactivate all game plans for the game plan's org (validated, not client-supplied)
   await db.gamePlan.updateMany({
-    where: { orgId },
+    where: { orgId: gamePlan.orgId },
     data: { isActive: false },
   });
 
   // Activate the selected one
   return db.gamePlan.update({
-    where: { id: gamePlanId },
+    where: { id: gamePlan.id },
     data: { isActive: true },
   });
 }
 
 export async function addPlayToGamePlan(gamePlanId: string, playId: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const { gamePlan } = await requireGamePlanAccess(gamePlanId, { coach: true });
+  const { play } = await requirePlayAccess(playId, { coach: true });
+  if (play.playbook.orgId !== gamePlan.orgId) throw new AuthzError();
 
   // Get the next sort order
   const lastPlay = await db.gamePlanPlay.findFirst({
@@ -89,8 +95,7 @@ export async function removePlayFromGamePlan(
   gamePlanId: string,
   playId: string,
 ) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  await requireGamePlanAccess(gamePlanId, { coach: true });
 
   return db.gamePlanPlay.delete({
     where: { gamePlanId_playId: { gamePlanId, playId } },
@@ -98,7 +103,7 @@ export async function removePlayFromGamePlan(
 }
 
 export async function getGamePlan(id: string) {
-  return db.gamePlan.findUnique({
+  const gamePlan = await db.gamePlan.findUnique({
     where: { id },
     include: {
       plays: {
@@ -107,14 +112,16 @@ export async function getGamePlan(id: string) {
       },
     },
   });
+  if (!gamePlan) return null;
+  await requireOrgAccess(gamePlan.orgId, { coach: true });
+  return gamePlan;
 }
 
 export async function reorderGamePlanPlays(
   gamePlanId: string,
   playIds: string[],
 ) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  await requireGamePlanAccess(gamePlanId, { coach: true });
 
   // Update sortOrder for each play based on array index
   await Promise.all(
@@ -128,8 +135,7 @@ export async function reorderGamePlanPlays(
 }
 
 export async function deleteGamePlan(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  await requireGamePlanAccess(id, { coach: true });
 
   return db.gamePlan.delete({ where: { id } });
 }
