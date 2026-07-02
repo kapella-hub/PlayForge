@@ -9,7 +9,8 @@ services:
       POSTGRES_PASSWORD: playforge
       POSTGRES_DB: playforge
     ports:
-      - "5433:5432"
+      # loopback-only: nothing off this machine can reach the dev DB
+      - "127.0.0.1:5433:5432"
     volumes:
       - pgdata_dev:/var/lib/postgresql/data
     healthcheck:

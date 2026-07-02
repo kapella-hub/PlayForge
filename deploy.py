@@ -13,10 +13,11 @@ import base64
 
 import paramiko
 
-# ── Config ────────────────────────────────────────────────────────────────────
-VPS_HOST   = "2.25.133.158"
-VPS_USER   = "root"
-VPS_PASS   = "REDACTED-ROTATE-ME"
+# ── Config ── credentials come from the environment; never hardcode them ─────
+VPS_HOST    = os.environ.get("VPS_HOST", "")
+VPS_USER    = os.environ.get("VPS_USER", "root")
+VPS_PASS    = os.environ.get("VPS_PASS", "")     # or use VPS_SSH_KEY instead
+VPS_SSH_KEY = os.environ.get("VPS_SSH_KEY", "")  # path to a private key file
 APP_DIR    = "/opt/playforge"
 DB_USER    = "playforge"
 DB_NAME    = "playforge"
@@ -68,14 +69,29 @@ def ssh_run(client: paramiko.SSHClient, cmd: str, check: bool = True) -> str:
         raise RuntimeError(f"Command failed (rc={rc}): {cmd[:80]}")
     return out
 
-def connect(host: str, user: str, password: str, retries: int = 6) -> paramiko.SSHClient:
+def connect(host: str, user: str, password: str, key_path: str = "",
+            retries: int = 6) -> paramiko.SSHClient:
     client = paramiko.SSHClient()
-    client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    client.load_system_host_keys()
+    client.set_missing_host_key_policy(paramiko.RejectPolicy())
     for attempt in range(1, retries + 1):
         try:
-            client.connect(host, username=user, password=password, timeout=15,
+            client.connect(host, username=user,
+                           password=password or None,
+                           key_filename=key_path or None,
+                           timeout=15,
                            look_for_keys=False, allow_agent=False)
             return client
+        except paramiko.ssh_exception.SSHException as exc:
+            if "not found in known_hosts" in str(exc).lower():
+                raise RuntimeError(
+                    f"Host key for {host} is not in known_hosts. Verify the server "
+                    f"fingerprint out-of-band, then run:\n"
+                    f"  ssh-keyscan -H {host} >> ~/.ssh/known_hosts"
+                ) from exc
+            print(f"  Attempt {attempt}/{retries}: {exc}")
+            if attempt < retries:
+                time.sleep(5)
         except Exception as exc:
             print(f"  Attempt {attempt}/{retries}: {exc}")
             if attempt < retries:
@@ -85,6 +101,11 @@ def connect(host: str, user: str, password: str, retries: int = 6) -> paramiko.S
 # ── Main ─────────────────────────────────────────────────────────────────────
 
 def main() -> None:
+    if not VPS_HOST or not (VPS_PASS or VPS_SSH_KEY):
+        sys.exit("Set VPS_HOST and VPS_PASS (or VPS_SSH_KEY) in the environment "
+                 "before deploying, e.g.:\n"
+                 "  $env:VPS_HOST='1.2.3.4'; $env:VPS_PASS='...'; python deploy.py")
+
     print("=" * 62)
     print("  PlayForge -> VPS Deployment")
     print(f"  Target : {VPS_USER}@{VPS_HOST}:{APP_DIR}")
@@ -92,7 +113,7 @@ def main() -> None:
 
     # ── 1. Connect ────────────────────────────────────────────────────────────
     print("\n[1/7] Connecting to VPS …")
-    client = connect(VPS_HOST, VPS_USER, VPS_PASS)
+    client = connect(VPS_HOST, VPS_USER, VPS_PASS, VPS_SSH_KEY)
     print("  Connected.")
 
     # ── 2. Install Docker if missing ──────────────────────────────────────────
