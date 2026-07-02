@@ -8,6 +8,7 @@ import {
   masteryFromInterval,
 } from "@/lib/spaced-repetition/sm2";
 import type { MasteryLevel } from "@prisma/client";
+import { AuthzError } from "@/lib/authz";
 
 export async function recordPlayView(playId: string) {
   const session = await auth();
@@ -101,6 +102,10 @@ export async function recordQuizScore(playId: string, score: number) {
 }
 
 export async function getPlayerProgress(userId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new AuthzError();
+  if (userId !== session.user.id) throw new AuthzError();
+
   return db.playerProgress.findMany({
     where: { userId },
     include: {
@@ -115,6 +120,10 @@ export async function getPlayerProgress(userId: string) {
 }
 
 export async function getDueForReview(userId: string) {
+  const session = await auth();
+  if (!session?.user?.id) throw new AuthzError();
+  if (userId !== session.user.id) throw new AuthzError();
+
   const now = new Date();
 
   return db.playerProgress.findMany({
