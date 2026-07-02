@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
+import { resolveJoinUser } from "@/lib/auth/join-logic";
 
 export const dynamic = "force-dynamic";
 
@@ -11,14 +12,14 @@ export async function POST(req: Request) {
     if (!name || !email || !position || !password || !inviteCode) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (password.length < 8) {
       return NextResponse.json(
         { error: "Password must be at least 8 characters" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -29,18 +30,32 @@ export async function POST(req: Request) {
     if (!org) {
       return NextResponse.json(
         { error: "Invalid invite code" },
-        { status: 404 }
+        { status: 404 },
       );
     }
 
-    const hashedPassword = await bcrypt.hash(password, 12);
+    const existingUser = await db.user.findUnique({ where: { email } });
+    const resolution = await resolveJoinUser(
+      existingUser,
+      password,
+      (plain, hash) => bcrypt.compare(plain, hash),
+    );
+    if (!resolution.ok) {
+      return NextResponse.json(
+        { error: resolution.error },
+        { status: resolution.status },
+      );
+    }
+
+    const hashedPassword =
+      resolution.mode === "new" ? await bcrypt.hash(password, 12) : null;
 
     const result = await db.$transaction(async (tx) => {
-      const user = await tx.user.upsert({
-        where: { email },
-        update: {},
-        create: { name, email, password: hashedPassword },
-      });
+      const user =
+        existingUser ??
+        (await tx.user.create({
+          data: { name, email, password: hashedPassword! },
+        }));
 
       const existingMembership = await tx.membership.findUnique({
         where: { userId_orgId: { userId: user.id, orgId: org.id } },
@@ -65,7 +80,7 @@ export async function POST(req: Request) {
     if ("alreadyMember" in result) {
       return NextResponse.json(
         { error: "Already a member of this team" },
-        { status: 409 }
+        { status: 409 },
       );
     }
 
@@ -74,7 +89,8 @@ export async function POST(req: Request) {
     console.error("Join error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
+
