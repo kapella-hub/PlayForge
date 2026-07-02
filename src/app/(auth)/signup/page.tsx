@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +48,12 @@ export default function SignupPage() {
         }),
       });
       if (res.ok) {
-        router.push("/login");
+        const signInResult = await signIn("credentials", {
+          email: form.email,
+          password: form.password,
+          redirect: false,
+        });
+        router.push(signInResult?.error ? "/login" : "/dashboard");
       } else {
         const data = await res.json();
         setError(data.error || "Signup failed. Please try again.");
