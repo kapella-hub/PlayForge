@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getUserMembership } from "@/lib/membership";
 import { getGamePlan } from "@/lib/actions/game-plan-actions";
+import { AuthzError } from "@/lib/authz";
 import { getPlaysByOrg } from "@/lib/actions/play-actions";
 import { Badge } from "@/components/ui/badge";
 import { GamePlanPlayList } from "@/components/game-plan/play-list";
@@ -20,7 +21,13 @@ export default async function GamePlanDetailPage({
   if (!membership) redirect("/login");
 
   const { id } = await params;
-  const gamePlan = await getGamePlan(id);
+  let gamePlan;
+  try {
+    gamePlan = await getGamePlan(id);
+  } catch (e) {
+    if (e instanceof AuthzError) notFound();
+    throw e;
+  }
   if (!gamePlan) notFound();
 
   // Get all plays from the org's playbooks for the add-play picker

@@ -1,6 +1,7 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { getQuiz } from "@/lib/actions/quiz-actions";
+import { AuthzError } from "@/lib/authz";
 import { QuizFlow } from "@/components/quiz/quiz-flow";
 import { FileQuestion } from "lucide-react";
 
@@ -15,7 +16,13 @@ export default async function QuizDetailPage({
   if (!session?.user?.id) redirect("/login");
 
   const { id } = await params;
-  const quiz = await getQuiz(id);
+  let quiz;
+  try {
+    quiz = await getQuiz(id);
+  } catch (e) {
+    if (e instanceof AuthzError) notFound();
+    throw e;
+  }
   if (!quiz) notFound();
 
   if (quiz.questions.length === 0) {

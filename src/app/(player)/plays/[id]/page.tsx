@@ -2,6 +2,7 @@ import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getPlay } from "@/lib/actions/play-actions";
+import { AuthzError } from "@/lib/authz";
 import { recordPlayView } from "@/lib/actions/progress-actions";
 import { PlayViewer } from "@/components/play/play-viewer";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +21,13 @@ export default async function PlayDetailPage({
   if (!session?.user?.id) redirect("/login");
 
   const { id } = await params;
-  const play = await getPlay(id);
+  let play;
+  try {
+    play = await getPlay(id);
+  } catch (e) {
+    if (e instanceof AuthzError) notFound();
+    throw e;
+  }
   if (!play) notFound();
 
   // Record view for spaced repetition tracking

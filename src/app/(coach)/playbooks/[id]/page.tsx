@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { getPlaysByPlaybook } from "@/lib/actions/play-actions";
+import { requireOrgAccess, AuthzError } from "@/lib/authz";
 import { PlaybookFilters } from "@/components/play/playbook-filters";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,14 @@ export default async function PlaybookDetailPage({
     },
   });
 
-  if (!playbook) redirect("/playbooks");
+  if (!playbook) notFound();
+
+  try {
+    await requireOrgAccess(playbook.orgId, { coach: true });
+  } catch (e) {
+    if (e instanceof AuthzError) notFound();
+    throw e;
+  }
 
   const plays = await getPlaysByPlaybook(id);
 

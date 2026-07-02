@@ -1,8 +1,9 @@
-import { redirect } from "next/navigation";
+import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { getUserMembership } from "@/lib/membership";
 import { getPracticePlan } from "@/lib/actions/practice-actions";
+import { AuthzError } from "@/lib/authz";
 import { getPlaybooks } from "@/lib/actions/playbook-actions";
 import { db } from "@/lib/db";
 import { ArrowLeft } from "lucide-react";
@@ -23,8 +24,14 @@ export default async function PracticePlanDetailPage({
   const membership = await getUserMembership(session.user.id);
   if (!membership) redirect("/login");
 
-  const plan = await getPracticePlan(id);
-  if (!plan) redirect("/practice");
+  let plan;
+  try {
+    plan = await getPracticePlan(id);
+  } catch (e) {
+    if (e instanceof AuthzError) notFound();
+    throw e;
+  }
+  if (!plan) notFound();
 
   // Get all plays in the org for the play picker
   const plays = await db.play.findMany({
