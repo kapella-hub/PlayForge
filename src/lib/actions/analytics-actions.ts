@@ -1,9 +1,10 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { auth } from "@/lib/auth";
+import { requireOrgAccess } from "@/lib/authz";
 
 export async function getTeamAnalytics(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   const [memberships, playbooks, activeGamePlan, recentAttempts] =
     await Promise.all([
       db.membership.findMany({
@@ -124,6 +125,7 @@ export async function getTeamAnalytics(orgId: string) {
 }
 
 export async function getInstallProgress(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   const [activeGamePlan, players] = await Promise.all([
     db.gamePlan.findFirst({
       where: { orgId, isActive: true },
@@ -207,6 +209,7 @@ export async function getLeaderboard(
   orgId: string,
   positionGroup?: string | null,
 ): Promise<LeaderboardEntry[]> {
+  await requireOrgAccess(orgId);
   const memberships = await db.membership.findMany({
     where: {
       orgId,
@@ -300,6 +303,7 @@ export async function getLeaderboard(
 }
 
 export async function getPlayerRank(orgId: string, userId: string) {
+  await requireOrgAccess(orgId);
   const leaderboard = await getLeaderboard(orgId);
   const total = leaderboard.length;
   const entry = leaderboard.find((e) => e.userId === userId);
