@@ -87,6 +87,9 @@ export default function DesignerPage() {
   const [coverageOverlay, setCoverageOverlay] = useState<string>("");
   const canvasRef = useRef<PlayCanvasHandle>(null);
 
+  // Draft restore state
+  const [draftKey, setDraftKey] = useState<string | null>(null);
+
   // Load existing play if playId search param is present
   useEffect(() => {
     const playId = searchParams.get("playId");
@@ -122,6 +125,18 @@ export default function DesignerPage() {
     window.addEventListener("beforeunload", handler);
     return () => window.removeEventListener("beforeunload", handler);
   }, [dirty]);
+
+  // Offer to restore a saved draft when opening the designer with no target
+  useEffect(() => {
+    if (searchParams.get("playId") || searchParams.get("playbookId")) return;
+    const keys = Object.keys(localStorage).filter((k) =>
+      k.startsWith("playforge-draft-"),
+    );
+    if (keys.length === 0) return;
+    keys.sort();
+    setDraftKey(keys[keys.length - 1]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // Animation preview state
   const [previewMode, setPreviewMode] = useState(false);
@@ -247,7 +262,11 @@ export default function DesignerPage() {
         });
         toast.success("Play created");
       } else {
-        // No playbook context — save to localStorage as fallback
+        // No playbook context — save to localStorage as fallback.
+        // Cap stored drafts: keep only the one we are about to write.
+        Object.keys(localStorage)
+          .filter((k) => k.startsWith("playforge-draft-"))
+          .forEach((k) => localStorage.removeItem(k));
         const key = `playforge-draft-${Date.now()}`;
         localStorage.setItem(
           key,
@@ -415,6 +434,34 @@ export default function DesignerPage() {
   const handlePrint = useCallback(() => {
     window.print();
   }, []);
+
+  const handleRestoreDraft = useCallback(() => {
+    if (!draftKey) return;
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (raw) {
+        const draft = JSON.parse(raw) as {
+          name?: string;
+          playType?: string;
+          canvasData?: unknown;
+        };
+        const canvas = deserializeCanvas(draft.canvasData);
+        setCanvasData(canvas);
+        setPlayName(draft.name ?? "Untitled Play");
+        setPlayType(draft.playType ?? "pass");
+        if (canvas.meta.side) setSide(canvas.meta.side as "offense" | "defense");
+        setDirty(true);
+      }
+    } catch {
+      toast.error("Couldn't restore draft.");
+    }
+    setDraftKey(null);
+  }, [draftKey, toast]);
+
+  const handleDismissDraft = useCallback(() => {
+    if (draftKey) localStorage.removeItem(draftKey);
+    setDraftKey(null);
+  }, [draftKey]);
 
   // ── Keyboard shortcuts ──
   useKeyboardShortcuts([
@@ -613,6 +660,27 @@ export default function DesignerPage() {
             onToggleHistory={() => setVersionHistoryOpen((v) => !v)}
           />
         </div>
+
+        {/* Draft restore banner */}
+        {draftKey && (
+          <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-3">
+            <div className="flex items-center gap-3 rounded-full border border-white/10 bg-zinc-900/95 px-4 py-2 text-xs text-zinc-200 shadow-lg backdrop-blur-sm">
+              <span>Restore your unsaved draft?</span>
+              <button
+                onClick={handleRestoreDraft}
+                className="rounded-md bg-emerald-600 px-3 py-1 font-medium text-white transition-colors hover:bg-emerald-500"
+              >
+                Restore
+              </button>
+              <button
+                onClick={handleDismissDraft}
+                className="rounded-md px-2 py-1 text-zinc-400 transition-colors hover:text-white"
+              >
+                Dismiss
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Drawing mode indicator */}
         <AnimatePresence>
