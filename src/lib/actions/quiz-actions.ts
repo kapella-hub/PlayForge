@@ -1,11 +1,12 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recordQuizScore } from "./progress-actions";
 import type { QuestionType } from "@prisma/client";
+import { requireOrgAccess, requireQuizAccess, AuthzError } from "@/lib/authz";
 
 export async function getQuizzes(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   return db.quiz.findMany({
     where: { orgId },
     include: {
@@ -17,7 +18,7 @@ export async function getQuizzes(orgId: string) {
 }
 
 export async function getQuiz(id: string) {
-  return db.quiz.findUnique({
+  const quiz = await db.quiz.findUnique({
     where: { id },
     include: {
       questions: {
@@ -28,9 +29,13 @@ export async function getQuiz(id: string) {
       },
     },
   });
+  if (!quiz) return null;
+  await requireOrgAccess(quiz.orgId);
+  return quiz;
 }
 
 export async function getPlayerQuizzes(orgId: string) {
+  await requireOrgAccess(orgId);
   return db.quiz.findMany({
     where: { orgId },
     include: {
@@ -47,8 +52,7 @@ export async function createQuiz(data: {
   gamePlanId?: string;
   dueDate?: Date;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const membership = await requireOrgAccess(data.orgId, { coach: true });
 
   return db.quiz.create({
     data: {
@@ -56,7 +60,7 @@ export async function createQuiz(data: {
       name: data.name,
       gamePlanId: data.gamePlanId,
       dueDate: data.dueDate,
-      createdById: session.user.id,
+      createdById: membership.userId,
     },
   });
 }
@@ -71,6 +75,8 @@ export async function addQuizQuestion(data: {
   correctAnswer?: string;
   sortOrder: number;
 }) {
+  await requireQuizAccess(data.quizId, { coach: true });
+
   return db.quizQuestion.create({
     data: {
       quizId: data.quizId,
@@ -89,8 +95,7 @@ export async function submitQuizAttempt(data: {
   quizId: string;
   answers: { questionId: string; answer: string; correct: boolean }[];
 }) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
+  const { membership } = await requireQuizAccess(data.quizId);
 
   const correctCount = data.answers.filter((a) => a.correct).length;
   const score = data.answers.length > 0 ? correctCount / data.answers.length : 0;
@@ -98,7 +103,7 @@ export async function submitQuizAttempt(data: {
   const attempt = await db.quizAttempt.create({
     data: {
       quizId: data.quizId,
-      userId: session.user.id,
+      userId: membership.userId,
       score,
       answers: data.answers,
       completedAt: new Date(),
@@ -137,6 +142,8 @@ export async function submitQuizAttempt(data: {
 }
 
 export async function getQuizAttempts(quizId: string, userId: string) {
+  const { membership } = await requireQuizAccess(quizId);
+  if (userId !== membership.userId) throw new AuthzError();
   return db.quizAttempt.findMany({
     where: { quizId, userId },
     orderBy: { startedAt: "desc" },
