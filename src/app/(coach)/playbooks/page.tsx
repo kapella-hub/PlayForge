@@ -5,9 +5,9 @@ import { getUserMembership } from "@/lib/membership";
 import { getPlaybooks, getSharedPlaybooks } from "@/lib/actions/playbook-actions";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { BookOpen, Plus, Share2 } from "lucide-react";
+import { BookOpen, Share2 } from "lucide-react";
 import { ImportPlaybookButton } from "./import-button";
+import { NewPlaybookDialog } from "./new-playbook-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -32,11 +32,7 @@ export default async function PlaybooksPage() {
             Organize your plays into playbooks by scheme or situation.
           </p>
         </div>
-        {/* TODO: Wire up create playbook modal */}
-        <Button size="sm">
-          <Plus className="mr-1.5 h-4 w-4" />
-          New Playbook
-        </Button>
+        <NewPlaybookDialog orgId={membership.orgId} />
       </div>
 
       {playbooks.length === 0 ? (
