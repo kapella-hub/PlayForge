@@ -75,6 +75,8 @@ Phase 1 fixes everything that is **broken, lossy, or unsafe**. It deliberately a
 
 ## Risks / notes
 
+- **Accepted residuals (user decisions, 2026-07-02, during execution):** (1) read-by-id actions return `null` for missing rows but throw `AuthzError` for cross-org rows — a theoretical existence oracle, accepted because IDs are unguessable cuids and `null` is the established caller contract; (2) guard resolvers re-fetch the row in write paths (one redundant PK query per write) — accepted for sweep uniformity; revisit in Phase 2.
+
 - Org-scoping touches every action file; the helper keeps changes mechanical but a missed path stays vulnerable — the sweep must enumerate all `findUnique`/`update`/`delete` by-id calls in `src/lib/actions/` and API routes.
 - `createPlaybook` takes `FormData`; dialog submission must match its existing contract rather than changing the action signature.
 - Quiz edit-mode reuse of the create UI is explicitly conditional; the fallback (detail + rename + delete) is the committed scope.
