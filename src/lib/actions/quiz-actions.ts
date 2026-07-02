@@ -4,6 +4,11 @@ import { db } from "@/lib/db";
 import { recordQuizScore } from "./progress-actions";
 import type { QuestionType } from "@prisma/client";
 import { requireOrgAccess, requireQuizAccess, AuthzError } from "@/lib/authz";
+import {
+  playerStatsFromProgress,
+  computeQuizReward,
+  type RewardBadge,
+} from "@/lib/gamification";
 
 export async function getQuizzes(orgId: string) {
   await requireOrgAccess(orgId, { coach: true });
@@ -94,16 +99,24 @@ export async function addQuizQuestion(data: {
 export async function submitQuizAttempt(data: {
   quizId: string;
   answers: { questionId: string; answer: string; correct: boolean }[];
-}) {
+}): Promise<{ xpEarned: number; newBadges: RewardBadge[] }> {
   const { membership } = await requireQuizAccess(data.quizId);
+  const userId = membership.userId;
+
+  // Snapshot stats BEFORE recording the attempt.
+  const beforeRows = await db.playerProgress.findMany({
+    where: { userId },
+    select: { views: true, masteryLevel: true, quizScores: true },
+  });
+  const beforeStats = playerStatsFromProgress(beforeRows);
 
   const correctCount = data.answers.filter((a) => a.correct).length;
   const score = data.answers.length > 0 ? correctCount / data.answers.length : 0;
 
-  const attempt = await db.quizAttempt.create({
+  await db.quizAttempt.create({
     data: {
       quizId: data.quizId,
-      userId: membership.userId,
+      userId,
       score,
       answers: data.answers,
       completedAt: new Date(),
@@ -138,7 +151,14 @@ export async function submitQuizAttempt(data: {
     }
   }
 
-  return attempt;
+  // Snapshot stats AFTER, then return the reward delta.
+  const afterRows = await db.playerProgress.findMany({
+    where: { userId },
+    select: { views: true, masteryLevel: true, quizScores: true },
+  });
+  const afterStats = playerStatsFromProgress(afterRows);
+
+  return computeQuizReward(beforeStats, afterStats);
 }
 
 export async function getQuizAttempts(quizId: string, userId: string) {

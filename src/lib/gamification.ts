@@ -130,3 +130,35 @@ export function getLevel(xp: number): {
   const next = levels[level + 1]?.xp ?? levels[level].xp;
   return { level: level + 1, title: levels[level].title, nextLevelXP: next };
 }
+
+export type RewardBadge = Pick<Badge, "id" | "name" | "description" | "icon">;
+
+export function playerStatsFromProgress(
+  rows: { views: number; masteryLevel: string; quizScores: number[] }[],
+): PlayerStats {
+  return {
+    totalViews: rows.reduce((sum, r) => sum + r.views, 0),
+    totalQuizzes: rows.reduce((sum, r) => sum + r.quizScores.length, 0),
+    averageScore: 0,
+    hasPerfectQuiz: rows.some((r) => r.quizScores.some((s) => s >= 1)),
+    currentStreak: 0,
+    longestStreak: 0,
+    playsMastered: rows.filter((r) => r.masteryLevel === "mastered").length,
+    totalPlays: rows.length,
+    daysActive: 0,
+  };
+}
+
+export function computeQuizReward(
+  before: PlayerStats,
+  after: PlayerStats,
+): { xpEarned: number; newBadges: RewardBadge[] } {
+  const beforeIds = new Set(getEarnedBadges(before).map((b) => b.id));
+  const newBadges = getEarnedBadges(after)
+    .filter((b) => !beforeIds.has(b.id))
+    .map(({ id, name, description, icon }) => ({ id, name, description, icon }));
+  return {
+    xpEarned: Math.max(0, calculateXP(after) - calculateXP(before)),
+    newBadges,
+  };
+}

@@ -36,6 +36,10 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
   const [finished, setFinished] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [reward, setReward] = useState<{
+    xpEarned: number;
+    newBadges: { id: string; name: string; description: string; icon: string }[];
+  } | null>(null);
 
   const question = questions[currentIndex];
   const totalQuestions = questions.length;
@@ -60,7 +64,8 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
       setSubmitError(null);
       try {
         const finalAnswers = answers;
-        await submitQuizAttempt({ quizId, answers: finalAnswers });
+        const result = await submitQuizAttempt({ quizId, answers: finalAnswers });
+        setReward(result);
         setFinished(true);
       } catch (err) {
         setSubmitError(
@@ -85,7 +90,36 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
         <p className="text-sm text-zinc-400">
           {correctCount} of {supportedCount} correct
         </p>
-        <Link href="/quizzes">
+
+        {reward && reward.xpEarned > 0 && (
+          <p className="text-sm font-semibold text-indigo-400">
+            +{reward.xpEarned} XP
+          </p>
+        )}
+
+        {reward && reward.newBadges.length > 0 && (
+          <div className="w-full max-w-xs space-y-2">
+            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+              New badge{reward.newBadges.length !== 1 ? "s" : ""}
+            </p>
+            <div className="flex flex-col gap-2">
+              {reward.newBadges.map((badge) => (
+                <div
+                  key={badge.id}
+                  className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-left"
+                >
+                  <span className="text-2xl">{badge.icon}</span>
+                  <div>
+                    <p className="text-sm font-medium text-white">{badge.name}</p>
+                    <p className="text-xs text-zinc-500">{badge.description}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <Link href="/quiz">
           <Button variant="outline">Back to Quizzes</Button>
         </Link>
       </div>
