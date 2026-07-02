@@ -7,7 +7,7 @@ const badgeVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-indigo-600/20 text-indigo-400",
+        default: "bg-emerald-600/20 text-emerald-400",
         success: "bg-green-600/20 text-green-400",
         warning: "bg-amber-600/20 text-amber-400",
         destructive: "bg-red-600/20 text-red-400",
@@ -21,11 +21,11 @@ const badgeVariants = cva(
 );
 
 export interface BadgeProps
-  extends HTMLAttributes<HTMLDivElement>,
+  extends HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> {}
 
 function Badge({ className, variant, ...props }: BadgeProps) {
-  return <div className={cn(badgeVariants({ variant }), className)} {...props} />;
+  return <span className={cn(badgeVariants({ variant }), className)} {...props} />;
 }
 
 export { Badge, badgeVariants };

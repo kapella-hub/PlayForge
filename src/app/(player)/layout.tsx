@@ -26,9 +26,14 @@ export default async function PlayerLayout({
   }
 
   return (
-    <div className="min-h-screen bg-[var(--background)] pb-20">
-      <header className="sticky top-0 z-20 flex h-14 items-center justify-between border-b border-zinc-800 bg-[var(--background)]/80 px-4 backdrop-blur-md">
-        <span className="text-base font-bold text-indigo-400">PlayForge</span>
+    <div className="min-h-screen bg-[var(--background)] pb-24 md:pb-8">
+      <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/8 bg-[var(--background)]/75 px-4 backdrop-blur-xl sm:px-6">
+        <div>
+          <span data-display="true" className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
+            PlayForge
+          </span>
+          <p className="hidden text-xs text-zinc-500 sm:block">Player install and review</p>
+        </div>
         <div className="flex items-center gap-2">
           <NotificationBell />
           <ThemeToggle />
@@ -36,7 +41,7 @@ export default async function PlayerLayout({
         </div>
       </header>
 
-      <main className="px-4 py-4">
+      <main className="px-4 py-5 sm:px-6">
         <PageTransition>{children}</PageTransition>
       </main>
 

@@ -1,7 +1,46 @@
+# Designer Toolbar Redesign Implementation Plan
+
+> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+
+**Goal:** Merge PlayToolbar + ContextBar into one unified bar that never wraps, with a single mode-selector group (Select | Draw | Motion | Preview) and an overflow popover for less-used features.
+
+**Architecture:** Replace the two stacked floating bars with a single `PlayToolbar` component that absorbs all `ContextBar` props. A `ModeSelector` segment group centralises tool switching. Rarely-used controls (Mirror, Coverage, Game Format, Export, Library, AI, Print, History) move into a `⋯` overflow popover rendered via a `useRef` click-outside pattern. `ContextBar` is deleted.
+
+**Tech Stack:** React, TypeScript, Tailwind CSS, Lucide React, Framer Motion (already installed)
+
+## Global Constraints
+
+- No new npm dependencies — use only what is already installed.
+- All keyboard shortcuts must remain working (V, D, M, P, H, Esc, Cmd+Z, Cmd+Shift+Z, Cmd+S, F, R, L, A, Backspace/Delete).
+- Tailwind only — no inline styles except where Tailwind cannot express the value.
+- The bar must remain a single row on all viewport widths ≥ 640 px; on < 640 px it may show two rows (name + controls).
+- Keep existing prop interfaces on `designer/page.tsx` side — only add props to `PlayToolbar`, never remove.
+
+---
+
+### Task 1: Rewrite PlayToolbar as unified single-row bar
+
+**Files:**
+- Modify: `src/components/play/play-toolbar.tsx` (full rewrite)
+
+**Interfaces:**
+- Produces: `PlayToolbarProps` (superset of old props + ContextBar props — see step 3)
+- Consumed by: `src/app/(coach)/designer/page.tsx`
+
+- [ ] **Step 1: Read the current file to understand all imports and prop names**
+
+```bash
+# Already done in session — proceed.
+```
+
+- [ ] **Step 2: Replace the entire file with the unified toolbar**
+
+Write `src/components/play/play-toolbar.tsx`:
+
+```tsx
 "use client";
 
-import { useState, useCallback } from "react";
-import * as Popover from "@radix-ui/react-popover";
+import { useRef, useState, useEffect, useCallback } from "react";
 import {
   MousePointer2,
   Pen,
@@ -110,9 +149,24 @@ export function PlayToolbar({
   versionHistoryOpen,
   onToggleHistory,
 }: PlayToolbarProps) {
+  const nameInputRef = useRef<HTMLInputElement>(null);
   const [nameEditing, setNameEditing] = useState(false);
   const [overflowOpen, setOverflowOpen] = useState(false);
+  const overflowRef = useRef<HTMLDivElement>(null);
 
+  // Close overflow on outside click
+  useEffect(() => {
+    if (!overflowOpen) return;
+    function handleClick(e: MouseEvent) {
+      if (overflowRef.current && !overflowRef.current.contains(e.target as Node)) {
+        setOverflowOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [overflowOpen]);
+
+  // Derived mode
   const selectActive = !drawingRoute && !motionMode && !previewMode;
   const drawActive = drawingRoute && !previewMode;
   const motionActive = motionMode && !previewMode;
@@ -120,19 +174,10 @@ export function PlayToolbar({
   const handleModeSelect = useCallback(
     (mode: "select" | "draw" | "motion" | "preview") => {
       if (mode === "preview") { onTogglePreview(); return; }
-      if (previewMode) onTogglePreview();
-      if (mode === "select") {
-        if (drawingRoute) onToggleDrawing();
-        if (motionMode) onToggleMotion();
-      }
-      if (mode === "draw") {
-        if (!drawingRoute) onToggleDrawing();
-        if (motionMode) onToggleMotion();
-      }
-      if (mode === "motion") {
-        if (drawingRoute) onToggleDrawing();
-        if (!motionMode) onToggleMotion();
-      }
+      if (previewMode) onTogglePreview(); // exit preview first
+      if (mode === "select") { if (drawingRoute) onToggleDrawing(); if (motionMode) onToggleMotion(); }
+      if (mode === "draw")   { if (!drawingRoute) onToggleDrawing(); if (motionMode) onToggleMotion(); }
+      if (mode === "motion") { if (drawingRoute) onToggleDrawing(); if (!motionMode) onToggleMotion(); }
     },
     [drawingRoute, motionMode, previewMode, onToggleDrawing, onToggleMotion, onTogglePreview],
   );
@@ -142,6 +187,7 @@ export function PlayToolbar({
 
       {/* ── Play name ── */}
       <input
+        ref={nameInputRef}
         value={name}
         onChange={(e) => onNameChange(e.target.value)}
         onFocus={() => setNameEditing(true)}
@@ -184,13 +230,13 @@ export function PlayToolbar({
 
       <div className="h-4 w-px shrink-0 bg-zinc-700/60" />
 
-      {/* ── Mode selector: Select | Draw | Motion | Preview ── */}
+      {/* ── Mode selector ── */}
       <div className="flex shrink-0 items-center rounded-xl bg-white/[0.05] p-0.5">
         <ModeButton
           icon={<MousePointer2 className="h-3.5 w-3.5" />}
           label="Select"
           active={selectActive}
-          color="emerald"
+          color="indigo"
           tooltip="Select (V)"
           onClick={() => handleModeSelect("select")}
         />
@@ -233,25 +279,21 @@ export function PlayToolbar({
       {/* ── Spacer ── */}
       <div className="flex-1" />
 
-      {/* ── Overflow menu (Radix Popover) ── */}
-      <Popover.Root open={overflowOpen} onOpenChange={setOverflowOpen}>
-        <Popover.Trigger asChild>
-          <button
-            title="More options"
-            className={cn(
-              "rounded-xl p-2 text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-zinc-200",
-              overflowOpen && "bg-white/[0.08] text-zinc-200",
-            )}
-          >
-            <MoreHorizontal className="h-4 w-4" />
-          </button>
-        </Popover.Trigger>
-        <Popover.Portal>
-          <Popover.Content
-            align="end"
-            sideOffset={8}
-            className="z-50 w-52 rounded-2xl border border-white/[0.08] bg-zinc-950/95 p-2 shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 duration-100"
-          >
+      {/* ── Overflow menu ── */}
+      <div ref={overflowRef} className="relative shrink-0">
+        <button
+          onClick={() => setOverflowOpen((v) => !v)}
+          title="More options"
+          className={cn(
+            "rounded-xl p-2 text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-zinc-200",
+            overflowOpen && "bg-white/[0.08] text-zinc-200",
+          )}
+        >
+          <MoreHorizontal className="h-4 w-4" />
+        </button>
+
+        {overflowOpen && (
+          <div className="absolute right-0 top-full z-50 mt-2 w-52 rounded-2xl border border-white/[0.08] bg-zinc-950/95 p-2 shadow-2xl backdrop-blur-xl">
             {/* Game format */}
             {gameFormat && onGameFormatChange && (
               <div className="mb-1 px-2 py-1">
@@ -270,7 +312,7 @@ export function PlayToolbar({
               </div>
             )}
 
-            {/* Coverage overlay */}
+            {/* Coverage */}
             {!previewMode && (
               <div className="mb-1 px-2 py-1">
                 <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-zinc-500">
@@ -352,23 +394,17 @@ export function PlayToolbar({
                 />
               </>
             )}
-          </Popover.Content>
-        </Popover.Portal>
-      </Popover.Root>
+          </div>
+        )}
+      </div>
 
       {/* ── Save indicator + button ── */}
       <div className="flex shrink-0 items-center gap-2">
         <div className="hidden items-center gap-1.5 text-xs sm:flex">
           {dirty ? (
-            <>
-              <Circle className="h-2 w-2 fill-amber-400 text-amber-400" />
-              <span className="text-zinc-500">Unsaved</span>
-            </>
+            <><Circle className="h-2 w-2 fill-amber-400 text-amber-400" /><span className="text-zinc-500">Unsaved</span></>
           ) : (
-            <>
-              <Check className="h-3 w-3 text-emerald-500" />
-              <span className="text-zinc-500">Saved</span>
-            </>
+            <><Check className="h-3 w-3 text-emerald-500" /><span className="text-zinc-500">Saved</span></>
           )}
         </div>
         <button
@@ -382,11 +418,7 @@ export function PlayToolbar({
             "disabled:pointer-events-none disabled:opacity-50",
           )}
         >
-          {saving ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : (
-            <Save className="h-4 w-4" />
-          )}
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
           <span className="hidden sm:inline">Save</span>
           <kbd className="hidden rounded bg-white/10 px-1 py-0.5 text-[10px] font-normal text-white/50 lg:inline-block">
             ⌘S
@@ -411,12 +443,13 @@ function ModeButton({
   icon: React.ReactNode;
   label: string;
   active: boolean;
-  color: "emerald" | "cyan" | "amber";
+  color: "indigo" | "emerald" | "cyan" | "amber";
   disabled?: boolean;
   onClick: () => void;
   tooltip: string;
 }) {
   const activeClass = {
+    indigo: "bg-indigo-600 text-white",
     emerald: "bg-emerald-600 text-white",
     cyan: "bg-cyan-600 text-white",
     amber: "bg-amber-500 text-white",
@@ -496,3 +529,165 @@ function OverflowItem({
     </button>
   );
 }
+```
+
+- [ ] **Step 3: Verify the file was written correctly (no TypeScript errors visible)**
+
+Check that all imports are used and all props in the interface are consumed in the component body.
+
+---
+
+### Task 2: Update designer/page.tsx — remove ContextBar, wire new props
+
+**Files:**
+- Modify: `src/app/(coach)/designer/page.tsx`
+
+**Interfaces:**
+- Consumes: new `PlayToolbarProps` from Task 1
+
+- [ ] **Step 1: Remove the ContextBar import**
+
+Find:
+```tsx
+import { ContextBar } from "@/components/play/context-bar";
+```
+Delete that line.
+
+- [ ] **Step 2: Remove the <ContextBar> JSX block**
+
+Find and delete:
+```tsx
+          <ContextBar
+            coverageOverlay={coverageOverlay}
+            onCoverageChange={setCoverageOverlay}
+            motionMode={motionMode}
+            onToggleMotion={() => {
+              setMotionMode((m) => !m);
+              if (!motionMode) {
+                setDrawingRoute(false);
+              }
+              setMotionPlayerId(null);
+            }}
+            previewMode={previewMode}
+            onTogglePreview={handleTogglePreview}
+            onMirror={handleMirror}
+            onExport={handleExport}
+            showHistory={!!searchParams.get("playId")}
+            versionHistoryOpen={versionHistoryOpen}
+            onToggleHistory={() => setVersionHistoryOpen((v) => !v)}
+            hasFormation={hasFormation}
+          />
+```
+
+- [ ] **Step 3: Add the new props to <PlayToolbar>**
+
+Find the closing `/>` of `<PlayToolbar ... />` and replace the entire `<PlayToolbar>` block with:
+
+```tsx
+          <PlayToolbar
+            name={playName}
+            onNameChange={setPlayName}
+            formation={formationName}
+            playType={playType}
+            onPlayTypeChange={handlePlayTypeChange}
+            drawingRoute={drawingRoute}
+            onToggleDrawing={() => {
+              setDrawingRoute((d) => !d);
+              setMotionMode(false);
+              setMotionPlayerId(null);
+            }}
+            motionMode={motionMode}
+            onToggleMotion={() => {
+              if (!hasFormation || previewMode) return;
+              setMotionMode((m) => !m);
+              if (!motionMode) setDrawingRoute(false);
+              setMotionPlayerId(null);
+            }}
+            previewMode={previewMode}
+            onTogglePreview={handleTogglePreview}
+            hasFormation={hasFormation}
+            onSave={handleSave}
+            onUndo={handleUndo}
+            onRedo={handleRedo}
+            saving={saving}
+            dirty={dirty}
+            canUndo={undoRef.current.length > 0}
+            canRedo={redoRef.current.length > 0}
+            coverageOverlay={coverageOverlay}
+            onCoverageChange={setCoverageOverlay}
+            onMirror={handleMirror}
+            onExport={handleExport}
+            onOpenLibrary={() => setPlayLibraryOpen(true)}
+            onOpenAI={() => setAiPanelOpen((v) => !v)}
+            onOpenPrint={() => setPrintPanelOpen(true)}
+            gameFormat={gameFormat}
+            onGameFormatChange={setGameFormat}
+            showHistory={!!searchParams.get("playId")}
+            versionHistoryOpen={versionHistoryOpen}
+            onToggleHistory={() => setVersionHistoryOpen((v) => !v)}
+          />
+```
+
+- [ ] **Step 4: Remove the wrapping flex-col div that stacked the two bars**
+
+The current wrapper is:
+```tsx
+        <div className="absolute inset-x-0 top-0 z-20 flex flex-col gap-2 px-3 pt-3 sm:px-4 sm:pt-4">
+```
+
+Change `flex-col gap-2` to just `flex` (single child now, no stacking needed).
+
+- [ ] **Step 5: Verify — remove any now-unused imports from page.tsx**
+
+Check the import block. Remove `MoveRight` from the lucide imports if it's no longer used directly in page.tsx (it was used for the motion indicator pill — keep the pill, so keep `MoveRight`).
+
+- [ ] **Step 6: Commit**
+
+```bash
+git add src/components/play/play-toolbar.tsx src/app/(coach)/designer/page.tsx
+git commit -m "feat: unify PlayToolbar + ContextBar into single non-wrapping bar with mode selector and overflow menu"
+```
+
+---
+
+### Task 3: Delete ContextBar (cleanup)
+
+**Files:**
+- Delete: `src/components/play/context-bar.tsx`
+
+- [ ] **Step 1: Confirm no other files import ContextBar**
+
+```bash
+grep -r "context-bar" src/
+```
+Expected output: nothing (after Task 2 is done).
+
+- [ ] **Step 2: Delete the file**
+
+```bash
+rm src/components/play/context-bar.tsx
+```
+
+- [ ] **Step 3: Commit**
+
+```bash
+git add -A
+git commit -m "chore: delete ContextBar — functionality merged into PlayToolbar"
+```
+
+---
+
+## Self-Review
+
+**Spec coverage:**
+- ✅ Single bar that never wraps — achieved via `flex items-center` with `shrink-0` on all fixed items and `flex-1` spacer
+- ✅ Mode selector: Select | Draw | Motion | Preview — `ModeButton` group in center
+- ✅ Play type segmented control — retained inline
+- ✅ Formation badge — retained inline (hidden on < 640 px)
+- ✅ Overflow: Mirror, Coverage, Game Format, Export, Library, AI, Print, History — all in `⋯` popover
+- ✅ Keyboard shortcuts — all tooltip labels retained; shortcuts themselves are in `useKeyboardShortcuts` in page.tsx (unchanged)
+- ✅ ContextBar deleted after migration
+
+**Placeholder scan:** No TBDs or TODOs.
+
+**Type consistency:** `PlayToolbarProps` is self-contained. `ModeButton`, `IconButton`, `OverflowItem` are internal sub-components with no external consumers.

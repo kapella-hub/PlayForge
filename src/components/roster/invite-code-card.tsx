@@ -67,7 +67,7 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
       <CardHeader>
         <CardTitle>Invite Code</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-4">
+      <CardContent className="space-y-4 pt-0 sm:pt-0">
         <div className="rounded-lg bg-zinc-800 p-4 text-center">
           <span className="font-mono text-3xl font-bold tracking-widest text-white">
             {code}

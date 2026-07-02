@@ -28,15 +28,20 @@ export default async function CoachLayout({
     <div className="min-h-screen bg-[var(--background)]">
       <CoachSidebar />
 
-      <div className="lg:pl-[240px]">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-end border-b border-zinc-800 bg-[var(--background)]/80 px-6 backdrop-blur-md">
+      <div className="xl:pl-[240px]">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/8 bg-[var(--background)]/75 px-4 pl-16 backdrop-blur-xl sm:px-6 sm:pl-20 xl:justify-end xl:pl-6">
+          <div className="xl:hidden">
+            <span data-display="true" className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
+              PlayForge
+            </span>
+          </div>
           <div className="flex items-center gap-2">
             <ThemeToggle />
             <UserMenu user={session.user} />
           </div>
         </header>
 
-        <main className="p-6">
+        <main className="mx-auto max-w-7xl px-4 py-6 sm:px-6 sm:py-8 xl:px-8">
           <PageTransition>{children}</PageTransition>
         </main>
       </div>

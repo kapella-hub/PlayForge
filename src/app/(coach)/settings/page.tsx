@@ -42,7 +42,7 @@ export default async function SettingsPage() {
           <CardHeader>
             <CardTitle>Organization</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0 sm:pt-0">
             <div>
               <p className="text-xs text-zinc-500">Name</p>
               <p className="text-sm font-medium text-zinc-100">
@@ -71,8 +71,8 @@ export default async function SettingsPage() {
         <Link href="/settings/files">
           <Card className="transition-colors hover:border-zinc-700">
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-indigo-500/10">
-                <FileText className="h-5 w-5 text-indigo-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
+                <FileText className="h-5 w-5 text-emerald-400" />
               </div>
               <div className="flex-1">
                 <p className="text-sm font-semibold text-zinc-100">Team Files</p>

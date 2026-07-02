@@ -87,7 +87,7 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle>Getting Started</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 text-sm text-zinc-400">
+            <CardContent className="space-y-4 pt-0 text-sm text-zinc-400 sm:pt-0">
               <p>1. Create your first playbook</p>
               <p>2. Add plays using the Play Designer</p>
               <p>3. Invite your players with an invite code</p>
@@ -106,7 +106,7 @@ export default async function DashboardPage() {
                 Inactive Players ({analytics.inactivePlayers.length})
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 sm:pt-0">
               <p className="text-sm text-zinc-400 mb-3">
                 These players have not been active in the last 3 days.
               </p>
@@ -134,7 +134,7 @@ export default async function DashboardPage() {
                 Active Game Plan: {activeGamePlan.name}
               </CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="pt-0 sm:pt-0">
               {activeGamePlan.plays.length === 0 ? (
                 <p className="text-sm text-zinc-500">
                   No plays added to this game plan yet.

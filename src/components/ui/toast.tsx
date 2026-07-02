@@ -68,13 +68,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <div className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none">
+      <div
+        className="fixed bottom-4 right-4 z-[100] flex flex-col gap-2 pointer-events-none"
+        aria-live="polite"
+        aria-label="Notifications"
+      >
         <AnimatePresence mode="popLayout">
           {toasts.map((toast) => {
             const Icon = variantIcons[toast.variant];
             return (
               <motion.div
                 key={toast.id}
+                role={toast.variant === "error" ? "alert" : "status"}
                 initial={{ opacity: 0, y: 20, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -88,6 +93,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 <span className="text-sm font-medium">{toast.message}</span>
                 <button
                   onClick={() => dismiss(toast.id)}
+                  aria-label="Dismiss notification"
                   className="ml-2 flex-shrink-0 opacity-60 hover:opacity-100 transition-opacity"
                 >
                   <X className="h-3.5 w-3.5" />

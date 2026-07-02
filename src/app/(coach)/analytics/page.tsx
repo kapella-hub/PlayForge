@@ -80,7 +80,7 @@ export default async function AnalyticsPage() {
               Inactive Players ({analytics.inactivePlayers.length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0 sm:pt-0">
             <p className="text-sm text-zinc-400 mb-3">
               These players have not been active in the last 3 days.
             </p>
@@ -104,7 +104,7 @@ export default async function AnalyticsPage() {
           <CardHeader>
             <CardTitle>Install Progress</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="pt-0 sm:pt-0">
             <InstallTracker
               gamePlanName={installProgress.gamePlanName}
               plays={installProgress.plays}
@@ -118,7 +118,7 @@ export default async function AnalyticsPage() {
         <CardHeader>
           <CardTitle>Mastery Heatmap</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0 sm:pt-0">
           <MasteryHeatmap
             players={analytics.playerMasteryData}
             plays={uniquePlays}
@@ -131,7 +131,7 @@ export default async function AnalyticsPage() {
         <CardHeader>
           <CardTitle>Player Leaderboard</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="pt-0 sm:pt-0">
           <Leaderboard orgId={orgId} initialData={leaderboardData} />
         </CardContent>
       </Card>

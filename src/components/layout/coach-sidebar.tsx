@@ -162,6 +162,8 @@ export function CoachSidebar() {
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
+        aria-label="Open navigation"
+        aria-expanded={mobileOpen}
         className="fixed left-4 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-950/80 text-white shadow-lg backdrop-blur xl:hidden"
       >
         <Menu className="h-5 w-5" />

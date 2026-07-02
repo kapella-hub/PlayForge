@@ -50,20 +50,20 @@ export default async function RosterPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {coaches.map((coach) => (
             <Card key={coach.id}>
-              <CardContent className="flex items-center gap-4 p-4">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-400 font-bold text-sm">
+              <CardContent className="flex items-center gap-4">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold leading-none text-emerald-400">
                   {(coach.user.name ?? coach.user.email)?.[0]?.toUpperCase() ??
                     "?"}
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-zinc-100 truncate">
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium text-zinc-100">
                     {coach.user.name ?? "Unnamed"}
                   </p>
-                  <p className="text-xs text-zinc-500 truncate">
+                  <p className="truncate text-xs text-zinc-500">
                     {coach.user.email}
                   </p>
                 </div>
-                <span className="rounded-full bg-indigo-500/10 px-2.5 py-0.5 text-xs font-medium text-indigo-400 capitalize">
+                <span className="shrink-0 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium capitalize text-emerald-400">
                   {coach.role}
                 </span>
               </CardContent>
@@ -102,8 +102,8 @@ export default async function RosterPage() {
 
               return (
                 <Card key={player.id}>
-                  <CardContent className="flex items-center gap-4 p-4">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/20 text-green-400 font-bold text-sm">
+                  <CardContent className="flex items-center gap-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold leading-none text-emerald-400">
                       {(
                         player.user.name ?? player.user.email
                       )?.[0]?.toUpperCase() ?? "?"}

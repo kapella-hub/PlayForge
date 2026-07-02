@@ -63,7 +63,7 @@ export default async function PlaybooksPage() {
                     </Badge>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0 sm:pt-0">
                   <p className="text-sm text-zinc-500">
                     {pb._count.plays} play{pb._count.plays !== 1 ? "s" : ""}
                   </p>
@@ -116,7 +116,7 @@ export default async function PlaybooksPage() {
                     </div>
                   </CardTitle>
                 </CardHeader>
-                <CardContent>
+                <CardContent className="pt-0 sm:pt-0">
                   <p className="text-sm text-zinc-500">
                     {share.playbook._count.plays} play
                     {share.playbook._count.plays !== 1 ? "s" : ""}

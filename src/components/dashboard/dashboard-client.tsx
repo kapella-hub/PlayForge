@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import type { ReactNode } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 
 const staggerContainer = {
   hidden: {},
@@ -23,7 +23,7 @@ export function DashboardStagger({ children }: { children: ReactNode }) {
       variants={staggerContainer}
       initial="hidden"
       animate="show"
-      className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
+      className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4"
     >
       {children}
     </motion.div>
@@ -47,17 +47,23 @@ export function DashboardFadeIn({ children, delay = 0 }: { children: ReactNode; 
 }
 
 export function TimeGreeting({ name }: { name?: string | null }) {
-  const hour = new Date().getHours();
-  let greeting = "Good evening";
-  if (hour < 12) greeting = "Good morning";
-  else if (hour < 17) greeting = "Good afternoon";
+  // Empty initial state so server and client render the same empty string.
+  // useEffect runs only on the client after hydration and sets the real greeting.
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) setGreeting("Good morning");
+    else if (hour < 17) setGreeting("Good afternoon");
+    else setGreeting("Good evening");
+  }, []);
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-white">
-        {greeting}{name ? `, ${name}` : ""}
+      <h1 className="text-3xl font-semibold text-white sm:text-4xl">
+        {greeting}{greeting && name ? `, ${name}` : ""}
       </h1>
-      <p className="text-sm text-zinc-500">Team overview and quick actions.</p>
+      <p className="mt-1 text-sm text-zinc-400">Team overview, install momentum, and next actions.</p>
     </div>
   );
 }

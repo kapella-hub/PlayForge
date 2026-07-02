@@ -17,15 +17,15 @@ export function StatCard({
   icon: Icon,
 }: StatCardProps) {
   return (
-    <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-indigo-500/5">
+    <Card className="overflow-hidden transition-all duration-200 hover:-translate-y-0.5">
       <CardContent className="p-6">
-        <div className="flex items-center justify-between">
-          <p className="text-xs text-zinc-500">{label}</p>
-          {Icon && <Icon className="h-4 w-4 text-zinc-600" />}
+        <div className="mb-5 flex items-center justify-between">
+          <p className="text-[11px] uppercase tracking-[0.16em] text-zinc-500">{label}</p>
+          {Icon && <Icon className="h-4 w-4 text-zinc-500" />}
         </div>
-        <p className={`text-3xl font-bold ${color}`}>{value}</p>
+        <p className={`text-3xl font-semibold sm:text-4xl ${color}`}>{value}</p>
         {subtitle && (
-          <p className="text-xs text-zinc-400 mt-1">{subtitle}</p>
+          <p className="mt-2 text-xs text-zinc-400">{subtitle}</p>
         )}
       </CardContent>
     </Card>

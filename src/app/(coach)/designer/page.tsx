@@ -81,6 +81,7 @@ export default function DesignerPage() {
   // Film link state
   const [filmUrl, setFilmUrl] = useState("");
   const [filmTimestamp, setFilmTimestamp] = useState<number | null>(null);
+  const [filmPanelOpen, setFilmPanelOpen] = useState(false);
 
   // Coverage overlay state
   const [coverageOverlay, setCoverageOverlay] = useState<string>("");
@@ -168,6 +169,7 @@ export default function DesignerPage() {
       setSelectedPlayerId(null);
       setDrawingRoute(false);
       setMotionMode(false);
+      setFormationPanelOpen(false);
       setDirty(true);
     },
     [canvasData, playType, pushHistory],
@@ -723,7 +725,7 @@ export default function DesignerPage() {
                   onClick={() => setSide("offense")}
                   className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     side === "offense"
-                      ? "bg-indigo-600 text-white"
+                      ? "bg-emerald-600 text-white"
                       : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
@@ -733,7 +735,7 @@ export default function DesignerPage() {
                   onClick={() => setSide("defense")}
                   className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
                     side === "defense"
-                      ? "bg-indigo-600 text-white"
+                      ? "bg-emerald-600 text-white"
                       : "text-zinc-400 hover:text-zinc-200"
                   }`}
                 >
@@ -810,7 +812,7 @@ export default function DesignerPage() {
             {/* Pick Route from Library button */}
             <button
               onClick={() => setRoutePickerOpen(true)}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-4 py-2.5 text-xs font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:border-indigo-500/40 hover:bg-zinc-800 hover:text-white"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-4 py-2.5 text-xs font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:border-emerald-500/40 hover:bg-zinc-800 hover:text-white"
             >
               <RouteIcon className="h-3.5 w-3.5" />
               Pick Route from Library
@@ -821,25 +823,45 @@ export default function DesignerPage() {
           </div>
         )}
 
-        {/* ── Film Link editor (floating bottom-right when no player selected) ── */}
+        {/* ── Film Link editor (collapsible icon button, bottom-right) ── */}
         {hasFormation && !selectedPlayer && !previewMode && (
-          <div className="absolute bottom-4 right-4 z-20 w-64 rounded-2xl border border-white/[0.06] bg-zinc-900/95 p-4 shadow-2xl backdrop-blur-xl">
-            <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-zinc-300">
-              <Film className="h-3.5 w-3.5" />
-              Film Clip
-            </div>
-            <FilmLinkEditor
-              filmUrl={filmUrl}
-              filmTimestamp={filmTimestamp}
-              onFilmUrlChange={(url) => {
-                setFilmUrl(url);
-                setDirty(true);
-              }}
-              onFilmTimestampChange={(ts) => {
-                setFilmTimestamp(ts);
-                setDirty(true);
-              }}
-            />
+          <div className="absolute bottom-4 right-4 z-20">
+            {filmPanelOpen ? (
+              <div className="w-64 rounded-2xl border border-white/[0.06] bg-zinc-900/95 p-4 shadow-2xl backdrop-blur-xl">
+                <div className="mb-2 flex items-center justify-between">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
+                    <Film className="h-3.5 w-3.5" />
+                    Film Clip
+                  </div>
+                  <button
+                    onClick={() => setFilmPanelOpen(false)}
+                    className="rounded p-0.5 text-zinc-500 transition-colors hover:text-zinc-300"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+                <FilmLinkEditor
+                  filmUrl={filmUrl}
+                  filmTimestamp={filmTimestamp}
+                  onFilmUrlChange={(url) => {
+                    setFilmUrl(url);
+                    setDirty(true);
+                  }}
+                  onFilmTimestampChange={(ts) => {
+                    setFilmTimestamp(ts);
+                    setDirty(true);
+                  }}
+                />
+              </div>
+            ) : (
+              <button
+                onClick={() => setFilmPanelOpen(true)}
+                title="Film Clip"
+                className={`rounded-xl border border-white/[0.06] bg-zinc-900/80 p-3 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-800 hover:text-zinc-200 ${filmUrl ? "text-amber-400" : "text-zinc-400"}`}
+              >
+                <Film className="h-5 w-5" />
+              </button>
+            )}
           </div>
         )}
 
@@ -889,7 +911,7 @@ export default function DesignerPage() {
                 onClick={() => setPrintMode("playbook")}
                 className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
                   printMode === "playbook"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-emerald-600 text-white"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
@@ -899,7 +921,7 @@ export default function DesignerPage() {
                 onClick={() => setPrintMode("wristband")}
                 className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
                   printMode === "wristband"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-emerald-600 text-white"
                     : "text-zinc-400 hover:text-zinc-200"
                 }`}
               >
@@ -926,7 +948,7 @@ export default function DesignerPage() {
             {/* Print button */}
             <button
               onClick={handlePrint}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-emerald-500/25 transition-colors hover:bg-emerald-500"
             >
               <Printer className="h-4 w-4" />
               Print

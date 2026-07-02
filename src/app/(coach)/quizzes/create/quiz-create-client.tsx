@@ -208,7 +208,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
         <CardHeader>
           <CardTitle>Quiz Details</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
+        <CardContent className="space-y-4 pt-0 sm:pt-0">
           <div>
             <label className="mb-1 block text-xs font-medium text-zinc-400">
               Quiz Name
@@ -366,11 +366,11 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
       {/* ── Play Question Form ── */}
       {showPlayForm && (
-        <Card className="mt-4 border-indigo-500/30">
+        <Card className="mt-4 border-emerald-500/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Add Question from Play</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0 sm:pt-0">
             {/* Play selector */}
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-400">
@@ -469,11 +469,11 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
       {/* ── Custom Question Form ── */}
       {showCustomForm && (
-        <Card className="mt-4 border-indigo-500/30">
+        <Card className="mt-4 border-emerald-500/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Add Custom Question</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0 sm:pt-0">
             {/* Category */}
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-400">

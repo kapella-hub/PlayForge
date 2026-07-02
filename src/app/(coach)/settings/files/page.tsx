@@ -172,11 +172,11 @@ export default function TeamFilesPage() {
 
       {/* Add form */}
       {showAdd && (
-        <Card className="mb-6 border-indigo-500/30">
+        <Card className="mb-6 border-emerald-500/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Add Team Link</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-4 pt-0 sm:pt-0">
             <div>
               <label className="mb-1 block text-xs font-medium text-zinc-400">
                 Category
