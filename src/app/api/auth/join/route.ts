@@ -1,15 +1,23 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
-    const { name, email, position, inviteCode } = await req.json();
+    const { name, email, position, password, inviteCode } = await req.json();
 
-    if (!name || !email || !position || !inviteCode) {
+    if (!name || !email || !position || !password || !inviteCode) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters" },
         { status: 400 }
       );
     }
@@ -25,11 +33,13 @@ export async function POST(req: Request) {
       );
     }
 
+    const hashedPassword = await bcrypt.hash(password, 12);
+
     const result = await db.$transaction(async (tx) => {
       const user = await tx.user.upsert({
         where: { email },
         update: {},
-        create: { name, email },
+        create: { name, email, password: hashedPassword },
       });
 
       const existingMembership = await tx.membership.findUnique({

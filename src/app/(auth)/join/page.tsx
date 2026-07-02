@@ -100,7 +100,7 @@ function JoinPageContent() {
   const [step, setStep] = useState<"code" | "profile">("code");
   const [inviteCode, setInviteCode] = useState("");
   const [orgName, setOrgName] = useState("");
-  const [form, setForm] = useState({ name: "", email: "", position: "" });
+  const [form, setForm] = useState({ name: "", email: "", position: "", password: "", confirmPassword: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [autoSubmitted, setAutoSubmitted] = useState(false);
@@ -160,13 +160,27 @@ function JoinPageContent() {
 
   async function handleJoin(e: React.FormEvent) {
     e.preventDefault();
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+    if (form.password.length < 8) {
+      setError("Password must be at least 8 characters.");
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch("/api/auth/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...form, inviteCode }),
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          position: form.position,
+          password: form.password,
+          inviteCode,
+        }),
       });
       if (res.ok) {
         router.push("/login");
@@ -259,6 +273,32 @@ function JoinPageContent() {
                   placeholder="WR, QB, MLB, etc."
                   value={form.position}
                   onChange={(e) => setForm({ ...form, position: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                  Password
+                </label>
+                <Input
+                  id="password"
+                  type="password"
+                  placeholder="Min. 8 characters"
+                  value={form.password}
+                  onChange={(e) => setForm({ ...form, password: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                  Confirm password
+                </label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="••••••••"
+                  value={form.confirmPassword}
+                  onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                   required
                 />
               </div>

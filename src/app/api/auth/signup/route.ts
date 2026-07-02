@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { generateInviteCode } from "@/lib/utils";
 
@@ -8,11 +9,18 @@ const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export async function POST(req: Request) {
   try {
-    const { name, email, orgName } = await req.json();
+    const { name, email, orgName, password } = await req.json();
 
-    if (!name || !email || !orgName) {
+    if (!name || !email || !orgName || !password) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    if (password.length < 8) {
+      return NextResponse.json(
+        { error: "Password must be at least 8 characters" },
         { status: 400 }
       );
     }
@@ -37,9 +45,11 @@ export async function POST(req: Request) {
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
 
+    const hashedPassword = await bcrypt.hash(password, 12);
+
     const result = await db.$transaction(async (tx) => {
       const user = await tx.user.create({
-        data: { name, email },
+        data: { name, email, password: hashedPassword },
       });
 
       const org = await tx.organization.create({
