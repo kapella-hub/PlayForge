@@ -905,6 +905,7 @@ export default function DesignerPage() {
               onDeleteRoute={handleDeleteRoute}
               onUpdateRouteType={handleUpdateRouteType}
               onUpdateRouteTypeName={handleUpdateRouteTypeName}
+              onMirror={handleMirror}
             />
 
             {/* Pick Route from Library button */}

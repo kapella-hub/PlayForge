@@ -12,6 +12,7 @@ interface AssignmentPanelProps {
   onDeleteRoute: () => void;
   onUpdateRouteType: (type: Route["type"]) => void;
   onUpdateRouteTypeName?: (playerId: string, routeType: string) => void;
+  onMirror?: () => void;
 }
 
 const routeGroups = [
@@ -108,6 +109,7 @@ export function AssignmentPanel({
   onDeleteRoute,
   onUpdateRouteType,
   onUpdateRouteTypeName,
+  onMirror,
 }: AssignmentPanelProps) {
   return (
     <AnimatePresence mode="wait">
@@ -203,12 +205,11 @@ export function AssignmentPanel({
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {group.routes.map((rt) => {
-                          const isActive =
-                            route.routeType === rt.toLowerCase();
+                          const isActive = route.routeType === rt;
                           return (
                             <button
                               key={rt}
-                              onClick={() => onUpdateRouteTypeName?.(player.id, rt.toLowerCase())}
+                              onClick={() => onUpdateRouteTypeName?.(player.id, rt)}
                               className={cn(
                                 "rounded-full px-2.5 py-1 text-[11px] font-medium transition-all",
                                 isActive
@@ -242,6 +243,7 @@ export function AssignmentPanel({
                   Clear Route
                 </button>
                 <button
+                  onClick={onMirror}
                   className="flex items-center justify-center gap-1.5 rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800"
                   title="Mirror to opposite side"
                 >
