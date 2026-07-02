@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/toast";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
 import {
   addPracticePeriod,
   updatePracticePeriod,
@@ -61,6 +62,8 @@ export function PracticePlanEditor({
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const toast = useToast();
+  const [pendingDeletePeriodId, setPendingDeletePeriodId] = useState<string | null>(null);
+  const [confirmPlanDelete, setConfirmPlanDelete] = useState(false);
 
   const totalDuration = periods.reduce((sum, p) => sum + p.durationMin, 0);
 
@@ -176,10 +179,15 @@ export function PracticePlanEditor({
   }
 
   function handleDeletePlan() {
-    if (!confirm("Delete this practice plan?")) return;
     startTransition(async () => {
-      await deletePracticePlan(plan.id);
-      router.push("/practice");
+      try {
+        await deletePracticePlan(plan.id);
+        router.push("/practice");
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to delete plan",
+        );
+      }
     });
   }
 
@@ -243,7 +251,7 @@ export function PracticePlanEditor({
           <Button
             variant="outline"
             size="sm"
-            onClick={handleDeletePlan}
+            onClick={() => setConfirmPlanDelete(true)}
             className="text-red-400 hover:text-red-300 hover:border-red-800"
           >
             <Trash2 className="mr-1.5 h-3.5 w-3.5" />
@@ -309,7 +317,7 @@ export function PracticePlanEditor({
 
               {/* Delete */}
               <button
-                onClick={() => handleDeletePeriod(period.id)}
+                onClick={() => setPendingDeletePeriodId(period.id)}
                 className="text-zinc-500 hover:text-red-400 transition-colors print:hidden"
               >
                 <Trash2 className="h-4 w-4" />
@@ -393,6 +401,30 @@ export function PracticePlanEditor({
         )}
         Add Period
       </Button>
+
+      <ConfirmDialog
+        open={pendingDeletePeriodId !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDeletePeriodId(null);
+        }}
+        title="Delete this period?"
+        description="This removes the period and its play assignments from the practice plan."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={() => {
+          if (pendingDeletePeriodId) handleDeletePeriod(pendingDeletePeriodId);
+        }}
+      />
+
+      <ConfirmDialog
+        open={confirmPlanDelete}
+        onOpenChange={setConfirmPlanDelete}
+        title="Delete this practice plan?"
+        description="The entire plan and all its periods will be permanently deleted."
+        confirmLabel="Delete"
+        destructive
+        onConfirm={handleDeletePlan}
+      />
     </div>
   );
 }

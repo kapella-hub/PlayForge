@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { regenerateInviteCode } from "@/lib/actions/roster-actions";
 import { generateInviteQR } from "@/lib/qr";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { useToast } from "@/components/ui/toast";
 
 interface InviteCodeCardProps {
   code: string;
@@ -18,6 +20,8 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
   const [showQR, setShowQR] = useState(false);
   const [qrDataUrl, setQrDataUrl] = useState<string | null>(null);
   const [qrLoading, setQrLoading] = useState(false);
+  const [confirmRegen, setConfirmRegen] = useState(false);
+  const toast = useToast();
 
   async function handleCopy() {
     await navigator.clipboard.writeText(code);
@@ -32,6 +36,10 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
       setCode(newCode);
       setQrDataUrl(null); // Invalidate cached QR
       setShowQR(false);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to regenerate code",
+      );
     } finally {
       setRegenerating(false);
     }
@@ -114,7 +122,7 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
           <Button
             variant="secondary"
             className="flex-1"
-            onClick={handleRegenerate}
+            onClick={() => setConfirmRegen(true)}
             disabled={regenerating}
           >
             {regenerating ? (
@@ -242,6 +250,15 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
           Regenerating will invalidate the previous code.
         </p>
       </CardContent>
+      <ConfirmDialog
+        open={confirmRegen}
+        onOpenChange={setConfirmRegen}
+        title="Regenerate invite code?"
+        description="The current code will stop working immediately. Anyone who has it will need the new code to join."
+        confirmLabel="Regenerate"
+        destructive
+        onConfirm={handleRegenerate}
+      />
     </Card>
   );
 }
