@@ -22,7 +22,7 @@ import { getPlay, createPlay, updatePlay } from "@/lib/actions/play-actions";
 import { deserializeCanvas } from "@/engine/serialization";
 import { useToast } from "@/components/ui/toast";
 import { generateKeyframes } from "@/engine/animation-engine";
-import { exportPlayAsImage } from "@/engine/export";
+import { exportPlayAsImage, getStageDataURL } from "@/engine/export";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
 import type { CanvasData, FormationTemplate, Route, AnimationData, MotionPath } from "@/engine/types";
 import type { AnimationState } from "@/engine/animation-engine";
@@ -71,6 +71,7 @@ export default function DesignerPage() {
   const [gameFormat, setGameFormat] = useState<GameFormat>("11v11");
   const [printPanelOpen, setPrintPanelOpen] = useState(false);
   const [printMode, setPrintMode] = useState<"playbook" | "wristband">("playbook");
+  const [printImageUrl, setPrintImageUrl] = useState<string | null>(null);
 
   // AI generator state
   const [aiPanelOpen, setAiPanelOpen] = useState(false);
@@ -436,6 +437,13 @@ export default function DesignerPage() {
     window.print();
   }, []);
 
+  // ── Open print dialog: snapshot the live canvas as a PNG for the layout ──
+  const handleOpenPrint = useCallback(() => {
+    const handle = canvasRef.current;
+    setPrintImageUrl(handle ? getStageDataURL(handle.getStageRef()) : null);
+    setPrintPanelOpen(true);
+  }, []);
+
   const handleRestoreDraft = useCallback(() => {
     if (!draftKey) return;
     try {
@@ -604,7 +612,7 @@ export default function DesignerPage() {
     {
       name: playName,
       formation: formationName,
-      canvasData: "",
+      canvasData: printImageUrl ?? "",
       notes: canvasData.routes
         .map((r) => {
           const player = canvasData.players.find((p) => p.id === r.playerId);
@@ -656,7 +664,7 @@ export default function DesignerPage() {
             onExport={handleExport}
             onOpenLibrary={() => setPlayLibraryOpen(true)}
             onOpenAI={() => setAiPanelOpen((v) => !v)}
-            onOpenPrint={() => setPrintPanelOpen(true)}
+            onOpenPrint={handleOpenPrint}
             gameFormat={gameFormat}
             onGameFormatChange={setGameFormat}
             showHistory={!!searchParams.get("playId")}

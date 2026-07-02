@@ -1,17 +1,26 @@
 import type Konva from "konva";
 
 /**
+ * Returns the current Konva stage as a PNG data-URL at high resolution,
+ * or null if the stage is not mounted.
+ */
+export function getStageDataURL(
+  stageRef: React.RefObject<Konva.Stage | null>,
+): string | null {
+  const stage = stageRef.current;
+  if (!stage) return null;
+  return stage.toDataURL({ pixelRatio: 2 });
+}
+
+/**
  * Exports the current Konva stage as a PNG image download.
  */
 export async function exportPlayAsImage(
   stageRef: React.RefObject<Konva.Stage | null>,
   playName: string,
 ): Promise<void> {
-  const stage = stageRef.current;
-  if (!stage) return;
-
-  const pixelRatio = 2; // high-res export
-  const dataURL = stage.toDataURL({ pixelRatio });
+  const dataURL = getStageDataURL(stageRef);
+  if (!dataURL) return;
 
   // Create a temporary link and trigger download
   const link = document.createElement("a");
