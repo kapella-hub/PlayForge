@@ -1,12 +1,15 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { mirrorPlay as mirrorCanvasData } from "@/engine/mirror";
 import { deserializeCanvas } from "@/engine/serialization";
 import type { PlayType, Prisma } from "@prisma/client";
+import {
+  requireOrgAccess,
+  requirePlayAccess,
+  requirePlaybookAccess,
+} from "@/lib/authz";
 
 export async function getPlay(id: string) {
   const play = await db.play.findUnique({
@@ -16,10 +19,13 @@ export async function getPlay(id: string) {
       playbook: true,
     },
   });
+  if (!play) return null;
+  await requireOrgAccess(play.playbook.orgId);
   return play;
 }
 
 export async function getPlaysByPlaybook(playbookId: string) {
+  await requirePlaybookAccess(playbookId, { coach: true });
   const plays = await db.play.findMany({
     where: { playbookId },
     orderBy: { createdAt: "desc" },
@@ -36,8 +42,9 @@ export async function createPlay(data: {
   animationData?: unknown;
   notes?: string;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const { membership } = await requirePlaybookAccess(data.playbookId, {
+    coach: true,
+  });
 
   const play = await db.play.create({
     data: {
@@ -48,7 +55,7 @@ export async function createPlay(data: {
       canvasData: data.canvasData ?? {},
       animationData: data.animationData ?? {},
       notes: data.notes,
-      createdById: session.user.id,
+      createdById: membership.userId,
     },
   });
 
@@ -70,8 +77,7 @@ export async function updatePlay(
     situationTags?: string[];
   },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const { membership } = await requirePlayAccess(id, { coach: true });
 
   // Snapshot the current state as a version before updating
   const current = await db.play.findUnique({ where: { id } });
@@ -88,7 +94,7 @@ export async function updatePlay(
         canvasData: current.canvasData ?? {},
         animationData: current.animationData ?? {},
         notes: current.notes,
-        createdById: session.user.id,
+        createdById: membership.userId,
       },
     });
   }
@@ -102,6 +108,7 @@ export async function updatePlay(
 }
 
 export async function getPlayVersions(playId: string) {
+  await requirePlayAccess(playId, { coach: true });
   return db.playVersion.findMany({
     where: { playId },
     orderBy: { version: "desc" },
@@ -112,8 +119,7 @@ export async function getPlayVersions(playId: string) {
 }
 
 export async function restorePlayVersion(playId: string, versionId: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const { membership } = await requirePlayAccess(playId, { coach: true });
 
   const version = await db.playVersion.findUnique({
     where: { id: versionId },
@@ -137,7 +143,7 @@ export async function restorePlayVersion(playId: string, versionId: string) {
         canvasData: current.canvasData ?? {},
         animationData: current.animationData ?? {},
         notes: `Auto-saved before restoring v${version.version}`,
-        createdById: session.user.id,
+        createdById: membership.userId,
       },
     });
   }
@@ -156,8 +162,7 @@ export async function restorePlayVersion(playId: string, versionId: string) {
 }
 
 export async function deletePlay(id: string, playbookId: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  await requirePlayAccess(id, { coach: true });
 
   await db.play.delete({
     where: { id },
@@ -167,8 +172,7 @@ export async function deletePlay(id: string, playbookId: string) {
 }
 
 export async function duplicatePlay(playId: string, newName?: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const { membership } = await requirePlayAccess(playId, { coach: true });
 
   const original = await db.play.findUnique({
     where: { id: playId },
@@ -187,7 +191,7 @@ export async function duplicatePlay(playId: string, newName?: string) {
       animationData: original.animationData ?? {},
       notes: original.notes,
       thumbnailUrl: original.thumbnailUrl,
-      createdById: session.user.id,
+      createdById: membership.userId,
     },
   });
 
@@ -196,8 +200,7 @@ export async function duplicatePlay(playId: string, newName?: string) {
 }
 
 export async function mirrorPlayAction(playId: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const { membership } = await requirePlayAccess(playId, { coach: true });
 
   const original = await db.play.findUnique({
     where: { id: playId },
@@ -221,7 +224,7 @@ export async function mirrorPlayAction(playId: string) {
       filmUrl: original.filmUrl,
       filmTimestamp: original.filmTimestamp,
       thumbnailUrl: null,
-      createdById: session.user.id,
+      createdById: membership.userId,
     },
   });
 
@@ -230,6 +233,7 @@ export async function mirrorPlayAction(playId: string) {
 }
 
 export async function getPlaysByOrg(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   return db.play.findMany({
     where: {
       playbook: { orgId },
