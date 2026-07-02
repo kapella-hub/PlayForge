@@ -1,9 +1,10 @@
 "use server";
 
+import { cache } from "react";
 import { db } from "@/lib/db";
 import { requireOrgAccess } from "@/lib/authz";
 
-export async function getTeamAnalytics(orgId: string) {
+export const getTeamAnalytics = cache(async (orgId: string) => {
   await requireOrgAccess(orgId, { coach: true });
   const [memberships, playbooks, activeGamePlan, recentAttempts] =
     await Promise.all([
@@ -122,7 +123,7 @@ export async function getTeamAnalytics(orgId: string) {
         name: gpp.play.name,
       })) ?? [],
   };
-}
+});
 
 export async function getInstallProgress(orgId: string) {
   await requireOrgAccess(orgId, { coach: true });

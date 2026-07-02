@@ -33,6 +33,34 @@ describe("generateCoachNotifications", () => {
       ]),
     );
   });
+
+  it("keeps the inactive-player notification id stable while its message reflects the current count", () => {
+    const threeInactive: TeamAnalytics = {
+      ...analytics,
+      inactivePlayers: [
+        { id: "p1", name: "Sam", lastActive: null },
+        { id: "p2", name: "Alex", lastActive: null },
+        { id: "p3", name: "Jordan", lastActive: null },
+      ],
+    };
+    const twoInactive: TeamAnalytics = {
+      ...analytics,
+      inactivePlayers: [
+        { id: "p1", name: "Sam", lastActive: null },
+        { id: "p2", name: "Alex", lastActive: null },
+      ],
+    };
+
+    const withThree = generateCoachNotifications(threeInactive).find(
+      (n) => n.id === "coach:inactive",
+    );
+    const withTwo = generateCoachNotifications(twoInactive).find(
+      (n) => n.id === "coach:inactive",
+    );
+
+    expect(withThree?.id).toBe(withTwo?.id);
+    expect(withThree?.message).not.toBe(withTwo?.message);
+  });
 });
 
 describe("generatePlayerNotifications", () => {

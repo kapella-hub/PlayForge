@@ -37,14 +37,34 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
     setNotifications(loadNotifications());
   }, []);
 
-  // Merge incoming (deduplicate by id)
+  // Merge incoming: add new ids, refresh content on existing ids (keep read state
+  // unless the message actually changed), keep history for ids no longer incoming.
   useEffect(() => {
     if (!incoming?.length) return;
     setNotifications((prev) => {
+      const incomingById = new Map(incoming.map((n) => [n.id, n]));
+      let changed = false;
+      const refreshed = prev.map((n) => {
+        const match = incomingById.get(n.id);
+        if (!match) return n;
+        const contentChanged =
+          match.title !== n.title || match.message !== n.message;
+        if (!contentChanged && match.timestamp === n.timestamp) return n;
+        changed = true;
+        return {
+          ...n,
+          title: match.title,
+          message: match.message,
+          timestamp: match.timestamp,
+          read: contentChanged ? false : n.read,
+        };
+      });
+
       const existingIds = new Set(prev.map((n) => n.id));
       const fresh = incoming.filter((n) => !existingIds.has(n.id));
-      if (!fresh.length) return prev;
-      const merged = [...fresh, ...prev].slice(0, 20);
+      if (!fresh.length && !changed) return prev;
+
+      const merged = [...fresh, ...refreshed].slice(0, 20);
       saveNotifications(merged);
       return merged;
     });
