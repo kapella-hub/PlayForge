@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { LogOut } from "lucide-react";
+import { LogOut, Lock } from "lucide-react";
 import { signOut } from "next-auth/react";
+import { ChangePasswordDialog } from "@/components/account/change-password-dialog";
 
 interface UserMenuProps {
   user: {
@@ -16,6 +17,7 @@ interface UserMenuProps {
 
 export function UserMenu({ user }: UserMenuProps) {
   const [open, setOpen] = useState(false);
+  const [pwOpen, setPwOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -63,6 +65,13 @@ export function UserMenu({ user }: UserMenuProps) {
               <p className="text-xs text-zinc-500">{user.email}</p>
             </div>
             <button
+              onClick={() => { setOpen(false); setPwOpen(true); }}
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white"
+            >
+              <Lock className="h-4 w-4" />
+              Change password
+            </button>
+            <button
               onClick={() => signOut({ callbackUrl: "/login" })}
               className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white"
             >
@@ -72,6 +81,7 @@ export function UserMenu({ user }: UserMenuProps) {
           </motion.div>
         )}
       </AnimatePresence>
+      <ChangePasswordDialog open={pwOpen} onOpenChange={setPwOpen} />
     </div>
   );
 }
