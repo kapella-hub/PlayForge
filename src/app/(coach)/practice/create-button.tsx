@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Plus, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/toast";
 import { createPracticePlan } from "@/lib/actions/practice-actions";
 
 export function CreatePracticePlanButton({ orgId }: { orgId: string }) {
@@ -13,16 +14,23 @@ export function CreatePracticePlanButton({ orgId }: { orgId: string }) {
   const [date, setDate] = useState("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const toast = useToast();
 
   function handleCreate() {
     if (!name.trim()) return;
     startTransition(async () => {
-      const plan = await createPracticePlan({
-        orgId,
-        name: name.trim(),
-        date: date || null,
-      });
-      router.push(`/practice/${plan.id}`);
+      try {
+        const plan = await createPracticePlan({
+          orgId,
+          name: name.trim(),
+          date: date || null,
+        });
+        router.push(`/practice/${plan.id}`);
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to create plan",
+        );
+      }
     });
   }
 

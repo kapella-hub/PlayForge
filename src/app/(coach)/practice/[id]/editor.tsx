@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useToast } from "@/components/ui/toast";
 import {
   addPracticePeriod,
   updatePracticePeriod,
@@ -59,37 +60,50 @@ export function PracticePlanEditor({
   const [planNotes, setPlanNotes] = useState(plan.notes ?? "");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
+  const toast = useToast();
 
   const totalDuration = periods.reduce((sum, p) => sum + p.durationMin, 0);
 
   function savePlanHeader() {
     startTransition(async () => {
-      await updatePracticePlan(plan.id, {
-        name: planName,
-        date: planDate || null,
-        notes: planNotes || null,
-      });
+      try {
+        await updatePracticePlan(plan.id, {
+          name: planName,
+          date: planDate || null,
+          notes: planNotes || null,
+        });
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to save plan",
+        );
+      }
     });
   }
 
   function handleAddPeriod() {
     startTransition(async () => {
-      const period = await addPracticePeriod({
-        practicePlanId: plan.id,
-        name: "New Period",
-        durationMin: 15,
-      });
-      setPeriods((prev) => [
-        ...prev,
-        {
-          id: period.id,
-          name: period.name,
-          durationMin: period.durationMin,
-          sortOrder: period.sortOrder,
-          playIds: [],
-          notes: null,
-        },
-      ]);
+      try {
+        const period = await addPracticePeriod({
+          practicePlanId: plan.id,
+          name: "New Period",
+          durationMin: 15,
+        });
+        setPeriods((prev) => [
+          ...prev,
+          {
+            id: period.id,
+            name: period.name,
+            durationMin: period.durationMin,
+            sortOrder: period.sortOrder,
+            playIds: [],
+            notes: null,
+          },
+        ]);
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to add period",
+        );
+      }
     });
   }
 
@@ -107,36 +121,57 @@ export function PracticePlanEditor({
     const period = periods.find((p) => p.id === id);
     if (!period) return;
     startTransition(async () => {
-      await updatePracticePeriod(id, {
-        name: period.name,
-        durationMin: period.durationMin,
-        playIds: period.playIds,
-        notes: period.notes,
-      });
+      try {
+        await updatePracticePeriod(id, {
+          name: period.name,
+          durationMin: period.durationMin,
+          playIds: period.playIds,
+          notes: period.notes,
+        });
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to save period",
+        );
+      }
     });
   }
 
   function handleDeletePeriod(id: string) {
     startTransition(async () => {
-      await deletePracticePeriod(id);
-      setPeriods((prev) => prev.filter((p) => p.id !== id));
+      try {
+        await deletePracticePeriod(id);
+        setPeriods((prev) => prev.filter((p) => p.id !== id));
+      } catch (err) {
+        toast.error(
+          err instanceof Error ? err.message : "Failed to delete period",
+        );
+      }
     });
   }
 
   function handleMove(index: number, direction: "up" | "down") {
-    const newPeriods = [...periods];
     const swapIndex = direction === "up" ? index - 1 : index + 1;
-    if (swapIndex < 0 || swapIndex >= newPeriods.length) return;
+    if (swapIndex < 0 || swapIndex >= periods.length) return;
+
+    const prevPeriods = periods;
+    const newPeriods = [...periods];
     [newPeriods[index], newPeriods[swapIndex]] = [
       newPeriods[swapIndex],
       newPeriods[index],
     ];
     setPeriods(newPeriods);
     startTransition(async () => {
-      await reorderPracticePeriods(
-        plan.id,
-        newPeriods.map((p) => p.id),
-      );
+      try {
+        await reorderPracticePeriods(
+          plan.id,
+          newPeriods.map((p) => p.id),
+        );
+      } catch (err) {
+        setPeriods(prevPeriods);
+        toast.error(
+          err instanceof Error ? err.message : "Failed to reorder periods",
+        );
+      }
     });
   }
 
