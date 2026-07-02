@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 vi.mock("@/lib/db", () => ({
   db: {
-    membership: { findUnique: vi.fn() },
+    membership: { findUnique: vi.fn(), findMany: vi.fn() },
     user: { update: vi.fn() },
   },
 }));
@@ -20,6 +20,7 @@ import { requireOrgAccess } from "@/lib/authz";
 import bcrypt from "bcryptjs";
 
 const mockFindUnique = vi.mocked(db.membership.findUnique);
+const mockFindMany = vi.mocked(db.membership.findMany);
 const mockUserUpdate = vi.mocked(db.user.update);
 const mockRequireOrgAccess = vi.mocked(requireOrgAccess);
 const mockHash = vi.mocked(bcrypt.hash);
@@ -91,6 +92,30 @@ describe("resetMemberPassword", () => {
     expect(mockUserUpdate).not.toHaveBeenCalled();
   });
 
+  it("refuses to reset when the target is an owner/coach on another team", async () => {
+    mockFindUnique.mockResolvedValue({
+      id: "m1",
+      orgId: "org1",
+      userId: "u1",
+      role: "player",
+    } as never);
+    mockRequireOrgAccess.mockResolvedValue({
+      id: "caller-m",
+      orgId: "org1",
+      userId: "coach-u",
+      role: "coach",
+    } as never);
+    mockFindMany.mockResolvedValue([
+      { id: "m2", orgId: "org2", userId: "u1", role: "coach" },
+    ] as never);
+    await expect(resetMemberPassword("m1")).rejects.toThrow(/elevated role/i);
+    expect(mockFindMany).toHaveBeenCalledWith({
+      where: { userId: "u1", NOT: { id: "m1" } },
+    });
+    expect(mockHash).not.toHaveBeenCalled();
+    expect(mockUserUpdate).not.toHaveBeenCalled();
+  });
+
   it("stores the hashed temp password and returns the plaintext once", async () => {
     mockFindUnique.mockResolvedValue({
       id: "m1",
@@ -104,6 +129,7 @@ describe("resetMemberPassword", () => {
       userId: "coach-u",
       role: "coach",
     } as never);
+    mockFindMany.mockResolvedValue([] as never);
     mockHash.mockResolvedValue("hashed" as never);
     const { tempPassword } = await resetMemberPassword("m1");
     expect(tempPassword).toHaveLength(10);

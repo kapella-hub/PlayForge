@@ -113,6 +113,17 @@ export async function resetMemberPassword(
     throw new Error("Only player passwords can be reset");
   }
 
+  // User.password is account-global, not per-org: a player here could be an
+  // owner/coach elsewhere, so resetting here would take over that account.
+  const otherMemberships = await db.membership.findMany({
+    where: { userId: membership.userId, NOT: { id: membershipId } },
+  });
+  if (otherMemberships.some((m) => m.role !== "player")) {
+    throw new Error(
+      "This player has an elevated role on another team; their password can't be reset from here.",
+    );
+  }
+
   const tempPassword = generateTempPassword();
   const hash = await bcrypt.hash(tempPassword, 12);
 
