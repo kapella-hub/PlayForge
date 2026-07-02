@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/toast";
 import {
   ArrowUp,
   ArrowDown,
@@ -49,10 +50,13 @@ export function GamePlanPlayList({
   const [availablePlays, setAvailablePlays] = useState(initialAvailable);
   const [showPicker, setShowPicker] = useState(false);
   const [isPending, startTransition] = useTransition();
+  const toast = useToast();
 
   const movePlay = (index: number, direction: "up" | "down") => {
     const newIndex = direction === "up" ? index - 1 : index + 1;
     if (newIndex < 0 || newIndex >= plays.length) return;
+
+    const prevPlays = plays;
 
     const newPlays = [...plays];
     const temp = newPlays[index];
@@ -64,14 +68,24 @@ export function GamePlanPlayList({
     setPlays(reordered);
 
     startTransition(async () => {
-      await reorderGamePlanPlays(
-        gamePlanId,
-        reordered.map((p) => p.playId),
-      );
+      try {
+        await reorderGamePlanPlays(
+          gamePlanId,
+          reordered.map((p) => p.playId),
+        );
+      } catch (err) {
+        setPlays(prevPlays);
+        toast.error(
+          err instanceof Error ? err.message : "Failed to reorder plays",
+        );
+      }
     });
   };
 
   const handleRemove = (playId: string) => {
+    const prevPlays = plays;
+    const prevAvailable = availablePlays;
+
     const removed = plays.find((p) => p.playId === playId);
     setPlays((prev) => prev.filter((p) => p.playId !== playId));
     if (removed) {
@@ -87,13 +101,24 @@ export function GamePlanPlayList({
     }
 
     startTransition(async () => {
-      await removePlayFromGamePlan(gamePlanId, playId);
+      try {
+        await removePlayFromGamePlan(gamePlanId, playId);
+      } catch (err) {
+        setPlays(prevPlays);
+        setAvailablePlays(prevAvailable);
+        toast.error(
+          err instanceof Error ? err.message : "Failed to remove play",
+        );
+      }
     });
   };
 
   const handleAdd = (playId: string) => {
     const play = availablePlays.find((p) => p.id === playId);
     if (!play) return;
+
+    const prevPlays = plays;
+    const prevAvailable = availablePlays;
 
     setAvailablePlays((prev) => prev.filter((p) => p.id !== playId));
     setPlays((prev) => [
@@ -111,7 +136,13 @@ export function GamePlanPlayList({
     setShowPicker(false);
 
     startTransition(async () => {
-      await addPlayToGamePlan(gamePlanId, playId);
+      try {
+        await addPlayToGamePlan(gamePlanId, playId);
+      } catch (err) {
+        setPlays(prevPlays);
+        setAvailablePlays(prevAvailable);
+        toast.error(err instanceof Error ? err.message : "Failed to add play");
+      }
     });
   };
 
