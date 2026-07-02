@@ -5,6 +5,8 @@ import { generateInviteCode } from "@/lib/utils";
 import { revalidatePath } from "next/cache";
 import type { MemberRole } from "@prisma/client";
 import { requireOrgAccess, AuthzError } from "@/lib/authz";
+import bcrypt from "bcryptjs";
+import { generateTempPassword } from "@/lib/temp-password";
 
 export async function getRoster(orgId: string) {
   await requireOrgAccess(orgId, { coach: true });
@@ -94,4 +96,29 @@ export async function getOrganization(orgId: string) {
   return db.organization.findUnique({
     where: { id: orgId },
   });
+}
+
+export async function resetMemberPassword(
+  membershipId: string,
+): Promise<{ tempPassword: string }> {
+  const membership = await db.membership.findUnique({
+    where: { id: membershipId },
+  });
+  if (!membership) throw new Error("Membership not found");
+
+  await requireOrgAccess(membership.orgId, { coach: true });
+
+  if (membership.role !== "player") {
+    throw new Error("Only player passwords can be reset");
+  }
+
+  const tempPassword = generateTempPassword();
+  const hash = await bcrypt.hash(tempPassword, 12);
+
+  await db.user.update({
+    where: { id: membership.userId },
+    data: { password: hash },
+  });
+
+  return { tempPassword };
 }

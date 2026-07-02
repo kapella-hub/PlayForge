@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { getRoster, getOrganization } from "@/lib/actions/roster-actions";
 import { InviteCodeCard } from "@/components/roster/invite-code-card";
+import { PlayerCard } from "@/components/roster/player-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export const dynamic = "force-dynamic";
@@ -93,43 +94,28 @@ export default async function RosterPage() {
               const lastActive = player.user.playerProgress.reduce<Date | null>(
                 (latest, pp) => {
                   if (!pp.lastViewedAt) return latest;
-                  if (!latest || pp.lastViewedAt > latest)
-                    return pp.lastViewedAt;
+                  if (!latest || pp.lastViewedAt > latest) return pp.lastViewedAt;
                   return latest;
                 },
-                null
+                null,
               );
+              const lastActiveLabel = lastActive
+                ? lastActive.toLocaleDateString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                  })
+                : null;
 
               return (
-                <Card key={player.id}>
-                  <CardContent className="flex items-center gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold leading-none text-emerald-400">
-                      {(
-                        player.user.name ?? player.user.email
-                      )?.[0]?.toUpperCase() ?? "?"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-zinc-100 truncate">
-                        {player.user.name ?? "Unnamed"}
-                      </p>
-                      <div className="flex items-center gap-2 text-xs text-zinc-500">
-                        {player.position && (
-                          <span className="truncate">{player.position}</span>
-                        )}
-                        <span>{playsStudied} plays studied</span>
-                      </div>
-                      {lastActive && (
-                        <p className="text-xs text-zinc-600">
-                          Last active:{" "}
-                          {lastActive.toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                          })}
-                        </p>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <PlayerCard
+                  key={player.id}
+                  membershipId={player.id}
+                  name={player.user.name ?? ""}
+                  email={player.user.email}
+                  position={player.position}
+                  playsStudied={playsStudied}
+                  lastActiveLabel={lastActiveLabel}
+                />
               );
             })}
           </div>
