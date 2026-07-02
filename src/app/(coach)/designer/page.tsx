@@ -92,20 +92,36 @@ export default function DesignerPage() {
     const playId = searchParams.get("playId");
     if (!playId) return;
     let cancelled = false;
-    getPlay(playId).then((play) => {
-      if (cancelled || !play) return;
-      const canvas = deserializeCanvas(play.canvasData);
-      setCanvasData(canvas);
-      setPlayName(play.name);
-      setPlayType(play.playType);
-      if (canvas.meta.side) setSide(canvas.meta.side as "offense" | "defense");
-      if (play.filmUrl) setFilmUrl(play.filmUrl);
-      if (play.filmTimestamp) setFilmTimestamp(play.filmTimestamp);
-      setDirty(false);
-    });
+    getPlay(playId)
+      .then((play) => {
+        if (cancelled || !play) return;
+        const canvas = deserializeCanvas(play.canvasData);
+        setCanvasData(canvas);
+        setPlayName(play.name);
+        setPlayType(play.playType);
+        if (canvas.meta.side) setSide(canvas.meta.side as "offense" | "defense");
+        if (play.filmUrl) setFilmUrl(play.filmUrl);
+        if (play.filmTimestamp) setFilmTimestamp(play.filmTimestamp);
+        setDirty(false);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        toast.error("Couldn't load this play. It may have been deleted.");
+      });
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Warn before leaving with unsaved changes
+  useEffect(() => {
+    if (!dirty) return;
+    const handler = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", handler);
+    return () => window.removeEventListener("beforeunload", handler);
+  }, [dirty]);
 
   // Animation preview state
   const [previewMode, setPreviewMode] = useState(false);
@@ -466,12 +482,14 @@ export default function DesignerPage() {
       key: "z",
       meta: true,
       handler: handleUndo,
+      ignoreInputs: true,
     },
     {
       key: "z",
       meta: true,
       shift: true,
       handler: handleRedo,
+      ignoreInputs: true,
     },
     {
       key: "s",
