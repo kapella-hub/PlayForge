@@ -29,11 +29,19 @@ describe("changePassword", () => {
     await expect(changePassword("old", "newpassword")).rejects.toThrow(
       "Unauthorized",
     );
+    expect(mockFindUnique).not.toHaveBeenCalled();
+    expect(mockCompare).not.toHaveBeenCalled();
+    expect(mockHash).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it("rejects a new password shorter than 8 characters", async () => {
     mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
     await expect(changePassword("old", "short")).rejects.toThrow(/at least 8/);
+    expect(mockFindUnique).not.toHaveBeenCalled();
+    expect(mockCompare).not.toHaveBeenCalled();
+    expect(mockHash).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it("rejects when the account has no password", async () => {
@@ -42,6 +50,9 @@ describe("changePassword", () => {
     await expect(changePassword("old", "newpassword")).rejects.toThrow(
       /no password/i,
     );
+    expect(mockCompare).not.toHaveBeenCalled();
+    expect(mockHash).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it("rejects when the current password is wrong", async () => {
@@ -51,6 +62,8 @@ describe("changePassword", () => {
     await expect(changePassword("wrong", "newpassword")).rejects.toThrow(
       /incorrect/i,
     );
+    expect(mockHash).not.toHaveBeenCalled();
+    expect(mockUpdate).not.toHaveBeenCalled();
   });
 
   it("hashes and stores the new password on success", async () => {
@@ -64,5 +77,12 @@ describe("changePassword", () => {
       where: { id: "u1" },
       data: { password: "newhash" },
     });
+    // Verify ordering: compare before hash before update
+    expect(mockCompare.mock.invocationCallOrder[0]).toBeLessThan(
+      mockHash.mock.invocationCallOrder[0],
+    );
+    expect(mockHash.mock.invocationCallOrder[0]).toBeLessThan(
+      mockUpdate.mock.invocationCallOrder[0],
+    );
   });
 });
