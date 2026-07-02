@@ -106,7 +106,8 @@ export async function resetMemberPassword(
   });
   if (!membership) throw new Error("Membership not found");
 
-  await requireOrgAccess(membership.orgId, { coach: true });
+  const caller = await requireOrgAccess(membership.orgId);
+  if (!["owner", "coach"].includes(caller.role)) throw new AuthzError();
 
   if (membership.role !== "player") {
     throw new Error("Only player passwords can be reset");

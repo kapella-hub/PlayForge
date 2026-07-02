@@ -40,6 +40,14 @@ export function PlayerCard({
     setDialogOpen(true);
   }
 
+  function handleOpenChange(open: boolean) {
+    setDialogOpen(open);
+    if (!open) {
+      setTempPassword(null);
+      setError(null);
+    }
+  }
+
   async function handleReset() {
     setLoading(true);
     setError(null);
@@ -98,7 +106,7 @@ export function PlayerCard({
         </DropdownMenu>
       </CardContent>
 
-      <Dialog.Root open={dialogOpen} onOpenChange={setDialogOpen}>
+      <Dialog.Root open={dialogOpen} onOpenChange={handleOpenChange}>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0 duration-150" />
           <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100vw-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-zinc-700/60 bg-zinc-900 p-6 shadow-2xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 duration-150">
@@ -107,11 +115,11 @@ export function PlayerCard({
                 <Dialog.Title className="text-lg font-semibold text-white">
                   Reset player password
                 </Dialog.Title>
-                {!tempPassword && (
-                  <Dialog.Description className="mt-1 text-sm text-zinc-400">
-                    Generate a new temporary password for {name || "this player"}. Their current password will stop working.
-                  </Dialog.Description>
-                )}
+                <Dialog.Description className="mt-1 text-sm text-zinc-400">
+                  {tempPassword
+                    ? "Share this one-time password with the player. It won't be shown again."
+                    : `Generate a new temporary password for ${name || "this player"}. Their current password will stop working.`}
+                </Dialog.Description>
               </div>
               <Dialog.Close
                 aria-label="Close"
@@ -123,9 +131,6 @@ export function PlayerCard({
 
             {tempPassword ? (
               <div className="space-y-4">
-                <p className="text-sm text-zinc-400">
-                  Share this password with the player. It won&apos;t be shown again.
-                </p>
                 <div className="flex items-center gap-2">
                   <code className="flex-1 rounded-lg border border-white/10 bg-white/[0.04] px-3 py-2 font-mono text-sm text-white">
                     {tempPassword}
@@ -136,7 +141,7 @@ export function PlayerCard({
                   </Button>
                 </div>
                 <div className="flex justify-end">
-                  <Button type="button" onClick={() => setDialogOpen(false)}>
+                  <Button type="button" onClick={() => handleOpenChange(false)}>
                     Done
                   </Button>
                 </div>
@@ -152,7 +157,7 @@ export function PlayerCard({
                   <Button
                     type="button"
                     variant="ghost"
-                    onClick={() => setDialogOpen(false)}
+                    onClick={() => handleOpenChange(false)}
                     disabled={loading}
                   >
                     Cancel

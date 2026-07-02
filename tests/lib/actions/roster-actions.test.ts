@@ -40,18 +40,6 @@ describe("resetMemberPassword", () => {
     expect(mockUserUpdate).not.toHaveBeenCalled();
   });
 
-  it("enforces coach access on the target org", async () => {
-    mockFindUnique.mockResolvedValue({
-      id: "m1",
-      orgId: "org1",
-      userId: "u1",
-      role: "player",
-    } as never);
-    mockHash.mockResolvedValue("hashed" as never);
-    await resetMemberPassword("m1");
-    expect(mockRequireOrgAccess).toHaveBeenCalledWith("org1", { coach: true });
-  });
-
   it("propagates the authz error and does not touch the password when access is denied", async () => {
     mockFindUnique.mockResolvedValue({
       id: "m1",
@@ -61,6 +49,25 @@ describe("resetMemberPassword", () => {
     } as never);
     mockRequireOrgAccess.mockRejectedValue(new Error("Not authorized"));
     await expect(resetMemberPassword("m1")).rejects.toThrow(/not authorized/i);
+    expect(mockRequireOrgAccess).toHaveBeenCalledWith("org1");
+    expect(mockHash).not.toHaveBeenCalled();
+    expect(mockUserUpdate).not.toHaveBeenCalled();
+  });
+
+  it("rejects a coordinator caller (only owner/coach may reset) and never touches the password", async () => {
+    mockFindUnique.mockResolvedValue({
+      id: "m1",
+      orgId: "org1",
+      userId: "u1",
+      role: "player",
+    } as never);
+    mockRequireOrgAccess.mockResolvedValue({
+      id: "caller-m",
+      orgId: "org1",
+      userId: "coordinator-u",
+      role: "coordinator",
+    } as never);
+    await expect(resetMemberPassword("m1")).rejects.toThrow();
     expect(mockHash).not.toHaveBeenCalled();
     expect(mockUserUpdate).not.toHaveBeenCalled();
   });
@@ -72,8 +79,14 @@ describe("resetMemberPassword", () => {
       userId: "u1",
       role: "coach",
     } as never);
+    mockRequireOrgAccess.mockResolvedValue({
+      id: "caller-m",
+      orgId: "org1",
+      userId: "coach-u",
+      role: "coach",
+    } as never);
     await expect(resetMemberPassword("m1")).rejects.toThrow(/only player/i);
-    expect(mockRequireOrgAccess).toHaveBeenCalledWith("org1", { coach: true });
+    expect(mockRequireOrgAccess).toHaveBeenCalledWith("org1");
     expect(mockHash).not.toHaveBeenCalled();
     expect(mockUserUpdate).not.toHaveBeenCalled();
   });
@@ -85,9 +98,16 @@ describe("resetMemberPassword", () => {
       userId: "u1",
       role: "player",
     } as never);
+    mockRequireOrgAccess.mockResolvedValue({
+      id: "caller-m",
+      orgId: "org1",
+      userId: "coach-u",
+      role: "coach",
+    } as never);
     mockHash.mockResolvedValue("hashed" as never);
     const { tempPassword } = await resetMemberPassword("m1");
     expect(tempPassword).toHaveLength(10);
+    expect(mockRequireOrgAccess).toHaveBeenCalledWith("org1");
     expect(mockHash).toHaveBeenCalledWith(tempPassword, 12);
     expect(mockUserUpdate).toHaveBeenCalledWith({
       where: { id: "u1" },
