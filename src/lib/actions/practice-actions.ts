@@ -1,10 +1,14 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
+import {
+  requireOrgAccess,
+  requirePracticePlanAccess,
+  AuthzError,
+} from "@/lib/authz";
 
 export async function getPracticePlans(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   const plans = await db.practicePlan.findMany({
     where: { orgId },
     orderBy: { createdAt: "desc" },
@@ -29,6 +33,8 @@ export async function getPracticePlan(id: string) {
       createdBy: { select: { name: true, email: true } },
     },
   });
+  if (!plan) return null;
+  await requireOrgAccess(plan.orgId, { coach: true });
   return plan;
 }
 
@@ -38,8 +44,7 @@ export async function createPracticePlan(data: {
   date?: string | null;
   notes?: string | null;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const membership = await requireOrgAccess(data.orgId, { coach: true });
 
   const plan = await db.practicePlan.create({
     data: {
@@ -47,7 +52,7 @@ export async function createPracticePlan(data: {
       name: data.name,
       date: data.date ? new Date(data.date) : null,
       notes: data.notes ?? null,
-      createdById: session.user.id,
+      createdById: membership.userId,
     },
   });
 
@@ -58,8 +63,7 @@ export async function updatePracticePlan(
   id: string,
   data: { name?: string; date?: string | null; notes?: string | null },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  await requirePracticePlanAccess(id, { coach: true });
 
   const plan = await db.practicePlan.update({
     where: { id },
@@ -76,8 +80,7 @@ export async function updatePracticePlan(
 }
 
 export async function deletePracticePlan(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  await requirePracticePlanAccess(id, { coach: true });
 
   await db.practicePlan.delete({ where: { id } });
 }
@@ -89,8 +92,7 @@ export async function addPracticePeriod(data: {
   playIds?: string[];
   notes?: string | null;
 }) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  await requirePracticePlanAccess(data.practicePlanId, { coach: true });
 
   // Get next sort order
   const maxOrder = await db.practicePeriod.findFirst({
@@ -122,10 +124,14 @@ export async function updatePracticePeriod(
     notes?: string | null;
   },
 ) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const period = await db.practicePeriod.findUnique({
+    where: { id },
+    include: { practicePlan: { select: { orgId: true } } },
+  });
+  if (!period) throw new AuthzError();
+  await requireOrgAccess(period.practicePlan.orgId, { coach: true });
 
-  const period = await db.practicePeriod.update({
+  const updated = await db.practicePeriod.update({
     where: { id },
     data: {
       ...(data.name !== undefined && { name: data.name }),
@@ -135,12 +141,16 @@ export async function updatePracticePeriod(
     },
   });
 
-  return period;
+  return updated;
 }
 
 export async function deletePracticePeriod(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const period = await db.practicePeriod.findUnique({
+    where: { id },
+    include: { practicePlan: { select: { orgId: true } } },
+  });
+  if (!period) throw new AuthzError();
+  await requireOrgAccess(period.practicePlan.orgId, { coach: true });
 
   await db.practicePeriod.delete({ where: { id } });
 }
@@ -149,8 +159,7 @@ export async function reorderPracticePeriods(
   planId: string,
   periodIds: string[],
 ) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  await requirePracticePlanAccess(planId, { coach: true });
 
   await db.$transaction(
     periodIds.map((id, index) =>
