@@ -16,14 +16,14 @@ export default async function QuizDetailPage({
 }) {
   const { id } = await params;
 
+  let quiz: Awaited<ReturnType<typeof getQuiz>>;
   try {
     await requireQuizAccess(id, { coach: true });
+    quiz = await getQuiz(id);
   } catch (err) {
     if (err instanceof AuthzError) notFound();
     throw err;
   }
-
-  const quiz = await getQuiz(id);
   if (!quiz) notFound();
 
   return (
