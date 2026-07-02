@@ -4,6 +4,8 @@ import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { CoachSidebar } from "@/components/layout/coach-sidebar";
 import { UserMenu } from "@/components/layout/user-menu";
 import { PageTransition } from "@/components/ui/page-transition";
+import { getTeamAnalytics } from "@/lib/actions/analytics-actions";
+import { generateCoachNotifications } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
 
@@ -23,9 +25,12 @@ export default async function CoachLayout({
     redirect("/home");
   }
 
+  const analytics = await getTeamAnalytics(membership.orgId);
+  const notifications = generateCoachNotifications(analytics);
+
   return (
     <div className="min-h-screen bg-[var(--background)]">
-      <CoachSidebar />
+      <CoachSidebar notifications={notifications} />
 
       <div className="xl:pl-[240px]">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/8 bg-[var(--background)]/75 px-4 pl-16 backdrop-blur-xl sm:px-6 sm:pl-20 xl:justify-end xl:pl-6">

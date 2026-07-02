@@ -1,5 +1,6 @@
 "use server";
 
+import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recordQuizScore } from "./progress-actions";
 import type { QuestionType } from "@prisma/client";
@@ -49,6 +50,18 @@ export async function getPlayerQuizzes(orgId: string) {
     },
     orderBy: { dueDate: "asc" },
   });
+}
+
+export async function getAttemptedQuizIds(userId: string): Promise<string[]> {
+  const session = await auth();
+  if (!session?.user?.id) throw new AuthzError();
+  if (userId !== session.user.id) throw new AuthzError();
+
+  const attempts = await db.quizAttempt.findMany({
+    where: { userId },
+    select: { quizId: true },
+  });
+  return [...new Set(attempts.map((a) => a.quizId))];
 }
 
 export async function createQuiz(data: {

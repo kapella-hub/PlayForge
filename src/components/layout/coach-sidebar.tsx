@@ -20,6 +20,7 @@ import {
   Menu,
 } from "lucide-react";
 import { NotificationBell } from "@/components/ui/notification-bell";
+import type { Notification } from "@/lib/notifications";
 
 const navItems = [
   {
@@ -65,7 +66,11 @@ function Tooltip({ children, label, show }: { children: React.ReactNode; label: 
   );
 }
 
-export function CoachSidebar() {
+export function CoachSidebar({
+  notifications,
+}: {
+  notifications?: Notification[];
+}) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -146,7 +151,7 @@ export function CoachSidebar() {
       {/* Notifications */}
       <div className="space-y-1 border-t border-white/8 px-3 py-3">
         <Tooltip label="Notifications" show={collapsed}>
-          <NotificationBell />
+          <NotificationBell incoming={notifications} />
         </Tooltip>
       </div>
     </div>

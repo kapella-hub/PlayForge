@@ -30,12 +30,6 @@ export interface QuizInfo {
   attempted: boolean;
 }
 
-let notifCounter = 0;
-function nextId(): string {
-  notifCounter++;
-  return `notif_${Date.now()}_${notifCounter}`;
-}
-
 export function generateCoachNotifications(
   analytics: TeamAnalytics,
 ): Notification[] {
@@ -46,7 +40,7 @@ export function generateCoachNotifications(
   if (analytics.inactivePlayers.length > 0) {
     const count = analytics.inactivePlayers.length;
     notifications.push({
-      id: nextId(),
+      id: "coach:inactive",
       type: "player_inactive",
       title: `${count} inactive player${count !== 1 ? "s" : ""}`,
       message: `${analytics.inactivePlayers.map((p) => p.name).slice(0, 3).join(", ")}${count > 3 ? ` and ${count - 3} more` : ""} haven't studied in 3+ days.`,
@@ -59,7 +53,7 @@ export function generateCoachNotifications(
   // Low quiz scores
   if (analytics.avgQuizScore > 0 && analytics.avgQuizScore < 60) {
     notifications.push({
-      id: nextId(),
+      id: "coach:low-quiz",
       type: "quiz_due",
       title: "Low quiz scores",
       message: `Team average quiz score is ${analytics.avgQuizScore}%. Consider reviewing difficult plays.`,
@@ -72,7 +66,7 @@ export function generateCoachNotifications(
   // Game plan install progress
   if (analytics.gamePlanName && analytics.installCompletion < 100) {
     notifications.push({
-      id: nextId(),
+      id: "coach:install",
       type: "game_plan",
       title: "Install in progress",
       message: `"${analytics.gamePlanName}" is ${analytics.installCompletion}% installed across the team.`,
@@ -98,7 +92,7 @@ export function generatePlayerNotifications(
   );
   if (dueForReview.length > 0) {
     notifications.push({
-      id: nextId(),
+      id: "player:due-review",
       type: "new_plays",
       title: `${dueForReview.length} play${dueForReview.length !== 1 ? "s" : ""} due for review`,
       message: "Keep your mastery up by reviewing plays that are due.",
@@ -113,7 +107,7 @@ export function generatePlayerNotifications(
   if (pendingQuizzes.length > 0) {
     const upcoming = pendingQuizzes[0];
     notifications.push({
-      id: nextId(),
+      id: "player:quiz-available",
       type: "quiz_due",
       title: "Quiz available",
       message: `"${upcoming.name}" is waiting for you${upcoming.dueDate ? ` — due ${new Date(upcoming.dueDate).toLocaleDateString()}` : ""}.`,
@@ -127,7 +121,7 @@ export function generatePlayerNotifications(
   const newPlays = progress.filter((p) => p.views === 0);
   if (newPlays.length > 0) {
     notifications.push({
-      id: nextId(),
+      id: "player:new-plays",
       type: "new_plays",
       title: `${newPlays.length} new play${newPlays.length !== 1 ? "s" : ""} added`,
       message: "New plays have been added to your game plan. Start studying!",
