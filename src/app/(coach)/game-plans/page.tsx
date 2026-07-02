@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ClipboardList } from "lucide-react";
+import { CreateGamePlanDialog } from "./create-game-plan-dialog";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,7 @@ export default async function GamePlansPage() {
             Weekly game plans and play selections.
           </p>
         </div>
+        <CreateGamePlanDialog orgId={membership.orgId} />
       </div>
 
       {gamePlans.length === 0 ? (
