@@ -1,11 +1,11 @@
 "use server";
 
-import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
-import { redirect } from "next/navigation";
 import type { Side, Visibility } from "@prisma/client";
+import { requireOrgAccess, requirePlaybookAccess, AuthzError } from "@/lib/authz";
 
 export async function getPlaybooks(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   const playbooks = await db.playbook.findMany({
     where: { orgId },
     orderBy: { createdAt: "desc" },
@@ -17,9 +17,6 @@ export async function getPlaybooks(orgId: string) {
 }
 
 export async function createPlaybook(formData: FormData) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-
   const orgId = formData.get("orgId") as string;
   const name = formData.get("name") as string;
   const description = (formData.get("description") as string) || undefined;
@@ -31,6 +28,8 @@ export async function createPlaybook(formData: FormData) {
     throw new Error("Organization ID and name are required");
   }
 
+  const membership = await requireOrgAccess(orgId, { coach: true });
+
   const playbook = await db.playbook.create({
     data: {
       orgId,
@@ -38,7 +37,7 @@ export async function createPlaybook(formData: FormData) {
       description,
       side,
       visibility,
-      createdById: session.user.id,
+      createdById: membership.userId,
     },
   });
 
@@ -46,8 +45,7 @@ export async function createPlaybook(formData: FormData) {
 }
 
 export async function deletePlaybook(id: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  await requirePlaybookAccess(id, { coach: true });
 
   await db.playbook.delete({
     where: { id },
@@ -55,8 +53,9 @@ export async function deletePlaybook(id: string) {
 }
 
 export async function sharePlaybook(playbookId: string, targetSlug: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const { playbook, membership } = await requirePlaybookAccess(playbookId, {
+    coach: true,
+  });
 
   // Find the target org by slug or invite code
   const targetOrg = await db.organization.findFirst({
@@ -69,15 +68,6 @@ export async function sharePlaybook(playbookId: string, targetSlug: string) {
     throw new Error("Organization not found. Check the slug or invite code.");
   }
 
-  // Verify the playbook exists and belongs to user's org
-  const playbook = await db.playbook.findUnique({
-    where: { id: playbookId },
-  });
-
-  if (!playbook) {
-    throw new Error("Playbook not found.");
-  }
-
   if (targetOrg.id === playbook.orgId) {
     throw new Error("Cannot share a playbook with its own organization.");
   }
@@ -86,7 +76,7 @@ export async function sharePlaybook(playbookId: string, targetSlug: string) {
     data: {
       playbookId,
       sharedWithOrgId: targetOrg.id,
-      sharedById: session.user.id,
+      sharedById: membership.userId,
     },
   });
 
@@ -94,6 +84,7 @@ export async function sharePlaybook(playbookId: string, targetSlug: string) {
 }
 
 export async function getSharedPlaybooks(orgId: string) {
+  await requireOrgAccess(orgId, { coach: true });
   const shares = await db.playbookShare.findMany({
     where: { sharedWithOrgId: orgId },
     include: {
@@ -112,16 +103,17 @@ export async function getSharedPlaybooks(orgId: string) {
 }
 
 export async function revokePlaybookShare(shareId: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
+  const share = await db.playbookShare.findUnique({
+    where: { id: shareId },
+    include: { playbook: { select: { orgId: true } } },
+  });
+  if (!share) throw new AuthzError();
+  await requireOrgAccess(share.playbook.orgId, { coach: true });
 
   await db.playbookShare.delete({ where: { id: shareId } });
 }
 
 export async function importSharedPlaybook(shareId: string) {
-  const session = await auth();
-  if (!session?.user?.id) redirect("/login");
-
   const share = await db.playbookShare.findUnique({
     where: { id: shareId },
     include: {
@@ -131,16 +123,14 @@ export async function importSharedPlaybook(shareId: string) {
     },
   });
 
-  if (!share) throw new Error("Share not found.");
+  if (!share) throw new AuthzError();
 
-  // Find user's org
-  const membership = await db.membership.findFirst({
-    where: { userId: session.user.id },
+  // Caller must be a coach of the org the playbook was shared with.
+  const membership = await requireOrgAccess(share.sharedWithOrgId, {
+    coach: true,
   });
 
-  if (!membership) throw new Error("No organization membership found.");
-
-  // Create a copy of the playbook
+  // Create a copy of the playbook in the caller's org
   const newPlaybook = await db.playbook.create({
     data: {
       orgId: membership.orgId,
@@ -148,7 +138,7 @@ export async function importSharedPlaybook(shareId: string) {
       description: share.playbook.description,
       side: share.playbook.side,
       visibility: "private",
-      createdById: session.user.id,
+      createdById: membership.userId,
       plays: {
         create: share.playbook.plays.map((play) => ({
           name: play.name,
@@ -158,7 +148,7 @@ export async function importSharedPlaybook(shareId: string) {
           canvasData: play.canvasData ?? {},
           animationData: play.animationData ?? {},
           notes: play.notes,
-          createdById: session.user.id,
+          createdById: membership.userId,
         })),
       },
     },
