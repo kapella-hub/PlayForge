@@ -121,6 +121,7 @@ model User {
   playVersions   PlayVersion[] @relation("VersionCreator")
   createdPracticePlans PracticePlan[] @relation("PracticePlanCreator")
   sharedPlaybooks PlaybookShare[] @relation("PlaybookSharer")
+  createdTeamFiles TeamFile[] @relation("TeamFileCreator")
 }
 
 model Organization {
@@ -138,6 +139,7 @@ model Organization {
   quizzes        Quiz[]
   practicePlans  PracticePlan[]
   sharedPlaybooks PlaybookShare[] @relation("SharedPlaybooks")
+  teamFiles      TeamFile[]
 }
 
 model Membership {
@@ -353,4 +355,18 @@ model PlaybookShare {
   sharedBy   User         @relation("PlaybookSharer", fields: [sharedById], references: [id])
 
   @@unique([playbookId, sharedWithOrgId])
+}
+
+model TeamFile {
+  id          String   @id @default(cuid())
+  orgId       String
+  title       String
+  url         String
+  category    String
+  createdById String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  createdBy User         @relation("TeamFileCreator", fields: [createdById], references: [id])
 }
