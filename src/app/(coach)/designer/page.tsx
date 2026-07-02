@@ -272,6 +272,7 @@ export default function DesignerPage() {
           key,
           JSON.stringify({ name: playName, playType, canvasData }),
         );
+        setDraftKey(null);
         toast.info("No playbook selected. Draft saved to browser storage.");
       }
       setDirty(false);
@@ -451,6 +452,9 @@ export default function DesignerPage() {
         setPlayType(draft.playType ?? "pass");
         if (canvas.meta.side) setSide(canvas.meta.side as "offense" | "defense");
         setDirty(true);
+        localStorage.removeItem(draftKey);
+      } else {
+        toast.error("Draft is no longer available");
       }
     } catch {
       toast.error("Couldn't restore draft.");
