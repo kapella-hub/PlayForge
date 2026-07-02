@@ -3,6 +3,18 @@
 import { db } from "@/lib/db";
 import { requireMembership } from "@/lib/authz";
 
+function assertHttpUrl(url: string) {
+  let parsed: URL;
+  try {
+    parsed = new URL(url);
+  } catch {
+    throw new Error("Only http(s) links are allowed");
+  }
+  if (!["http:", "https:"].includes(parsed.protocol)) {
+    throw new Error("Only http(s) links are allowed");
+  }
+}
+
 export async function getTeamFiles() {
   const membership = await requireMembership({ coach: true });
   return db.teamFile.findMany({
@@ -17,6 +29,7 @@ export async function createTeamFile(data: {
   category: string;
 }) {
   const membership = await requireMembership({ coach: true });
+  assertHttpUrl(data.url);
   return db.teamFile.create({
     data: {
       orgId: membership.orgId,
@@ -33,6 +46,7 @@ export async function updateTeamFile(
   data: { title: string; url: string },
 ) {
   const membership = await requireMembership({ coach: true });
+  assertHttpUrl(data.url);
   const result = await db.teamFile.updateMany({
     where: { id, orgId: membership.orgId },
     data: { title: data.title, url: data.url },

@@ -58,6 +58,17 @@ describe("createTeamFile", () => {
       },
     });
   });
+
+  it("rejects non-http(s) urls and never touches the database", async () => {
+    await expect(
+      createTeamFile({
+        title: "XSS",
+        url: "javascript:alert(1)",
+        category: "rules",
+      }),
+    ).rejects.toThrow("Only http(s) links are allowed");
+    expect(db.teamFile.create).not.toHaveBeenCalled();
+  });
 });
 
 describe("updateTeamFile", () => {
@@ -77,6 +88,13 @@ describe("updateTeamFile", () => {
     await expect(
       updateTeamFile("tf1", { title: "T", url: "https://y" }),
     ).resolves.toBeUndefined();
+  });
+
+  it("rejects non-http(s) urls and never touches the database", async () => {
+    await expect(
+      updateTeamFile("tf1", { title: "T", url: "javascript:alert(1)" }),
+    ).rejects.toThrow("Only http(s) links are allowed");
+    expect(db.teamFile.updateMany).not.toHaveBeenCalled();
   });
 });
 
