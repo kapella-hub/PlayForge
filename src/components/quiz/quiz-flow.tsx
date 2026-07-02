@@ -6,6 +6,7 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MultipleChoice } from "./multiple-choice";
 import { submitQuizAttempt } from "@/lib/actions/quiz-actions";
+import { countSupportedQuestions, computeScorePercent } from "@/lib/quiz-score";
 
 interface QuizQuestion {
   id: string;
@@ -73,8 +74,8 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
 
   if (finished) {
     const correctCount = answers.filter((a) => a.correct).length;
-    const scorePercent =
-      totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
+    const supportedCount = countSupportedQuestions(questions);
+    const scorePercent = computeScorePercent(correctCount, supportedCount);
 
     return (
       <div className="flex flex-col items-center gap-6 py-12 text-center">
@@ -82,7 +83,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
         <h2 className="text-2xl font-bold text-white">Quiz Complete!</h2>
         <p className="text-4xl font-bold text-white">{scorePercent}%</p>
         <p className="text-sm text-zinc-400">
-          {correctCount} of {totalQuestions} correct
+          {correctCount} of {supportedCount} correct
         </p>
         <Link href="/quizzes">
           <Button variant="outline">Back to Quizzes</Button>
