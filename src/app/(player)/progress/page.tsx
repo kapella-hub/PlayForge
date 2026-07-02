@@ -69,6 +69,7 @@ export default async function ProgressPage() {
     totalViews,
     totalQuizzes,
     averageScore,
+    hasPerfectQuiz: allScores.some((s) => s >= 1),
     currentStreak,
     longestStreak,
     playsMastered: counts.mastered,

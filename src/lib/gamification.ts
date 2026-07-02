@@ -10,6 +10,7 @@ export interface PlayerStats {
   totalViews: number;
   totalQuizzes: number;
   averageScore: number;
+  hasPerfectQuiz: boolean;
   currentStreak: number;
   longestStreak: number;
   playsMastered: number;
@@ -51,7 +52,7 @@ export const BADGES: Badge[] = [
     name: "Perfect Score",
     description: "Score 100% on a quiz",
     icon: "\uD83D\uDCAF",
-    condition: (s) => s.averageScore >= 1.0,
+    condition: (s) => s.hasPerfectQuiz,
   },
   {
     id: "three-day-streak",
