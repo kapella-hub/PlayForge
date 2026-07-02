@@ -26,7 +26,7 @@ export default async function PlayerLayout({
 
   return (
     <div className="min-h-screen bg-[var(--background)] pb-24 md:pb-8">
-      <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/8 bg-[var(--background)]/75 px-4 backdrop-blur-xl sm:px-6">
+      <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-white/8 bg-[var(--background)]/75 px-4 pt-[env(safe-area-inset-top)] backdrop-blur-xl sm:px-6">
         <div>
           <span data-display="true" className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
             PlayForge
