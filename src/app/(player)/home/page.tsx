@@ -114,7 +114,7 @@ export default async function PlayerHomePage() {
                 NO PLAYS ASSIGNED
               </div>
               <div className="mt-1 text-sm font-medium text-white">
-                Ask your coach for an invite code to join a team.
+                Your coach hasn&apos;t assigned any plays yet. Check back soon.
               </div>
             </CardContent>
           </Card>
