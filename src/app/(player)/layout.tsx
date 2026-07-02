@@ -3,7 +3,6 @@ import { auth } from "@/lib/auth";
 import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { PlayerTabs } from "@/components/layout/player-tabs";
 import { UserMenu } from "@/components/layout/user-menu";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NotificationBell } from "@/components/ui/notification-bell";
 import { PageTransition } from "@/components/ui/page-transition";
 
@@ -36,7 +35,6 @@ export default async function PlayerLayout({
         </div>
         <div className="flex items-center gap-2">
           <NotificationBell />
-          <ThemeToggle />
           <UserMenu user={session.user} />
         </div>
       </header>

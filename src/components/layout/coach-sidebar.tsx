@@ -19,7 +19,6 @@ import {
   ChevronLeft,
   Menu,
 } from "lucide-react";
-import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { NotificationBell } from "@/components/ui/notification-bell";
 
 const navItems = [
@@ -144,13 +143,10 @@ export function CoachSidebar() {
         ))}
       </nav>
 
-      {/* Notifications & Theme toggle */}
+      {/* Notifications */}
       <div className="space-y-1 border-t border-white/8 px-3 py-3">
         <Tooltip label="Notifications" show={collapsed}>
           <NotificationBell />
-        </Tooltip>
-        <Tooltip label="Toggle theme" show={collapsed}>
-          <ThemeToggle />
         </Tooltip>
       </div>
     </div>
