@@ -149,3 +149,16 @@ export async function getQuizAttempts(quizId: string, userId: string) {
     orderBy: { startedAt: "desc" },
   });
 }
+
+export async function updateQuiz(id: string, data: { name: string }) {
+  await requireQuizAccess(id, { coach: true });
+  return db.quiz.update({
+    where: { id },
+    data: { name: data.name },
+  });
+}
+
+export async function deleteQuiz(id: string) {
+  await requireQuizAccess(id, { coach: true });
+  await db.quiz.delete({ where: { id } });
+}
