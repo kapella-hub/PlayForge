@@ -49,37 +49,39 @@ export default async function CoachQuizzesPage() {
           {quizzes.map((quiz) => {
             const due = quiz.dueDate ? new Date(quiz.dueDate) : null;
             return (
-              <Card key={quiz.id} className="transition-colors hover:border-zinc-700">
-                <CardContent className="p-5">
-                  <h3 className="truncate text-sm font-semibold text-white">
-                    {quiz.name}
-                  </h3>
+              <Link key={quiz.id} href={`/quizzes/${quiz.id}`}>
+                <Card className="transition-colors hover:border-zinc-700">
+                  <CardContent className="p-5">
+                    <h3 className="truncate text-sm font-semibold text-white">
+                      {quiz.name}
+                    </h3>
 
-                  <div className="mt-3 space-y-1.5 text-xs text-zinc-500">
-                    <p>
-                      {quiz._count.questions}{" "}
-                      {quiz._count.questions === 1 ? "question" : "questions"}
-                    </p>
-                    <p>
-                      {quiz._count.attempts}{" "}
-                      {quiz._count.attempts === 1 ? "attempt" : "attempts"}
-                    </p>
-                  </div>
+                    <div className="mt-3 space-y-1.5 text-xs text-zinc-500">
+                      <p>
+                        {quiz._count.questions}{" "}
+                        {quiz._count.questions === 1 ? "question" : "questions"}
+                      </p>
+                      <p>
+                        {quiz._count.attempts}{" "}
+                        {quiz._count.attempts === 1 ? "attempt" : "attempts"}
+                      </p>
+                    </div>
 
-                  <div className="mt-3 flex flex-wrap items-center gap-2">
-                    {quiz.gamePlan && (
-                      <Badge variant="outline" className="text-[10px]">
-                        {quiz.gamePlan.name}
-                      </Badge>
-                    )}
-                    {due && (
-                      <Badge variant="outline" className="text-[10px]">
-                        Due {due.toLocaleDateString()}
-                      </Badge>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      {quiz.gamePlan && (
+                        <Badge variant="outline" className="text-[10px]">
+                          {quiz.gamePlan.name}
+                        </Badge>
+                      )}
+                      {due && (
+                        <Badge variant="outline" className="text-[10px]">
+                          Due {due.toLocaleDateString()}
+                        </Badge>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+              </Link>
             );
           })}
         </div>
