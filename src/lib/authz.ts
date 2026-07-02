@@ -36,3 +36,61 @@ export async function requireMembership(opts: { coach?: boolean } = {}) {
   if (opts.coach && !isCoachRole(membership.role)) throw new AuthzError();
   return membership;
 }
+
+/** Resolves a playbook's org and verifies access. Throws AuthzError if missing or forbidden. */
+export async function requirePlaybookAccess(
+  playbookId: string,
+  opts: { coach?: boolean } = {},
+) {
+  const playbook = await db.playbook.findUnique({ where: { id: playbookId } });
+  if (!playbook) throw new AuthzError();
+  const membership = await requireOrgAccess(playbook.orgId, opts);
+  return { playbook, membership };
+}
+
+/** Resolves a play's org (via its playbook) and verifies access. Throws AuthzError if missing or forbidden. */
+export async function requirePlayAccess(
+  playId: string,
+  opts: { coach?: boolean } = {},
+) {
+  const play = await db.play.findUnique({
+    where: { id: playId },
+    include: { playbook: { select: { orgId: true } } },
+  });
+  if (!play) throw new AuthzError();
+  const membership = await requireOrgAccess(play.playbook.orgId, opts);
+  return { play, membership };
+}
+
+/** Resolves a game plan's org and verifies access. Throws AuthzError if missing or forbidden. */
+export async function requireGamePlanAccess(
+  gamePlanId: string,
+  opts: { coach?: boolean } = {},
+) {
+  const gamePlan = await db.gamePlan.findUnique({ where: { id: gamePlanId } });
+  if (!gamePlan) throw new AuthzError();
+  const membership = await requireOrgAccess(gamePlan.orgId, opts);
+  return { gamePlan, membership };
+}
+
+/** Resolves a quiz's org and verifies access. Throws AuthzError if missing or forbidden. */
+export async function requireQuizAccess(
+  quizId: string,
+  opts: { coach?: boolean } = {},
+) {
+  const quiz = await db.quiz.findUnique({ where: { id: quizId } });
+  if (!quiz) throw new AuthzError();
+  const membership = await requireOrgAccess(quiz.orgId, opts);
+  return { quiz, membership };
+}
+
+/** Resolves a practice plan's org and verifies access. Throws AuthzError if missing or forbidden. */
+export async function requirePracticePlanAccess(
+  planId: string,
+  opts: { coach?: boolean } = {},
+) {
+  const plan = await db.practicePlan.findUnique({ where: { id: planId } });
+  if (!plan) throw new AuthzError();
+  const membership = await requireOrgAccess(plan.orgId, opts);
+  return { plan, membership };
+}

@@ -23,6 +23,11 @@ import {
   AuthzError,
   requireOrgAccess,
   requireMembership,
+  requirePlaybookAccess,
+  requirePlayAccess,
+  requireGamePlanAccess,
+  requireQuizAccess,
+  requirePracticePlanAccess,
 } from "@/lib/authz";
 
 const mockAuth = vi.mocked(auth);
@@ -106,5 +111,123 @@ describe("requireMembership", () => {
     await expect(
       requireMembership({ coach: true }),
     ).rejects.toBeInstanceOf(AuthzError);
+  });
+});
+
+describe("requirePlaybookAccess", () => {
+  it("throws AuthzError when the playbook does not exist", async () => {
+    vi.mocked(db.playbook.findUnique).mockResolvedValue(null as never);
+    await expect(requirePlaybookAccess("pb1")).rejects.toBeInstanceOf(
+      AuthzError,
+    );
+  });
+
+  it("returns { playbook, membership } for a member of the owning org", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
+    vi.mocked(db.playbook.findUnique).mockResolvedValue({
+      id: "pb1",
+      orgId: "o1",
+    } as never);
+    mockMembershipFindUnique.mockResolvedValue(coachMembership as never);
+    await expect(requirePlaybookAccess("pb1")).resolves.toEqual({
+      playbook: { id: "pb1", orgId: "o1" },
+      membership: coachMembership,
+    });
+  });
+
+  it("throws AuthzError for a non-member of the owning org", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
+    vi.mocked(db.playbook.findUnique).mockResolvedValue({
+      id: "pb1",
+      orgId: "o1",
+    } as never);
+    mockMembershipFindUnique.mockResolvedValue(null as never);
+    await expect(requirePlaybookAccess("pb1")).rejects.toBeInstanceOf(
+      AuthzError,
+    );
+  });
+});
+
+describe("requirePlayAccess (org via playbook relation)", () => {
+  it("throws AuthzError when the play does not exist", async () => {
+    vi.mocked(db.play.findUnique).mockResolvedValue(null as never);
+    await expect(requirePlayAccess("p1")).rejects.toBeInstanceOf(AuthzError);
+  });
+
+  it("returns { play, membership } resolving org through playbook", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
+    vi.mocked(db.play.findUnique).mockResolvedValue({
+      id: "p1",
+      playbook: { orgId: "o1" },
+    } as never);
+    mockMembershipFindUnique.mockResolvedValue(coachMembership as never);
+    await expect(requirePlayAccess("p1", { coach: true })).resolves.toEqual({
+      play: { id: "p1", playbook: { orgId: "o1" } },
+      membership: coachMembership,
+    });
+  });
+});
+
+describe("requireGamePlanAccess", () => {
+  it("throws AuthzError when the game plan does not exist", async () => {
+    vi.mocked(db.gamePlan.findUnique).mockResolvedValue(null as never);
+    await expect(requireGamePlanAccess("g1")).rejects.toBeInstanceOf(
+      AuthzError,
+    );
+  });
+
+  it("returns { gamePlan, membership } for a member", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
+    vi.mocked(db.gamePlan.findUnique).mockResolvedValue({
+      id: "g1",
+      orgId: "o1",
+    } as never);
+    mockMembershipFindUnique.mockResolvedValue(coachMembership as never);
+    await expect(requireGamePlanAccess("g1")).resolves.toEqual({
+      gamePlan: { id: "g1", orgId: "o1" },
+      membership: coachMembership,
+    });
+  });
+});
+
+describe("requireQuizAccess", () => {
+  it("throws AuthzError when the quiz does not exist", async () => {
+    vi.mocked(db.quiz.findUnique).mockResolvedValue(null as never);
+    await expect(requireQuizAccess("q1")).rejects.toBeInstanceOf(AuthzError);
+  });
+
+  it("returns { quiz, membership } for a member", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
+    vi.mocked(db.quiz.findUnique).mockResolvedValue({
+      id: "q1",
+      orgId: "o1",
+    } as never);
+    mockMembershipFindUnique.mockResolvedValue(playerMembership as never);
+    await expect(requireQuizAccess("q1")).resolves.toEqual({
+      quiz: { id: "q1", orgId: "o1" },
+      membership: playerMembership,
+    });
+  });
+});
+
+describe("requirePracticePlanAccess", () => {
+  it("throws AuthzError when the practice plan does not exist", async () => {
+    vi.mocked(db.practicePlan.findUnique).mockResolvedValue(null as never);
+    await expect(requirePracticePlanAccess("pp1")).rejects.toBeInstanceOf(
+      AuthzError,
+    );
+  });
+
+  it("returns { plan, membership } for a member", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
+    vi.mocked(db.practicePlan.findUnique).mockResolvedValue({
+      id: "pp1",
+      orgId: "o1",
+    } as never);
+    mockMembershipFindUnique.mockResolvedValue(coachMembership as never);
+    await expect(requirePracticePlanAccess("pp1")).resolves.toEqual({
+      plan: { id: "pp1", orgId: "o1" },
+      membership: coachMembership,
+    });
   });
 });
