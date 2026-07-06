@@ -6,21 +6,25 @@ import { Bell } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Notification } from "@/lib/notifications";
 
-const STORAGE_KEY = "playforge_notifications";
+const KEY_PREFIX = "playforge_notifications";
 
-function loadNotifications(): Notification[] {
+function storageKey(userId: string): string {
+  return `${KEY_PREFIX}:${userId}`;
+}
+
+function loadNotifications(userId: string): Notification[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = localStorage.getItem(storageKey(userId));
     return raw ? (JSON.parse(raw) as Notification[]) : [];
   } catch {
     return [];
   }
 }
 
-function saveNotifications(notifications: Notification[]) {
+function saveNotifications(userId: string, notifications: Notification[]) {
   if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+  localStorage.setItem(storageKey(userId), JSON.stringify(notifications));
 }
 
 const TYPE_COLOR: Record<string, string> = {
@@ -29,16 +33,26 @@ const TYPE_COLOR: Record<string, string> = {
   game_plan: "bg-primary",
 };
 
-export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
+export function NotificationBell({
+  userId,
+  incoming,
+}: {
+  userId: string;
+  incoming?: Notification[];
+}) {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [open, setOpen] = useState(false);
 
+  // Load persisted notifications on mount. Client-only: the component SSRs with
+  // an empty list to match the server, so this post-mount setState is required
+  // for hydration safety, not a cascading-render bug.
   useEffect(() => {
-    setNotifications(loadNotifications());
-  }, []);
+    setNotifications(loadNotifications(userId));
+  }, [userId]);
 
   // Merge incoming: add new ids, refresh content on existing ids (keep read state
   // unless the message actually changed), keep history for ids no longer incoming.
+  // Same client-only persisted-store sync as above; the merge is intentionally stateful.
   useEffect(() => {
     if (!incoming?.length) return;
     setNotifications((prev) => {
@@ -65,17 +79,17 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
       if (!fresh.length && !changed) return prev;
 
       const merged = [...fresh, ...refreshed].slice(0, 20);
-      saveNotifications(merged);
+      saveNotifications(userId, merged);
       return merged;
     });
-  }, [incoming]);
+  }, [incoming, userId]);
 
   const unreadCount = notifications.filter((n) => !n.read).length;
 
   function markRead(id: string) {
     setNotifications((prev) => {
       const updated = prev.map((n) => (n.id === id ? { ...n, read: true } : n));
-      saveNotifications(updated);
+      saveNotifications(userId, updated);
       return updated;
     });
   }
@@ -83,14 +97,14 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
   function markAllRead() {
     setNotifications((prev) => {
       const updated = prev.map((n) => ({ ...n, read: true }));
-      saveNotifications(updated);
+      saveNotifications(userId, updated);
       return updated;
     });
   }
 
   function clearAll() {
     setNotifications([]);
-    saveNotifications([]);
+    saveNotifications(userId, []);
   }
 
   function handleOpenChange(next: boolean) {

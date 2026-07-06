@@ -68,8 +68,10 @@ function Tooltip({ children, label, show }: { children: React.ReactNode; label: 
 }
 
 export function CoachSidebar({
+  userId,
   notifications,
 }: {
+  userId: string;
   notifications?: Notification[];
 }) {
   const pathname = usePathname();
@@ -152,7 +154,7 @@ export function CoachSidebar({
       {/* Notifications & theme */}
       <div className="space-y-1 border-t border-border px-3 py-3">
         <Tooltip label="Notifications" show={collapsed}>
-          <NotificationBell incoming={notifications} />
+          <NotificationBell userId={userId} incoming={notifications} />
         </Tooltip>
         <Tooltip label="Toggle theme" show={collapsed}>
           <ThemeToggle />

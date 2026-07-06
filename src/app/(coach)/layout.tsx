@@ -31,7 +31,7 @@ export default async function CoachLayout({
 
   return (
     <div className="min-h-screen bg-background">
-      <CoachSidebar notifications={notifications} />
+      <CoachSidebar userId={session.user.id} notifications={notifications} />
 
       <div className="xl:pl-[240px]">
         <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/75 px-4 pl-16 backdrop-blur-xl sm:px-6 sm:pl-20 xl:justify-end xl:pl-6">

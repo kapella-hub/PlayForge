@@ -59,7 +59,7 @@ export default async function PlayerLayout({
           <p className="hidden text-xs text-muted-foreground sm:block">Player install and review</p>
         </div>
         <div className="flex items-center gap-2">
-          <NotificationBell incoming={notifications} />
+          <NotificationBell userId={session.user.id} incoming={notifications} />
           <ThemeToggle />
           <UserMenu user={session.user} />
         </div>
