@@ -50,7 +50,7 @@ export default async function DashboardPage() {
           <StatCard
             label="Total Plays"
             value={analytics.totalPlays}
-            color="text-white"
+            color="text-foreground"
             icon={Layers}
           />
         </DashboardCard>
@@ -58,7 +58,7 @@ export default async function DashboardPage() {
           <StatCard
             label="Install Completion"
             value={`${analytics.installCompletion}%`}
-            color="text-green-400"
+            color="text-success"
             icon={CheckCircle2}
           />
         </DashboardCard>
@@ -66,7 +66,7 @@ export default async function DashboardPage() {
           <StatCard
             label="Active Players"
             value={analytics.totalPlayers}
-            color="text-amber-400"
+            color="text-accent"
             icon={Users}
           />
         </DashboardCard>
@@ -74,7 +74,7 @@ export default async function DashboardPage() {
           <StatCard
             label="Avg Quiz Score"
             value={`${analytics.avgQuizScore}%`}
-            color="text-indigo-400"
+            color="text-primary-emphasis"
             icon={BrainCircuit}
           />
         </DashboardCard>
@@ -87,7 +87,7 @@ export default async function DashboardPage() {
             <CardHeader>
               <CardTitle>Getting Started</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4 pt-0 text-sm text-zinc-400 sm:pt-0">
+            <CardContent className="space-y-4 pt-0 text-sm text-muted-foreground sm:pt-0">
               <p>1. Create your first playbook</p>
               <p>2. Add plays using the Play Designer</p>
               <p>3. Invite your players with an invite code</p>
@@ -100,21 +100,21 @@ export default async function DashboardPage() {
       {/* Inactive Players Alert */}
       {analytics.inactivePlayers.length > 0 && (
         <DashboardFadeIn delay={0.5}>
-          <Card className="mt-6 border-amber-500/50">
+          <Card className="mt-6 border-warning/50">
             <CardHeader>
-              <CardTitle className="text-amber-400">
+              <CardTitle className="text-warning">
                 Inactive Players ({analytics.inactivePlayers.length})
               </CardTitle>
             </CardHeader>
             <CardContent className="pt-0 sm:pt-0">
-              <p className="text-sm text-zinc-400 mb-3">
+              <p className="text-sm text-muted-foreground mb-3">
                 These players have not been active in the last 3 days.
               </p>
               <div className="flex flex-wrap gap-2">
                 {analytics.inactivePlayers.map((player) => (
                   <span
                     key={player.id}
-                    className="rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-400"
+                    className="rounded-full bg-warning/10 px-3 py-1 text-xs text-warning"
                   >
                     {player.name}
                   </span>
@@ -136,7 +136,7 @@ export default async function DashboardPage() {
             </CardHeader>
             <CardContent className="pt-0 sm:pt-0">
               {activeGamePlan.plays.length === 0 ? (
-                <p className="text-sm text-zinc-500">
+                <p className="text-sm text-muted-foreground">
                   No plays added to this game plan yet.
                 </p>
               ) : (
@@ -144,18 +144,18 @@ export default async function DashboardPage() {
                   {activeGamePlan.plays.slice(0, 5).map((gpp) => (
                     <div
                       key={gpp.play.id}
-                      className="flex items-center justify-between rounded-lg border border-zinc-800 bg-zinc-900/50 px-4 py-2"
+                      className="flex items-center justify-between rounded-lg border border-border bg-secondary px-4 py-2"
                     >
-                      <span className="text-sm font-medium text-zinc-100">
+                      <span className="text-sm font-medium text-foreground">
                         {gpp.play.name}
                       </span>
-                      <span className="text-xs text-zinc-500">
+                      <span className="text-xs text-muted-foreground">
                         {gpp.play.formation}
                       </span>
                     </div>
                   ))}
                   {activeGamePlan.plays.length > 5 && (
-                    <p className="text-xs text-zinc-500 text-center pt-1">
+                    <p className="text-xs text-muted-foreground text-center pt-1">
                       + {activeGamePlan.plays.length - 5} more plays
                     </p>
                   )}

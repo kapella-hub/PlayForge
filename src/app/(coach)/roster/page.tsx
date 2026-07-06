@@ -32,8 +32,8 @@ export default async function RosterPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Roster</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="text-2xl font-bold text-foreground">Roster</h1>
+        <p className="text-sm text-muted-foreground">
           Manage your team members and invite new players.
         </p>
       </div>
@@ -45,26 +45,26 @@ export default async function RosterPage() {
 
       {/* Coaches Section */}
       <div className="mb-8">
-        <h2 className="mb-4 text-lg font-semibold text-white">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">
           Coaches ({coaches.length})
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {coaches.map((coach) => (
             <Card key={coach.id}>
               <CardContent className="flex items-center gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/20 text-sm font-bold leading-none text-emerald-400">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/20 text-sm font-bold leading-none text-primary-emphasis">
                   {(coach.user.name ?? coach.user.email)?.[0]?.toUpperCase() ??
                     "?"}
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-zinc-100">
+                  <p className="truncate text-sm font-medium text-foreground">
                     {coach.user.name ?? "Unnamed"}
                   </p>
-                  <p className="truncate text-xs text-zinc-500">
+                  <p className="truncate text-xs text-muted-foreground">
                     {coach.user.email}
                   </p>
                 </div>
-                <span className="shrink-0 rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-xs font-medium capitalize text-emerald-400">
+                <span className="shrink-0 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium capitalize text-primary-emphasis">
                   {coach.role}
                 </span>
               </CardContent>
@@ -75,12 +75,12 @@ export default async function RosterPage() {
 
       {/* Players Section */}
       <div>
-        <h2 className="mb-4 text-lg font-semibold text-white">
+        <h2 className="mb-4 text-lg font-semibold text-foreground">
           Players ({players.length})
         </h2>
         {players.length === 0 ? (
           <Card>
-            <CardContent className="p-8 text-center text-zinc-500">
+            <CardContent className="p-8 text-center text-muted-foreground">
               <p className="text-sm">
                 No players have joined yet. Share the invite code to get
                 started.

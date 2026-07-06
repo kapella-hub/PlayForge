@@ -79,7 +79,7 @@ export function NewPlaybookDialog({ orgId }: { orgId: string }) {
 
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
               Name
             </label>
             <Input
@@ -90,10 +90,10 @@ export function NewPlaybookDialog({ orgId }: { orgId: string }) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
               Side
             </label>
-            <div className="flex rounded-lg bg-zinc-800/80 p-0.5">
+            <div className="flex rounded-lg bg-secondary p-0.5">
               {(["offense", "defense"] as const).map((s) => (
                 <button
                   key={s}
@@ -102,8 +102,8 @@ export function NewPlaybookDialog({ orgId }: { orgId: string }) {
                   className={cn(
                     "flex-1 rounded-md px-4 py-2 text-xs font-medium capitalize transition-colors",
                     side === s
-                      ? "bg-indigo-600 text-white"
-                      : "text-zinc-400 hover:text-zinc-200",
+                      ? "bg-primary text-primary-foreground"
+                      : "text-muted-foreground hover:text-foreground",
                   )}
                 >
                   {s}

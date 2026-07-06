@@ -23,8 +23,8 @@ export default async function GamePlansPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Game Plans</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold text-foreground">Game Plans</h1>
+          <p className="text-sm text-muted-foreground">
             Weekly game plans and play selections.
           </p>
         </div>
@@ -32,10 +32,10 @@ export default async function GamePlansPage() {
       </div>
 
       {gamePlans.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <ClipboardList className="mb-4 h-12 w-12 text-zinc-700" />
-          <p className="text-sm text-zinc-500">No game plans yet</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <ClipboardList className="mb-4 h-12 w-12 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">No game plans yet</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Create a game plan to organize plays for upcoming games.
           </p>
         </div>
@@ -44,23 +44,23 @@ export default async function GamePlansPage() {
           {gamePlans.map((gp) => (
             <Link key={gp.id} href={`/game-plans/${gp.id}`}>
             <Card
-              className={`transition-colors hover:border-zinc-700 ${
-                gp.isActive ? "border-indigo-500" : ""
+              className={`${
+                gp.isActive ? "border-primary" : ""
               }`}
             >
               <CardContent className="p-5">
                 <div className="flex items-start justify-between gap-2">
-                  <h3 className="truncate text-sm font-semibold text-white">
+                  <h3 className="truncate text-sm font-semibold text-foreground">
                     {gp.name}
                   </h3>
                   {gp.isActive && (
-                    <Badge className="shrink-0 bg-indigo-600 text-[10px] text-white hover:bg-indigo-600">
+                    <Badge className="shrink-0 bg-primary text-[10px] text-primary-foreground hover:bg-primary">
                       Active
                     </Badge>
                   )}
                 </div>
 
-                <div className="mt-3 space-y-1.5 text-xs text-zinc-500">
+                <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
                   <p>
                     {gp._count.plays}{" "}
                     {gp._count.plays === 1 ? "play" : "plays"}

@@ -27,8 +27,8 @@ export default async function PlaybooksPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Playbooks</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold text-foreground">Playbooks</h1>
+          <p className="text-sm text-muted-foreground">
             Organize your plays into playbooks by scheme or situation.
           </p>
         </div>
@@ -36,10 +36,10 @@ export default async function PlaybooksPage() {
       </div>
 
       {playbooks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <BookOpen className="mb-4 h-12 w-12 text-zinc-700" />
-          <p className="text-sm text-zinc-500">No playbooks yet</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <BookOpen className="mb-4 h-12 w-12 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">No playbooks yet</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Create your first playbook to start building plays.
           </p>
         </div>
@@ -47,7 +47,7 @@ export default async function PlaybooksPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {playbooks.map((pb) => (
             <Link key={pb.id} href={`/playbooks/${pb.id}`}>
-              <Card className="transition-colors hover:border-zinc-700">
+              <Card>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span className="truncate">{pb.name}</span>
@@ -60,11 +60,11 @@ export default async function PlaybooksPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 sm:pt-0">
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-muted-foreground">
                     {pb._count.plays} play{pb._count.plays !== 1 ? "s" : ""}
                   </p>
                   {pb.description && (
-                    <p className="mt-1 truncate text-xs text-zinc-600">
+                    <p className="mt-1 truncate text-xs text-muted-foreground/70">
                       {pb.description}
                     </p>
                   )}
@@ -79,17 +79,14 @@ export default async function PlaybooksPage() {
       {sharedPlaybooks.length > 0 && (
         <div className="mt-12">
           <div className="mb-4 flex items-center gap-2">
-            <Share2 className="h-4 w-4 text-zinc-500" />
-            <h2 className="text-lg font-semibold text-white">
+            <Share2 className="h-4 w-4 text-muted-foreground" />
+            <h2 className="text-lg font-semibold text-foreground">
               Shared with you
             </h2>
           </div>
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {sharedPlaybooks.map((share) => (
-              <Card
-                key={share.id}
-                className="transition-colors hover:border-zinc-700"
-              >
+              <Card key={share.id}>
                 <CardHeader>
                   <CardTitle className="flex items-center justify-between">
                     <span className="truncate">{share.playbook.name}</span>
@@ -105,7 +102,7 @@ export default async function PlaybooksPage() {
                       </Badge>
                       <Badge
                         variant="outline"
-                        className="border-indigo-500/50 text-indigo-400"
+                        className="border-primary/50 text-primary-emphasis"
                       >
                         Shared
                       </Badge>
@@ -113,11 +110,11 @@ export default async function PlaybooksPage() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="pt-0 sm:pt-0">
-                  <p className="text-sm text-zinc-500">
+                  <p className="text-sm text-muted-foreground">
                     {share.playbook._count.plays} play
                     {share.playbook._count.plays !== 1 ? "s" : ""}
                   </p>
-                  <p className="mt-1 text-xs text-zinc-600">
+                  <p className="mt-1 text-xs text-muted-foreground/70">
                     From {share.playbook.org.name}
                   </p>
                   <div className="mt-3">

@@ -42,8 +42,8 @@ export default async function AnalyticsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Analytics</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="text-2xl font-bold text-foreground">Analytics</h1>
+        <p className="text-sm text-muted-foreground">
           Team performance and install progress.
         </p>
       </div>
@@ -53,42 +53,42 @@ export default async function AnalyticsPage() {
         <StatCard
           label="Total Plays"
           value={analytics.totalPlays}
-          color="text-white"
+          color="text-foreground"
         />
         <StatCard
           label="Install Completion"
           value={`${analytics.installCompletion}%`}
-          color="text-green-400"
+          color="text-success"
         />
         <StatCard
           label="Active Players"
           value={analytics.totalPlayers}
-          color="text-amber-400"
+          color="text-accent"
         />
         <StatCard
           label="Avg Quiz Score"
           value={`${analytics.avgQuizScore}%`}
-          color="text-indigo-400"
+          color="text-primary-emphasis"
         />
       </div>
 
       {/* Inactive Players Alert */}
       {analytics.inactivePlayers.length > 0 && (
-        <Card className="mt-6 border-amber-500/50">
+        <Card className="mt-6 border-warning/50">
           <CardHeader>
-            <CardTitle className="text-amber-400">
+            <CardTitle className="text-warning">
               Inactive Players ({analytics.inactivePlayers.length})
             </CardTitle>
           </CardHeader>
           <CardContent className="pt-0 sm:pt-0">
-            <p className="text-sm text-zinc-400 mb-3">
+            <p className="text-sm text-muted-foreground mb-3">
               These players have not been active in the last 3 days.
             </p>
             <div className="flex flex-wrap gap-2">
               {analytics.inactivePlayers.map((player) => (
                 <span
                   key={player.id}
-                  className="rounded-full bg-amber-500/10 px-3 py-1 text-xs text-amber-400"
+                  className="rounded-full bg-warning/10 px-3 py-1 text-xs text-warning"
                 >
                   {player.name}
                 </span>

@@ -23,8 +23,8 @@ export default async function PracticePlansPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Practice Plans</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold text-foreground">Practice Plans</h1>
+          <p className="text-sm text-muted-foreground">
             Build and organize your practice schedule with periods and plays.
           </p>
         </div>
@@ -32,10 +32,10 @@ export default async function PracticePlansPage() {
       </div>
 
       {plans.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <ClipboardList className="mb-4 h-12 w-12 text-zinc-700" />
-          <p className="text-sm text-zinc-500">No practice plans yet</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <ClipboardList className="mb-4 h-12 w-12 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">No practice plans yet</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Create your first practice plan to organize your sessions.
           </p>
         </div>
@@ -43,13 +43,13 @@ export default async function PracticePlansPage() {
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => (
             <Link key={plan.id} href={`/practice/${plan.id}`}>
-              <Card className="transition-colors hover:border-zinc-700">
+              <Card>
                 <CardContent className="p-5">
-                  <h3 className="truncate text-sm font-semibold text-white">
+                  <h3 className="truncate text-sm font-semibold text-foreground">
                     {plan.name}
                   </h3>
 
-                  <div className="mt-3 space-y-1.5 text-xs text-zinc-500">
+                  <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
                     {plan.date && (
                       <p className="flex items-center gap-1.5">
                         <Calendar className="h-3 w-3" />

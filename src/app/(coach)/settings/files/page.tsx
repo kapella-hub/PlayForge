@@ -200,13 +200,13 @@ export default function TeamFilesPage() {
       <div className="mb-6 flex items-center gap-4">
         <Link
           href="/settings"
-          className="rounded-lg p-2 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex-1">
-          <h1 className="text-2xl font-bold text-white">Team Files</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold text-foreground">Team Files</h1>
+          <p className="text-sm text-muted-foreground">
             Manage links to team documents, schedules, and videos.
           </p>
         </div>
@@ -218,15 +218,15 @@ export default function TeamFilesPage() {
 
       {/* Loading state */}
       {loading && (
-        <div className="flex items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <Loader2 className="h-6 w-6 animate-spin text-zinc-600" />
+        <div className="flex items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <Loader2 className="h-6 w-6 animate-spin text-muted-foreground/70" />
         </div>
       )}
 
       {/* Error state */}
       {!loading && loadError && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-red-500/30 py-16">
-          <p className="text-sm text-red-400">Couldn&apos;t load team files.</p>
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-destructive/30 py-16">
+          <p className="text-sm text-destructive">Couldn&apos;t load team files.</p>
           <Button size="sm" variant="outline" className="mt-4" onClick={load}>
             Retry
           </Button>
@@ -235,13 +235,13 @@ export default function TeamFilesPage() {
 
       {/* Add form */}
       {!loading && !loadError && showAdd && (
-        <Card className="mb-6 border-emerald-500/30">
+        <Card className="mb-6 border-primary/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Add Team Link</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-0 sm:pt-0">
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Category
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -252,8 +252,8 @@ export default function TeamFilesPage() {
                     className={cn(
                       "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                       newCategory === cat.value
-                        ? "bg-indigo-500/20 text-indigo-300"
-                        : "bg-zinc-800 text-zinc-500 hover:text-zinc-300",
+                        ? "bg-primary/20 text-primary-emphasis"
+                        : "bg-secondary text-muted-foreground hover:text-foreground/85",
                     )}
                   >
                     {cat.label}
@@ -262,7 +262,7 @@ export default function TeamFilesPage() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Label
               </label>
               <Input
@@ -272,7 +272,7 @@ export default function TeamFilesPage() {
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 URL
               </label>
               <Input
@@ -308,10 +308,10 @@ export default function TeamFilesPage() {
 
       {/* Empty state */}
       {!loading && !loadError && files.length === 0 && !showAdd && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <Link2 className="mb-4 h-12 w-12 text-zinc-700" />
-          <p className="text-sm text-zinc-500">No team files yet</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <Link2 className="mb-4 h-12 w-12 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">No team files yet</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Add links to team rules, schedules, goals, and videos.
           </p>
           <Button
@@ -334,8 +334,8 @@ export default function TeamFilesPage() {
             return (
               <div key={group.value}>
                 <div className="mb-2 flex items-center gap-2">
-                  <Icon className="h-4 w-4 text-zinc-500" />
-                  <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+                  <Icon className="h-4 w-4 text-muted-foreground" />
+                  <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                     {group.label}
                   </h3>
                 </div>
@@ -360,7 +360,7 @@ export default function TeamFilesPage() {
                             <button
                               onClick={saveEdit}
                               disabled={savingEdit}
-                              className="rounded-md p-1.5 text-emerald-500 transition-colors hover:bg-zinc-800 disabled:opacity-50"
+                              className="rounded-md p-1.5 text-success transition-colors hover:bg-secondary disabled:opacity-50"
                               aria-label="Save"
                             >
                               {savingEdit ? (
@@ -371,7 +371,7 @@ export default function TeamFilesPage() {
                             </button>
                             <button
                               onClick={cancelEdit}
-                              className="rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800"
+                              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary"
                               aria-label="Cancel"
                             >
                               <X className="h-4 w-4" />
@@ -380,10 +380,10 @@ export default function TeamFilesPage() {
                         ) : (
                           <>
                             <div className="min-w-0 flex-1">
-                              <p className="truncate text-sm font-medium text-zinc-200">
+                              <p className="truncate text-sm font-medium text-foreground">
                                 {file.title}
                               </p>
-                              <p className="truncate text-[11px] text-zinc-500">
+                              <p className="truncate text-[11px] text-muted-foreground">
                                 {file.url}
                               </p>
                             </div>
@@ -391,21 +391,21 @@ export default function TeamFilesPage() {
                               href={file.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+                              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
                               title="Open link"
                             >
                               <ExternalLink className="h-4 w-4" />
                             </a>
                             <button
                               onClick={() => startEdit(file)}
-                              className="rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+                              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
                               title="Edit"
                             >
                               <Pencil className="h-4 w-4" />
                             </button>
                             <button
                               onClick={() => setConfirmDeleteId(file.id)}
-                              className="rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-red-400"
+                              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />

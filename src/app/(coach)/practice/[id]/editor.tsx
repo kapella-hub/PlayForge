@@ -215,7 +215,7 @@ export function PracticePlanEditor({
             value={planName}
             onChange={(e) => setPlanName(e.target.value)}
             onBlur={savePlanHeader}
-            className="text-lg font-bold text-white bg-transparent border-transparent hover:border-zinc-700 focus:border-zinc-600 print:border-none"
+            className="text-lg font-bold text-foreground bg-transparent border-transparent hover:border-border focus:border-ring print:border-none"
           />
           <div className="flex items-center gap-3">
             <Input
@@ -225,7 +225,7 @@ export function PracticePlanEditor({
               onBlur={savePlanHeader}
               className="w-44"
             />
-            <div className="flex items-center gap-1.5 rounded-md bg-zinc-800 px-3 py-1.5 text-xs font-medium text-zinc-300">
+            <div className="flex items-center gap-1.5 rounded-md bg-secondary px-3 py-1.5 text-xs font-medium text-secondary-foreground">
               <Clock className="h-3 w-3" />
               {totalDuration} min total
             </div>
@@ -236,7 +236,7 @@ export function PracticePlanEditor({
             onBlur={savePlanHeader}
             placeholder="Practice notes..."
             rows={2}
-            className="w-full rounded-md border border-zinc-800 bg-transparent px-3 py-2 text-sm text-zinc-300 placeholder:text-zinc-600 focus:border-zinc-600 focus:outline-none print:border-none"
+            className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-sm text-foreground/85 placeholder:text-muted-foreground/70 focus:border-ring focus:outline-none print:border-none"
           />
         </div>
         <div className="flex gap-2 print:hidden">
@@ -252,7 +252,7 @@ export function PracticePlanEditor({
             variant="outline"
             size="sm"
             onClick={() => setConfirmPlanDelete(true)}
-            className="text-red-400 hover:text-red-300 hover:border-red-800"
+            className="text-destructive hover:text-destructive hover:border-destructive/40"
           >
             <Trash2 className="mr-1.5 h-3.5 w-3.5" />
             Delete
@@ -265,7 +265,7 @@ export function PracticePlanEditor({
         {periods.map((period, index) => (
           <div
             key={period.id}
-            className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4 space-y-3 print:break-inside-avoid"
+            className="rounded-lg border border-border bg-card p-4 space-y-3 print:break-inside-avoid"
           >
             <div className="flex items-center gap-3">
               {/* Reorder buttons */}
@@ -273,14 +273,14 @@ export function PracticePlanEditor({
                 <button
                   onClick={() => handleMove(index, "up")}
                   disabled={index === 0}
-                  className="rounded p-0.5 text-zinc-500 hover:text-white disabled:opacity-30"
+                  className="rounded p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
                 >
                   <ChevronUp className="h-3.5 w-3.5" />
                 </button>
                 <button
                   onClick={() => handleMove(index, "down")}
                   disabled={index === periods.length - 1}
-                  className="rounded p-0.5 text-zinc-500 hover:text-white disabled:opacity-30"
+                  className="rounded p-0.5 text-muted-foreground hover:text-foreground disabled:opacity-30"
                 >
                   <ChevronDown className="h-3.5 w-3.5" />
                 </button>
@@ -293,7 +293,7 @@ export function PracticePlanEditor({
                   handleUpdatePeriod(period.id, "name", e.target.value)
                 }
                 onBlur={() => savePeriod(period.id)}
-                className="flex-1 font-medium text-white bg-transparent border-transparent hover:border-zinc-700 focus:border-zinc-600 print:border-none"
+                className="flex-1 font-medium text-foreground bg-transparent border-transparent hover:border-border focus:border-ring print:border-none"
               />
 
               {/* Duration */}
@@ -312,13 +312,13 @@ export function PracticePlanEditor({
                   onBlur={() => savePeriod(period.id)}
                   className="w-16 text-center"
                 />
-                <span className="text-xs text-zinc-500">min</span>
+                <span className="text-xs text-muted-foreground">min</span>
               </div>
 
               {/* Delete */}
               <button
                 onClick={() => setPendingDeletePeriodId(period.id)}
-                className="text-zinc-500 hover:text-red-400 transition-colors print:hidden"
+                className="text-muted-foreground hover:text-destructive transition-colors print:hidden"
               >
                 <Trash2 className="h-4 w-4" />
               </button>
@@ -332,12 +332,12 @@ export function PracticePlanEditor({
               }
               onBlur={() => savePeriod(period.id)}
               placeholder="Period notes..."
-              className="text-xs text-zinc-400"
+              className="text-xs text-muted-foreground"
             />
 
             {/* Play selector */}
             <div className="space-y-2 print:hidden">
-              <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+              <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
                 Plays ({period.playIds.length})
               </p>
               <div className="flex flex-wrap gap-1.5">
@@ -353,8 +353,8 @@ export function PracticePlanEditor({
                       }}
                       className={`rounded-md px-2 py-1 text-[11px] font-medium transition-colors ${
                         selected
-                          ? "bg-indigo-600 text-white"
-                          : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-300"
+                          ? "bg-primary text-primary-foreground"
+                          : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground/85"
                       }`}
                     >
                       {play.name}
@@ -362,7 +362,7 @@ export function PracticePlanEditor({
                   );
                 })}
                 {availablePlays.length === 0 && (
-                  <span className="text-[11px] text-zinc-600">
+                  <span className="text-[11px] text-muted-foreground/70">
                     No plays in playbooks yet
                   </span>
                 )}
@@ -372,7 +372,7 @@ export function PracticePlanEditor({
             {/* Print-friendly play list */}
             {period.playIds.length > 0 && (
               <div className="hidden print:block">
-                <p className="text-xs text-zinc-500">
+                <p className="text-xs text-muted-foreground">
                   Plays:{" "}
                   {period.playIds
                     .map(

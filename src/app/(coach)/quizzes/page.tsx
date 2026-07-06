@@ -22,14 +22,14 @@ export default async function CoachQuizzesPage() {
     <div>
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-white">Quizzes</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold text-foreground">Quizzes</h1>
+          <p className="text-sm text-muted-foreground">
             Manage quizzes for your players.
           </p>
         </div>
         <Link
           href="/quizzes/create"
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-indigo-500/25 transition-colors hover:bg-indigo-500"
+          className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-colors hover:bg-primary/90"
         >
           <Plus className="h-4 w-4" />
           Create Quiz
@@ -37,10 +37,10 @@ export default async function CoachQuizzesPage() {
       </div>
 
       {quizzes.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <FileQuestion className="mb-4 h-12 w-12 text-zinc-700" />
-          <p className="text-sm text-zinc-500">No quizzes yet</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <FileQuestion className="mb-4 h-12 w-12 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">No quizzes yet</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Create a quiz to test your players&apos; knowledge.
           </p>
         </div>
@@ -50,13 +50,13 @@ export default async function CoachQuizzesPage() {
             const due = quiz.dueDate ? new Date(quiz.dueDate) : null;
             return (
               <Link key={quiz.id} href={`/quizzes/${quiz.id}`}>
-                <Card className="transition-colors hover:border-zinc-700">
+                <Card>
                   <CardContent className="p-5">
-                    <h3 className="truncate text-sm font-semibold text-white">
+                    <h3 className="truncate text-sm font-semibold text-foreground">
                       {quiz.name}
                     </h3>
 
-                    <div className="mt-3 space-y-1.5 text-xs text-zinc-500">
+                    <div className="mt-3 space-y-1.5 text-xs text-muted-foreground">
                       <p>
                         {quiz._count.questions}{" "}
                         {quiz._count.questions === 1 ? "question" : "questions"}

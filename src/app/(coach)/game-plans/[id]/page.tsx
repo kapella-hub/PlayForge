@@ -59,14 +59,14 @@ export default async function GamePlanDetailPage({
     <div>
       <div className="mb-8">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-white">{gamePlan.name}</h1>
+          <h1 className="text-2xl font-bold text-foreground">{gamePlan.name}</h1>
           {gamePlan.isActive && (
-            <Badge className="bg-indigo-600 text-[10px] text-white hover:bg-indigo-600">
+            <Badge className="bg-primary text-[10px] text-primary-foreground hover:bg-primary">
               Active
             </Badge>
           )}
         </div>
-        <div className="mt-1 flex items-center gap-3 text-sm text-zinc-500">
+        <div className="mt-1 flex items-center gap-3 text-sm text-muted-foreground">
           {gamePlan.opponent && <span>vs. {gamePlan.opponent}</span>}
           {gamePlan.week != null && <span>Week {gamePlan.week}</span>}
           <span>

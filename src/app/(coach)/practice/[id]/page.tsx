@@ -45,7 +45,7 @@ export default async function PracticePlanDetailPage({
       <div className="mb-6">
         <Link
           href="/practice"
-          className="mb-4 inline-flex items-center text-sm text-zinc-500 transition-colors hover:text-zinc-300"
+          className="mb-4 inline-flex items-center text-sm text-muted-foreground transition-colors hover:text-foreground/85"
         >
           <ArrowLeft className="mr-1.5 h-3.5 w-3.5" />
           Back to Practice Plans

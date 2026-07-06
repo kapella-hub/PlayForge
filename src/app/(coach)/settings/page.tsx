@@ -30,8 +30,8 @@ export default async function SettingsPage() {
   return (
     <div>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white">Settings</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="text-2xl font-bold text-foreground">Settings</h1>
+        <p className="text-sm text-muted-foreground">
           Manage your organization settings.
         </p>
       </div>
@@ -44,20 +44,20 @@ export default async function SettingsPage() {
           </CardHeader>
           <CardContent className="space-y-4 pt-0 sm:pt-0">
             <div>
-              <p className="text-xs text-zinc-500">Name</p>
-              <p className="text-sm font-medium text-zinc-100">
+              <p className="text-xs text-muted-foreground">Name</p>
+              <p className="text-sm font-medium text-foreground">
                 {organization.name}
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Tier</p>
-              <p className="text-sm font-medium text-zinc-100">
+              <p className="text-xs text-muted-foreground">Tier</p>
+              <p className="text-sm font-medium text-foreground">
                 {tierLabels[organization.tier] ?? organization.tier}
               </p>
             </div>
             <div>
-              <p className="text-xs text-zinc-500">Slug</p>
-              <p className="text-sm font-mono text-zinc-400">
+              <p className="text-xs text-muted-foreground">Slug</p>
+              <p className="text-sm font-mono text-muted-foreground">
                 {organization.slug}
               </p>
             </div>
@@ -69,18 +69,18 @@ export default async function SettingsPage() {
 
         {/* Team Files */}
         <Link href="/settings/files">
-          <Card className="transition-colors hover:border-zinc-700">
+          <Card>
             <CardContent className="flex items-center gap-4 p-5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-emerald-500/10">
-                <FileText className="h-5 w-5 text-emerald-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <FileText className="h-5 w-5 text-primary-emphasis" />
               </div>
               <div className="flex-1">
-                <p className="text-sm font-semibold text-zinc-100">Team Files</p>
-                <p className="text-xs text-zinc-500">
+                <p className="text-sm font-semibold text-foreground">Team Files</p>
+                <p className="text-xs text-muted-foreground">
                   Manage links to team rules, schedules, goals, and videos.
                 </p>
               </div>
-              <ChevronRight className="h-5 w-5 text-zinc-600" />
+              <ChevronRight className="h-5 w-5 text-muted-foreground/70" />
             </CardContent>
           </Card>
         </Link>

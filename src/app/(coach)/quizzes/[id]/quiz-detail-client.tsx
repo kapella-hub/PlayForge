@@ -79,7 +79,7 @@ export function QuizDetailClient({
             onClick={handleSaveName}
             disabled={savingName}
             aria-label="Save name"
-            className="rounded-md p-1.5 text-emerald-500 transition-colors hover:bg-zinc-800 disabled:opacity-50"
+            className="rounded-md p-1.5 text-success transition-colors hover:bg-secondary disabled:opacity-50"
           >
             {savingName ? (
               <Loader2 className="h-4 w-4 animate-spin" />
@@ -93,21 +93,21 @@ export function QuizDetailClient({
               setEditing(false);
             }}
             aria-label="Cancel rename"
-            className="rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800"
+            className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
       ) : (
         <div className="flex min-w-0 flex-1 items-center gap-2">
-          <h1 className="truncate text-2xl font-bold text-white">{name}</h1>
+          <h1 className="truncate text-2xl font-bold text-foreground">{name}</h1>
           <button
             onClick={() => {
               setDraftName(name);
               setEditing(true);
             }}
             aria-label="Rename quiz"
-            className="shrink-0 rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            className="shrink-0 rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
           >
             <Pencil className="h-4 w-4" />
           </button>
