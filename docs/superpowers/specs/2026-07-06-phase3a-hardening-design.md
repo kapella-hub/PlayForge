@@ -33,7 +33,7 @@ Phases 1–2 accumulated a triaged follow-up backlog (`docs/superpowers/plans/20
 
 ## 4. Visual & accessibility
 
-- **`--accent-foreground`:** new token, dark ink `#1c1409` (both palettes), registered as `--color-accent-foreground` in `@theme inline`; every `bg-accent` FILL switches its text to `text-accent-foreground` (designer motion banner, player level circle, any other `bg-accent` + light-text pairs found by grep). Text-on-surface accent usages (`text-accent`) are unaffected.
+- **`--accent-foreground`:** new token, theme-split — `:root` (dark) `#1c1409` (5.71:1 on dark accent `#d97706`), `.light` `#ffffff` (5.02:1 on light accent `#b45309`) — registered as `--color-accent-foreground` in `@theme inline`; every `bg-accent` FILL switches its text to `text-accent-foreground` (designer motion banner, player level circle, any other `bg-accent` + light-text pairs found by grep). Text-on-surface accent usages (`text-accent`) are unaffected. *(Amended during planning: the originally approved single value `#1c1409` measures 3.63:1 on the light accent — below AA — so no single ink clears both palettes; the AA requirement governs.)*
 - **Contrast test extended:** `tests/lib/contrast.test.ts` parses the `:root` (dark) block too and asserts: accent-foreground on accent ≥4.5 (both themes), primary-foreground on primary (both), foreground on background/card (dark), plus the existing light assertions.
 - **QR fix:** `src/lib/qr.ts` generates dark modules on a white/light background (`color: { dark: "#10201d", light: "#ffffff" }`) — scanner-safe and theme-proof; the invite-code card renders it on a white tile.
 
