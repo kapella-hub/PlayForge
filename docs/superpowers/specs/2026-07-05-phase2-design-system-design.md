@@ -77,7 +77,7 @@ Canvas colors remain a parallel palette (Konva ≠ CSS). One task centralizes th
 - `src/lib/use-keyboard-shortcuts.ts:30-31`: `shortcutsRef.current = shortcuts` executes during render (React 19 hazard, existing lint error). Fix: move the assignment into `useEffect(() => { shortcutsRef.current = shortcuts; })` — handlers read the ref at event time, after effects settle; behavior preserved. Clears that file's lint errors (play-canvas.tsx's remain parked).
 - `src/app/api/ai/generate-play/route.ts`: add `requireMembership({ coach: true })` (session-gated only today — any player can spend Anthropic credits) and a simple per-user in-memory rate limit (e.g. 10 requests/minute; single-instance deploy makes in-memory acceptable; note as env-tunable).
 
-**Documented exceptions (adjudicated during planning):** the play-library play-type badge palette keeps its 6-way categorical color-coding (informational, not accent sprawl) — allowlisted, tokenize as `--category-*` in Phase 3; SVG `stroke=`/`fill=` hex props in route/formation/minimap previews are parked with the engine silo.
+**Documented exceptions (adjudicated during planning + execution):** the play-library play-type badge palette keeps its 6-way categorical color-coding (informational, not accent sprawl) — allowlisted, tokenize as `--category-*` in Phase 3; SVG `stroke=`/`fill=` hex props in route/formation/minimap previews are parked with the engine silo; print-layout ink/paper classes are intentional print styling (D14); modal/nav scrims stay `bg-black/*` (must dim both themes, D9); Google OAuth "G" SVG brand fills are mandated (D15); on-color `text-white` over destructive fills is sanctioned semantic on-color.
 
 ## Out of scope (Phase 3 / parked)
 

@@ -33,6 +33,14 @@ Triage source: final review of `phase-1-stabilize` (1267c3b..d9d75f8). Items bel
 - Tokenize the play-library play-type categorical palette as `--category-*` (kept as-is + allowlisted in Phase 2).
 - Migrate SVG `stroke=`/`fill=` hex props (route/formation/minimap previews) to a named viz palette (parked with the engine silo in Phase 2).
 
+## Added by Phase 2 final review (2026-07-06)
+- Dark-mode on-accent text (`text-primary-foreground` on `bg-accent` ≈ 3.2:1 — designer motion banner, player level circle): extend contrast.test.ts to the dark palette and pick a compliant on-accent treatment.
+- `src/lib/qr.ts`: inverted QR (white modules on stale `#0a0a14`) — many scanners reject inverted codes; also jarring on light theme. Re-generate dark-on-light.
+- Grep gates should also match `rgba(`/`rgb(` literals and include `src/lib` (the class of leak behind the button-glow and ::selection findings).
+- Rename play-toolbar ModeButton's stale `cyan:` map key (value is accent now) — plan froze the type in 2c.
+- Unit tests for the 5 migrated dialogs + a real ConfirmDialog test (behaviorally QA-covered; unit coverage absent).
+- `@custom-variant dark` currently has zero `dark:` consumers (inert future-proofing) — fine, but revisit if unused by end of Phase 3.
+
 ## Cleanup
 - Delete dead `SkeletonCard`/`SkeletonText`/`SkeletonImage` exports in skeleton.tsx (page-skeleton has its own local SkeletonCard).
 - `getQuizAttempts` has no UI caller (guarded dead code) — wire or remove.
@@ -45,3 +53,4 @@ Triage source: final review of `phase-1-stabilize` (1267c3b..d9d75f8). Items bel
 - assertHttpUrl catch-branch (not-a-URL input) untested; team-file tests: 3 of 4 blocks don't assert coach:true.
 - streak tests don't exercise i<10 cap or current>0 gate; quiz-score all-supported no-op unpinned; newBadges toEqual([]) tightening; hasPerfectQuiz true→true case.
 - special_teams playbooks styled as defense (binary ternary over tri-state Side enum in playbooks pages) — add a special_teams badge treatment when the feature matters
+- AI generate-play route: add server-side error logging (client message now generic; no log exists in the catch)
