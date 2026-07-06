@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership } from "@/lib/membership";
 import { getPlayerProgress } from "@/lib/actions/progress-actions";
 import { getPlayerRank } from "@/lib/actions/analytics-actions";
+import { hasPerfectQuizAttempt } from "@/lib/actions/quiz-actions";
 import { computeStreak } from "@/lib/streak";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -36,11 +37,12 @@ export default async function ProgressPage() {
   if (!session?.user?.id) redirect("/login");
 
   const membership = await getUserMembership(session.user.id);
-  const [progress, rankInfo] = await Promise.all([
+  const [progress, rankInfo, hasPerfectQuiz] = await Promise.all([
     getPlayerProgress(session.user.id),
     membership
       ? getPlayerRank(membership.orgId, session.user.id)
       : Promise.resolve(null),
+    hasPerfectQuizAttempt(session.user.id),
   ]);
 
   const counts = {
@@ -69,7 +71,7 @@ export default async function ProgressPage() {
     totalViews,
     totalQuizzes,
     averageScore,
-    hasPerfectQuiz: allScores.some((s) => s >= 1),
+    hasPerfectQuiz,
     currentStreak,
     longestStreak,
     playsMastered: counts.mastered,

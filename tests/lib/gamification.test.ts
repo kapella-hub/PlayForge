@@ -53,16 +53,15 @@ describe("playerStatsFromProgress", () => {
     expect(stats.daysActive).toBe(0);
   });
 
-  it("sets hasPerfectQuiz when any recorded quiz score is 100%, mirroring Home", () => {
-    const withPerfect = playerStatsFromProgress([
+  it("no longer derives hasPerfectQuiz from per-play scores (attempt-level identity is caller-supplied)", () => {
+    // A single-question play scoring 1.0 must NOT flip this true: per-play
+    // scores can't distinguish "one correct answer" from a genuinely
+    // perfect quiz attempt. submitQuizAttempt now overrides this from
+    // quiz-attempt-level data instead.
+    const stats = playerStatsFromProgress([
       { views: 1, masteryLevel: "learning", quizScores: [0.5, 1], lastViewedAt: null },
     ]);
-    expect(withPerfect.hasPerfectQuiz).toBe(true);
-
-    const withoutPerfect = playerStatsFromProgress([
-      { views: 1, masteryLevel: "learning", quizScores: [0.5, 0.9], lastViewedAt: null },
-    ]);
-    expect(withoutPerfect.hasPerfectQuiz).toBe(false);
+    expect(stats.hasPerfectQuiz).toBe(false);
   });
 
   it("computes currentStreak and daysActive from lastViewedAt via computeStreak", () => {

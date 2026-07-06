@@ -3,7 +3,10 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 vi.mock("@/lib/db", () => {
   const tx = {
     playerProgress: { findMany: vi.fn().mockResolvedValue([]) },
-    quizAttempt: { create: vi.fn().mockResolvedValue({ id: "a1" }) },
+    quizAttempt: {
+      create: vi.fn().mockResolvedValue({ id: "a1" }),
+      count: vi.fn().mockResolvedValue(0),
+    },
     quiz: {
       findUnique: vi.fn().mockResolvedValue({ id: "q1", questions: [] }),
     },
@@ -261,6 +264,117 @@ describe("submitQuizAttempt (transactional)", () => {
 
     expect(result.correctCount).toBe(0);
     expect(result.supportedCount).toBe(1);
+  });
+
+  it("awards perfect-quiz on a first, fully-correct attempt", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as {
+      __tx: {
+        quiz: { findUnique: ReturnType<typeof vi.fn> };
+        quizAttempt: { count: ReturnType<typeof vi.fn> };
+      };
+    }).__tx;
+    tx.quizAttempt.count.mockResolvedValueOnce(0); // no prior perfect attempt
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [
+        {
+          id: "qq1",
+          playId: "p1",
+          questionType: "multiple_choice",
+          options: [{ text: "a", correct: true }],
+        },
+      ],
+    });
+
+    const result = await submitQuizAttempt({
+      quizId: "q1",
+      answers: [{ questionId: "qq1", answer: "a" }],
+    });
+
+    expect(result.newBadges.map((b) => b.id)).toContain("perfect-quiz");
+  });
+
+  it("does NOT award perfect-quiz for a 75%-overall attempt, even though a single-question play scored 100% (QA repro)", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as {
+      __tx: {
+        quiz: { findUnique: ReturnType<typeof vi.fn> };
+        quizAttempt: { count: ReturnType<typeof vi.fn> };
+        playerProgress: { findMany: ReturnType<typeof vi.fn> };
+      };
+    }).__tx;
+    tx.quizAttempt.count.mockResolvedValueOnce(0);
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [
+        { id: "qq1", playId: "p1", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+        { id: "qq2", playId: "p2", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+        { id: "qq3", playId: "p3", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+        { id: "qq4", playId: "p4", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+      ],
+    });
+    // Each play in this quiz has exactly one question, so its own per-play
+    // score lands on a perfect 1.0 for every correct answer -- the fixture
+    // that used to falsely trip the old per-play hasPerfectQuiz derivation
+    // even though the overall attempt was only 75%.
+    tx.playerProgress.findMany
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([
+        { views: 0, masteryLevel: "learning", quizScores: [1], lastViewedAt: new Date() },
+        { views: 0, masteryLevel: "learning", quizScores: [1], lastViewedAt: new Date() },
+        { views: 0, masteryLevel: "learning", quizScores: [1], lastViewedAt: new Date() },
+        { views: 0, masteryLevel: "learning", quizScores: [0], lastViewedAt: new Date() },
+      ]);
+
+    const result = await submitQuizAttempt({
+      quizId: "q1",
+      answers: [
+        { questionId: "qq1", answer: "a" },
+        { questionId: "qq2", answer: "a" },
+        { questionId: "qq3", answer: "a" },
+        { questionId: "qq4", answer: "wrong" },
+      ],
+    });
+
+    expect(result.scorePercent).toBe(75);
+    expect(result.newBadges.map((b) => b.id)).not.toContain("perfect-quiz");
+  });
+
+  it("does not re-award perfect-quiz when the player already has a prior perfect attempt", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as {
+      __tx: {
+        quiz: { findUnique: ReturnType<typeof vi.fn> };
+        quizAttempt: { count: ReturnType<typeof vi.fn> };
+      };
+    }).__tx;
+    tx.quizAttempt.count.mockResolvedValueOnce(1); // already has a perfect attempt on record
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [
+        { id: "qq1", playId: "p1", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+      ],
+    });
+
+    const result = await submitQuizAttempt({
+      quizId: "q1",
+      answers: [{ questionId: "qq1", answer: "a" }],
+    });
+
+    expect(result.newBadges.map((b) => b.id)).not.toContain("perfect-quiz");
   });
 });
 

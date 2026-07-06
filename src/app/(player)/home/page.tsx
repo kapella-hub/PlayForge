@@ -3,7 +3,7 @@ import Link from "next/link";
 import { auth } from "@/lib/auth";
 import { getUserMembership } from "@/lib/membership";
 import { getDueForReview, getPlayerProgress } from "@/lib/actions/progress-actions";
-import { getPlayerQuizzes } from "@/lib/actions/quiz-actions";
+import { getPlayerQuizzes, hasPerfectQuizAttempt } from "@/lib/actions/quiz-actions";
 import { getActiveGamePlan } from "@/lib/actions/game-plan-actions";
 import { computeStreak } from "@/lib/streak";
 import { Card, CardContent } from "@/components/ui/card";
@@ -27,12 +27,14 @@ export default async function PlayerHomePage() {
   const membership = await getUserMembership(session.user.id);
   if (!membership) redirect("/login");
 
-  const [dueForReview, progress, quizzes, activeGamePlan] = await Promise.all([
-    getDueForReview(session.user.id),
-    getPlayerProgress(session.user.id),
-    getPlayerQuizzes(membership.orgId),
-    getActiveGamePlan(membership.orgId),
-  ]);
+  const [dueForReview, progress, quizzes, activeGamePlan, hasPerfectQuiz] =
+    await Promise.all([
+      getDueForReview(session.user.id),
+      getPlayerProgress(session.user.id),
+      getPlayerQuizzes(membership.orgId),
+      getActiveGamePlan(membership.orgId),
+      hasPerfectQuizAttempt(session.user.id),
+    ]);
 
   const firstName = session.user.name?.split(" ")[0] ?? "Player";
   const masteredCount = progress.filter((p) => p.masteryLevel === "mastered").length;
@@ -53,7 +55,7 @@ export default async function PlayerHomePage() {
     totalViews,
     totalQuizzes,
     averageScore,
-    hasPerfectQuiz: allScores.some((s) => s >= 1),
+    hasPerfectQuiz,
     currentStreak,
     longestStreak,
     playsMastered: masteredCount,

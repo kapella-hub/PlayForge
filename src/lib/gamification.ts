@@ -149,7 +149,11 @@ export function playerStatsFromProgress(
     totalViews: rows.reduce((sum, r) => sum + r.views, 0),
     totalQuizzes: rows.reduce((sum, r) => sum + r.quizScores.length, 0),
     averageScore: 0,
-    hasPerfectQuiz: rows.some((r) => r.quizScores.some((s) => s >= 1)),
+    // Per-play scores can't tell a genuinely perfect quiz attempt apart from
+    // a single correct answer on a one-question play, so this can't be
+    // derived from progress rows. Callers own it (see submitQuizAttempt,
+    // which overrides it from quiz-attempt-level data).
+    hasPerfectQuiz: false,
     currentStreak: current,
     longestStreak: longest,
     playsMastered: rows.filter((r) => r.masteryLevel === "mastered").length,

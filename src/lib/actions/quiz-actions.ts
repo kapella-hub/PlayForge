@@ -121,6 +121,21 @@ export async function getAttemptedQuizIds(userId: string): Promise<string[]> {
   return [...new Set(attempts.map((a) => a.quizId))];
 }
 
+// Attempt-level "Perfect Score" identity: true once any quiz attempt has a
+// perfect overall graded score. Per-play progress rows can't express this
+// (see the comment on playerStatsFromProgress), so display surfaces that
+// show badges must call this instead of deriving it from quizScores.
+export async function hasPerfectQuizAttempt(userId: string): Promise<boolean> {
+  const session = await auth();
+  if (!session?.user?.id) throw new AuthzError();
+  if (userId !== session.user.id) throw new AuthzError();
+
+  const count = await db.quizAttempt.count({
+    where: { userId, score: { gte: 1 } },
+  });
+  return count > 0;
+}
+
 export async function createQuiz(data: {
   orgId: string;
   name: string;
@@ -199,6 +214,13 @@ export async function submitQuizAttempt(data: {
     });
     const beforeStats = playerStatsFromProgress(beforeRows, now);
 
+    // "Perfect Score" is attempt-level: did the player already have a
+    // perfect-scored attempt before this one? Must run before this
+    // attempt's insert below so it doesn't count itself.
+    const hadPerfectBefore =
+      (await tx.quizAttempt.count({ where: { userId, score: { gte: 1 } } })) > 0;
+    beforeStats.hasPerfectQuiz = hadPerfectBefore;
+
     // Fetch the quiz's questions and grade server-side.
     const quiz = await tx.quiz.findUnique({
       where: { id: data.quizId },
@@ -248,6 +270,8 @@ export async function submitQuizAttempt(data: {
       select: { views: true, masteryLevel: true, quizScores: true, lastViewedAt: true },
     });
     const afterStats = playerStatsFromProgress(afterRows, now);
+    const isPerfectNow = grade.supportedCount > 0 && grade.score === 1;
+    afterStats.hasPerfectQuiz = hadPerfectBefore || isPerfectNow;
 
     return {
       ...computeQuizReward(beforeStats, afterStats),
