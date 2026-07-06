@@ -24,4 +24,16 @@ describe("Button", () => {
     render(<Button disabled>Disabled</Button>);
     expect(screen.getByRole("button", { name: "Disabled" })).toBeDisabled();
   });
+
+  it("uses the primary token for the default variant", () => {
+    render(<Button>Primary</Button>);
+    const btn = screen.getByRole("button", { name: "Primary" });
+    expect(btn.className).toContain("bg-primary");
+  });
+
+  it("uses primary-emphasis text for the link variant", () => {
+    render(<Button variant="link">Link</Button>);
+    const btn = screen.getByRole("button", { name: "Link" });
+    expect(btn.className).toContain("text-primary-emphasis");
+  });
 });
