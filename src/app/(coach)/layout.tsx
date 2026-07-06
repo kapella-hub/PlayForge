@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { CoachSidebar } from "@/components/layout/coach-sidebar";
 import { UserMenu } from "@/components/layout/user-menu";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PageTransition } from "@/components/ui/page-transition";
 import { getTeamAnalytics } from "@/lib/actions/analytics-actions";
 import { generateCoachNotifications } from "@/lib/notifications";
@@ -40,6 +41,7 @@ export default async function CoachLayout({
             </span>
           </div>
           <div className="flex items-center gap-2">
+            <ThemeToggle />
             <UserMenu user={session.user} />
           </div>
         </header>

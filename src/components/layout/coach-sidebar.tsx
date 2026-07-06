@@ -20,6 +20,7 @@ import {
   Menu,
 } from "lucide-react";
 import { NotificationBell } from "@/components/ui/notification-bell";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import type { Notification } from "@/lib/notifications";
 
 const navItems = [
@@ -148,10 +149,13 @@ export function CoachSidebar({
         ))}
       </nav>
 
-      {/* Notifications */}
+      {/* Notifications & theme */}
       <div className="space-y-1 border-t border-border px-3 py-3">
         <Tooltip label="Notifications" show={collapsed}>
           <NotificationBell incoming={notifications} />
+        </Tooltip>
+        <Tooltip label="Toggle theme" show={collapsed}>
+          <ThemeToggle />
         </Tooltip>
       </div>
     </div>
