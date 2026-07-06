@@ -164,7 +164,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
 }
 
 function ScoreCountUp({ value, reduced }: { value: number; reduced: boolean }) {
-  const count = useMotionValue(0);
+  const count = useMotionValue(reduced ? value : 0);
   const text = useTransform(count, (v) => `${Math.round(v)}%`);
 
   useEffect(() => {
