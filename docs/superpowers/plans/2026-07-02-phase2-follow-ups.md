@@ -44,3 +44,4 @@ Triage source: final review of `phase-1-stabilize` (1267c3b..d9d75f8). Items bel
 - authz tests: assert AuthzError.name; requireMembership coach-success case; resolver Prisma call-arg assertions (esp. requirePlayAccess org-threading); explicit resolver return-type annotations.
 - assertHttpUrl catch-branch (not-a-URL input) untested; team-file tests: 3 of 4 blocks don't assert coach:true.
 - streak tests don't exercise i<10 cap or current>0 gate; quiz-score all-supported no-op unpinned; newBadges toEqual([]) tightening; hasPerfectQuiz true→true case.
+- special_teams playbooks styled as defense (binary ternary over tri-state Side enum in playbooks pages) — add a special_teams badge treatment when the feature matters
