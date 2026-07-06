@@ -64,4 +64,29 @@ describe("computeStreak", () => {
     expect(result.daysActive).toBe(1);
     expect(result.current).toBe(1);
   });
+
+  it("caps the CURRENT streak at 10 days while longest keeps growing (i<10 gate)", () => {
+    const history = Array.from({ length: 11 }, (_, i) => ({
+      lastViewedAt: daysAgo(now, i),
+    }));
+    const result = computeStreak(history, now);
+    expect(result.current).toBe(10); // current stops advancing once i reaches 10
+    expect(result.longest).toBe(11); // longest counts the full run
+    expect(result.daysActive).toBe(11);
+  });
+
+  it("does not revive current from a long past run (current>0 gate)", () => {
+    // Three consecutive days, but all ended 3+ days ago → current stays 0.
+    const result = computeStreak(
+      [
+        { lastViewedAt: daysAgo(now, 3) },
+        { lastViewedAt: daysAgo(now, 4) },
+        { lastViewedAt: daysAgo(now, 5) },
+      ],
+      now,
+    );
+    expect(result.current).toBe(0);
+    expect(result.longest).toBe(3);
+    expect(result.daysActive).toBe(3);
+  });
 });

@@ -48,6 +48,13 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+describe("AuthzError", () => {
+  it("has name 'AuthzError' so callers can branch on it", () => {
+    expect(new AuthzError().name).toBe("AuthzError");
+    expect(new AuthzError("nope").message).toBe("nope");
+  });
+});
+
 describe("requireOrgAccess", () => {
   it("throws AuthzError when unauthenticated", async () => {
     mockAuth.mockResolvedValue(null as never);
@@ -112,6 +119,12 @@ describe("requireMembership", () => {
       requireMembership({ coach: true }),
     ).rejects.toBeInstanceOf(AuthzError);
   });
+
+  it("returns the membership for coach-only access when the role is coach", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "u1" } } as never);
+    mockGetUserMembership.mockResolvedValue(coachMembership as never);
+    await expect(requireMembership({ coach: true })).resolves.toEqual(coachMembership);
+  });
 });
 
 describe("requirePlaybookAccess", () => {
@@ -164,6 +177,10 @@ describe("requirePlayAccess (org via playbook relation)", () => {
     await expect(requirePlayAccess("p1", { coach: true })).resolves.toEqual({
       play: { id: "p1", playbook: { orgId: "o1" } },
       membership: coachMembership,
+    });
+    expect(vi.mocked(db.play.findUnique)).toHaveBeenCalledWith({
+      where: { id: "p1" },
+      include: { playbook: { select: { orgId: true } } },
     });
   });
 });

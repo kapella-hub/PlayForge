@@ -30,4 +30,8 @@ describe("computeScorePercent", () => {
   it("returns 0 when there are no supported questions", () => {
     expect(computeScorePercent(0, 0)).toBe(0);
   });
+
+  it("scores every supported question correct as 100% (all-supported, none skipped)", () => {
+    expect(computeScorePercent(4, 4)).toBe(100);
+  });
 });

@@ -48,6 +48,7 @@ describe("createTeamFile", () => {
   it("derives orgId and createdById from the membership, not the client", async () => {
     vi.mocked(db.teamFile.create).mockResolvedValue({ id: "tf1" } as never);
     await createTeamFile({ title: "Rules", url: "https://x", category: "rules" });
+    expect(mockedMembership).toHaveBeenCalledWith({ coach: true });
     expect(db.teamFile.create).toHaveBeenCalledWith({
       data: {
         orgId: "org1",
@@ -69,6 +70,13 @@ describe("createTeamFile", () => {
     ).rejects.toThrow("Only http(s) links are allowed");
     expect(db.teamFile.create).not.toHaveBeenCalled();
   });
+
+  it("rejects a string that is not a URL at all (catch branch) and never writes", async () => {
+    await expect(
+      createTeamFile({ title: "Bad", url: "not a url", category: "rules" }),
+    ).rejects.toThrow("Only http(s) links are allowed");
+    expect(db.teamFile.create).not.toHaveBeenCalled();
+  });
 });
 
 describe("updateTeamFile", () => {
@@ -77,6 +85,7 @@ describe("updateTeamFile", () => {
     await expect(
       updateTeamFile("tf1", { title: "T", url: "https://y" }),
     ).rejects.toThrow("Team file not found");
+    expect(mockedMembership).toHaveBeenCalledWith({ coach: true });
     expect(db.teamFile.updateMany).toHaveBeenCalledWith({
       where: { id: "tf1", orgId: "org1" },
       data: { title: "T", url: "https://y" },
@@ -102,6 +111,7 @@ describe("deleteTeamFile", () => {
   it("scopes the delete by org and throws when no row matches", async () => {
     vi.mocked(db.teamFile.deleteMany).mockResolvedValue({ count: 0 } as never);
     await expect(deleteTeamFile("tf1")).rejects.toThrow("Team file not found");
+    expect(mockedMembership).toHaveBeenCalledWith({ coach: true });
     expect(db.teamFile.deleteMany).toHaveBeenCalledWith({
       where: { id: "tf1", orgId: "org1" },
     });

@@ -102,4 +102,17 @@ describe("computeQuizReward", () => {
       computeQuizReward(before, after).newBadges.map((b) => b.id),
     ).toContain("perfect-quiz");
   });
+
+  it("returns an empty newBadges array when no threshold is newly crossed", () => {
+    const same = { ...baseStats, totalQuizzes: 1 };
+    expect(computeQuizReward(same, same).newBadges).toEqual([]);
+  });
+
+  it("does not re-unlock perfect-quiz when it was already earned (true → true)", () => {
+    const before = { ...baseStats, hasPerfectQuiz: true };
+    const after = { ...baseStats, hasPerfectQuiz: true };
+    expect(
+      computeQuizReward(before, after).newBadges.map((b) => b.id),
+    ).not.toContain("perfect-quiz");
+  });
 });
