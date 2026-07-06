@@ -104,23 +104,24 @@ export async function resetMemberPassword(
   const membership = await db.membership.findUnique({
     where: { id: membershipId },
   });
-  if (!membership) throw new Error("Membership not found");
+  if (!membership) throw new AuthzError("Membership not found");
 
   const caller = await requireOrgAccess(membership.orgId);
   if (!["owner", "coach"].includes(caller.role)) throw new AuthzError();
 
   if (membership.role !== "player") {
-    throw new Error("Only player passwords can be reset");
+    throw new AuthzError("Only player passwords can be reset");
   }
 
-  // User.password is account-global, not per-org: a player here could be an
-  // owner/coach elsewhere, so resetting here would take over that account.
+  // User.password is account-global, not per-org. If this player belongs to ANY
+  // other team, resetting here would silently take over the shared credential —
+  // refuse and point them elsewhere.
   const otherMemberships = await db.membership.findMany({
     where: { userId: membership.userId, NOT: { id: membershipId } },
   });
-  if (otherMemberships.some((m) => m.role !== "player")) {
-    throw new Error(
-      "This player has an elevated role on another team; their password can't be reset from here.",
+  if (otherMemberships.length > 0) {
+    throw new AuthzError(
+      "This player belongs to multiple teams; they can change their password themselves or via their other team.",
     );
   }
 

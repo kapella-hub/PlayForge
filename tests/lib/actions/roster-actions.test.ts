@@ -16,7 +16,7 @@ vi.mock("bcryptjs", () => ({ default: { hash: vi.fn() } }));
 
 import { resetMemberPassword } from "@/lib/actions/roster-actions";
 import { db } from "@/lib/db";
-import { requireOrgAccess } from "@/lib/authz";
+import { requireOrgAccess, AuthzError } from "@/lib/authz";
 import bcrypt from "bcryptjs";
 
 const mockFindUnique = vi.mocked(db.membership.findUnique);
@@ -33,8 +33,9 @@ beforeEach(() => {
 });
 
 describe("resetMemberPassword", () => {
-  it("throws when the membership does not exist", async () => {
+  it("throws AuthzError when the membership does not exist", async () => {
     mockFindUnique.mockResolvedValue(null as never);
+    await expect(resetMemberPassword("m1")).rejects.toBeInstanceOf(AuthzError);
     await expect(resetMemberPassword("m1")).rejects.toThrow(/not found/i);
     expect(mockRequireOrgAccess).not.toHaveBeenCalled();
     expect(mockHash).not.toHaveBeenCalled();
@@ -92,7 +93,7 @@ describe("resetMemberPassword", () => {
     expect(mockUserUpdate).not.toHaveBeenCalled();
   });
 
-  it("refuses to reset when the target is an owner/coach on another team", async () => {
+  it("refuses to reset any player who belongs to more than one team", async () => {
     mockFindUnique.mockResolvedValue({
       id: "m1",
       orgId: "org1",
@@ -105,10 +106,12 @@ describe("resetMemberPassword", () => {
       userId: "coach-u",
       role: "coach",
     } as never);
+    // A plain PLAYER membership on another team is now enough to refuse.
     mockFindMany.mockResolvedValue([
-      { id: "m2", orgId: "org2", userId: "u1", role: "coach" },
+      { id: "m2", orgId: "org2", userId: "u1", role: "player" },
     ] as never);
-    await expect(resetMemberPassword("m1")).rejects.toThrow(/elevated role/i);
+    await expect(resetMemberPassword("m1")).rejects.toBeInstanceOf(AuthzError);
+    await expect(resetMemberPassword("m1")).rejects.toThrow(/multiple teams/i);
     expect(mockFindMany).toHaveBeenCalledWith({
       where: { userId: "u1", NOT: { id: "m1" } },
     });
