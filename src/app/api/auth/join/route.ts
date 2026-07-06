@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/lib/db";
 import { resolveJoinUser } from "@/lib/auth/join-logic";
+import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
@@ -86,6 +87,17 @@ export async function POST(req: Request) {
 
     return NextResponse.json(result, { status: 201 });
   } catch (error) {
+    // Concurrent create of the same email loses the unique race → friendly 409,
+    // matching the "already a member"/duplicate path rather than a 500.
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === "P2002"
+    ) {
+      return NextResponse.json(
+        { error: "An account with this email already exists. Please sign in." },
+        { status: 409 },
+      );
+    }
     console.error("Join error:", error);
     return NextResponse.json(
       { error: "Internal server error" },
