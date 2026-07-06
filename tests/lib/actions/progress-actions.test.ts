@@ -39,8 +39,18 @@ describe("recordPlayView", () => {
     );
     const upsertArg = vi.mocked(db.playerProgress.upsert).mock.calls[0][0] as {
       where: { userId_playId: { userId: string; playId: string } };
+      create: Record<string, unknown>;
+      update: Record<string, unknown>;
     };
     expect(upsertArg.where.userId_playId).toEqual({ userId: "u1", playId: "p1" });
+    expect(upsertArg).toMatchObject({
+      create: { views: 1, lastViewedAt: expect.any(Date) },
+      update: { views: { increment: 1 }, lastViewedAt: expect.any(Date) },
+    });
+    for (const field of ["easeFactor", "intervalDays", "nextReviewAt", "masteryLevel"]) {
+      expect(upsertArg.create).not.toHaveProperty(field);
+      expect(upsertArg.update).not.toHaveProperty(field);
+    }
   });
 
   it("propagates AuthzError for a foreign/unknown play and never writes", async () => {
@@ -60,6 +70,15 @@ describe("recordQuizScore", () => {
 
     expect(mockRequire).toHaveBeenCalledWith("p1");
     expect(db.playerProgress.upsert).toHaveBeenCalledTimes(1);
+    const qCall = vi.mocked(db.playerProgress.upsert).mock.calls[0][0] as {
+      create: Record<string, unknown>;
+      update: Record<string, unknown>;
+    };
+    expect(qCall.create).toHaveProperty("lastViewedAt");
+    expect(qCall.update).toHaveProperty("lastViewedAt");
+    // still the sole SM-2 writer:
+    expect(qCall.create).toHaveProperty("nextReviewAt");
+    expect(qCall.update).toHaveProperty("masteryLevel");
   });
 
   it("writes through a provided transaction client instead of db", async () => {

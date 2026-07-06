@@ -15,21 +15,6 @@ export async function recordPlayView(playId: string) {
   const userId = membership.userId;
   const now = new Date();
 
-  const existing = await db.playerProgress.findUnique({
-    where: { userId_playId: { userId, playId } },
-  });
-
-  const state = {
-    easeFactor: existing?.easeFactor ?? 2.5,
-    intervalDays: existing?.intervalDays ?? 0,
-    repetition: existing ? (existing.intervalDays === 0 ? 0 : 1) : 0,
-  };
-
-  const next = calculateNextReview(state, 3);
-  const nextReviewAt = new Date(
-    now.getTime() + next.intervalDays * 24 * 60 * 60 * 1000,
-  );
-
   return db.playerProgress.upsert({
     where: { userId_playId: { userId, playId } },
     create: {
@@ -37,18 +22,10 @@ export async function recordPlayView(playId: string) {
       playId,
       views: 1,
       lastViewedAt: now,
-      easeFactor: next.easeFactor,
-      intervalDays: next.intervalDays,
-      nextReviewAt,
-      masteryLevel: masteryFromInterval(next.intervalDays) as MasteryLevel,
     },
     update: {
       views: { increment: 1 },
       lastViewedAt: now,
-      easeFactor: next.easeFactor,
-      intervalDays: next.intervalDays,
-      nextReviewAt,
-      masteryLevel: masteryFromInterval(next.intervalDays) as MasteryLevel,
     },
   });
 }
@@ -86,6 +63,7 @@ export async function recordQuizScore(
       userId,
       playId,
       quizScores: [score],
+      lastViewedAt: now,
       easeFactor: next.easeFactor,
       intervalDays: next.intervalDays,
       nextReviewAt,
@@ -93,6 +71,7 @@ export async function recordQuizScore(
     },
     update: {
       quizScores,
+      lastViewedAt: now,
       easeFactor: next.easeFactor,
       intervalDays: next.intervalDays,
       nextReviewAt,
