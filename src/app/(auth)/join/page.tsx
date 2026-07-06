@@ -81,7 +81,7 @@ function InviteCodeInput({
           initial={{ scale: 0.9, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
           transition={{ delay: i * 0.05, duration: 0.2 }}
-          className="h-14 w-11 rounded-lg border border-zinc-700 bg-zinc-800/50 text-center text-xl font-mono font-bold text-white uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-900 transition-all duration-150 focus:border-indigo-500 focus:bg-zinc-800"
+          className="h-14 w-11 rounded-lg border border-border bg-secondary text-center text-xl font-mono font-bold text-foreground uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background transition-all duration-150 focus:border-ring focus:bg-secondary"
         />
       ))}
     </div>
@@ -214,12 +214,12 @@ function JoinPageContent() {
         <motion.div
           animate={{ y: [0, -6, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-600 text-xl font-bold text-white shadow-lg shadow-indigo-600/25"
+          className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-xl font-bold text-primary-foreground shadow-lg shadow-primary/25"
         >
           PF
         </motion.div>
-        <h1 className="text-2xl font-bold text-white">Join a team</h1>
-        <p className="mt-1 text-sm text-zinc-500">
+        <h1 className="text-2xl font-bold text-foreground">Join a team</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
           {step === "code"
             ? "Enter the invite code from your coach"
             : `Joining ${orgName}`}
@@ -229,7 +229,7 @@ function JoinPageContent() {
       <Card>
         <CardContent className="pt-6">
           {error && (
-            <div className="mb-4 rounded-md bg-red-500/10 border border-red-500/20 px-4 py-3 text-sm text-red-400">
+            <div className="mb-4 rounded-md bg-destructive/10 border border-destructive/20 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -237,7 +237,7 @@ function JoinPageContent() {
           {step === "code" ? (
             <form onSubmit={handleVerifyCode} className="space-y-6">
               <div>
-                <label htmlFor="code" className="mb-3 block text-sm font-medium text-zinc-300 text-center">
+                <label htmlFor="code" className="mb-3 block text-sm font-medium text-foreground/85 text-center">
                   Invite Code
                 </label>
                 <InviteCodeInput value={inviteCode} onChange={setInviteCode} />
@@ -249,7 +249,7 @@ function JoinPageContent() {
           ) : (
             <form onSubmit={handleJoin} className="space-y-4">
               <div>
-                <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground/85">
                   Your name
                 </label>
                 <Input
@@ -261,7 +261,7 @@ function JoinPageContent() {
                 />
               </div>
               <div>
-                <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground/85">
                   Email
                 </label>
                 <Input
@@ -274,7 +274,7 @@ function JoinPageContent() {
                 />
               </div>
               <div>
-                <label htmlFor="position" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                <label htmlFor="position" className="mb-1.5 block text-sm font-medium text-foreground/85">
                   Position
                 </label>
                 <Input
@@ -286,7 +286,7 @@ function JoinPageContent() {
                 />
               </div>
               <div>
-                <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-foreground/85">
                   Password
                 </label>
                 <div className="relative">
@@ -302,14 +302,14 @@ function JoinPageContent() {
                     type="button"
                     aria-label={showPassword ? "Hide password" : "Show password"}
                     onClick={() => setShowPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
               </div>
               <div>
-                <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-zinc-300">
+                <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-foreground/85">
                   Confirm password
                 </label>
                 <div className="relative">
@@ -325,7 +325,7 @@ function JoinPageContent() {
                     type="button"
                     aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                     onClick={() => setShowConfirmPassword((v) => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition-colors"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
@@ -337,9 +337,9 @@ function JoinPageContent() {
             </form>
           )}
 
-          <div className="mt-6 text-center text-sm text-zinc-500">
+          <div className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-indigo-400 hover:underline">
+            <Link href="/login" className="text-primary-emphasis hover:underline">
               Sign in
             </Link>
           </div>

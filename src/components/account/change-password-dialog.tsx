@@ -77,12 +77,12 @@ export function ChangePasswordDialog({
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {error && (
-            <div className="rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
           <div>
-            <label htmlFor="current-password" className="mb-1.5 block text-sm font-medium text-zinc-300">
+            <label htmlFor="current-password" className="mb-1.5 block text-sm font-medium text-foreground/85">
               Current password
             </label>
             <Input
@@ -94,7 +94,7 @@ export function ChangePasswordDialog({
             />
           </div>
           <div>
-            <label htmlFor="new-password" className="mb-1.5 block text-sm font-medium text-zinc-300">
+            <label htmlFor="new-password" className="mb-1.5 block text-sm font-medium text-foreground/85">
               New password
             </label>
             <Input
@@ -107,7 +107,7 @@ export function ChangePasswordDialog({
             />
           </div>
           <div>
-            <label htmlFor="confirm-new-password" className="mb-1.5 block text-sm font-medium text-zinc-300">
+            <label htmlFor="confirm-new-password" className="mb-1.5 block text-sm font-medium text-foreground/85">
               Confirm new password
             </label>
             <Input

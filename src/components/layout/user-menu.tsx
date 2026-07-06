@@ -43,7 +43,7 @@ export function UserMenu({ user }: UserMenuProps) {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors"
+        className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90 transition-colors"
       >
         {user.image ? (
           <Image src={user.image} alt={user.name || "Avatar"} width={36} height={36} className="rounded-full" />
@@ -58,22 +58,22 @@ export function UserMenu({ user }: UserMenuProps) {
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -8 }}
-            className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-zinc-800 bg-zinc-900 py-1 shadow-xl"
+            className="absolute right-0 top-full mt-2 w-56 rounded-lg border border-border bg-card py-1 shadow-xl"
           >
-            <div className="border-b border-zinc-800 px-4 py-3">
-              <p className="text-sm font-medium text-white">{user.name}</p>
-              <p className="text-xs text-zinc-500">{user.email}</p>
+            <div className="border-b border-border px-4 py-3">
+              <p className="text-sm font-medium text-foreground">{user.name}</p>
+              <p className="text-xs text-muted-foreground">{user.email}</p>
             </div>
             <button
               onClick={() => { setOpen(false); setPwOpen(true); }}
-              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white"
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
               <Lock className="h-4 w-4" />
               Change password
             </button>
             <button
               onClick={() => signOut({ callbackUrl: "/login" })}
-              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-white"
+              className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
               <LogOut className="h-4 w-4" />
               Sign out

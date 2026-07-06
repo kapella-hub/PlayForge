@@ -85,18 +85,18 @@ export default function LoginPage() {
         <motion.div
           animate={{ y: [0, -6, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-xl font-bold text-white shadow-[0_16px_40px_rgba(5,150,105,0.28)]"
+          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-[0_16px_40px_rgba(15,118,110,0.28)]"
         >
           PF
         </motion.div>
-        <h1 className="text-3xl font-semibold text-white">Welcome back</h1>
-        <p className="mt-2 text-sm text-zinc-400">Sign in to PlayForge and pick up your install where you left off.</p>
+        <h1 className="text-3xl font-semibold text-foreground">Welcome back</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Sign in to PlayForge and pick up your install where you left off.</p>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
@@ -104,7 +104,7 @@ export default function LoginPage() {
           {/* Email + Password — always shown */}
           <form onSubmit={handleCredentials} className="space-y-3">
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-zinc-300">
+              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground/85">
                 Email
               </label>
               <Input
@@ -117,7 +117,7 @@ export default function LoginPage() {
               />
             </div>
             <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-zinc-300">
+              <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-foreground/85">
                 Password
               </label>
               <div className="relative">
@@ -133,7 +133,7 @@ export default function LoginPage() {
                   type="button"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -148,9 +148,9 @@ export default function LoginPage() {
           {process.env.NEXT_PUBLIC_GOOGLE_AUTH_ENABLED === "true" && (
             <>
               <div className="my-5 flex items-center gap-3">
-                <div className="h-px flex-1 bg-zinc-800" />
-                <span className="text-xs text-zinc-500">OR</span>
-                <div className="h-px flex-1 bg-zinc-800" />
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">OR</span>
+                <div className="h-px flex-1 bg-border" />
               </div>
               <Button
                 variant="outline"
@@ -173,9 +173,9 @@ export default function LoginPage() {
           {isDev && (
             <>
               <div className="my-5 flex items-center gap-3">
-                <div className="h-px flex-1 bg-zinc-800" />
-                <span className="text-xs text-zinc-500">DEV — email only</span>
-                <div className="h-px flex-1 bg-zinc-800" />
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-xs text-muted-foreground">DEV — email only</span>
+                <div className="h-px flex-1 bg-border" />
               </div>
               <form onSubmit={handleDevLogin} className="space-y-3">
                 <Input
@@ -192,15 +192,15 @@ export default function LoginPage() {
             </>
           )}
 
-          <div className="mt-6 text-center text-sm text-zinc-500">
+          <div className="mt-6 text-center text-sm text-muted-foreground">
             Don&apos;t have an account?{" "}
-            <Link href="/signup" className="text-emerald-300 hover:underline">
+            <Link href="/signup" className="text-primary-emphasis hover:underline">
               Sign up
             </Link>
           </div>
-          <div className="mt-2 text-center text-sm text-zinc-500">
+          <div className="mt-2 text-center text-sm text-muted-foreground">
             Player with an invite code?{" "}
-            <Link href="/join" className="text-emerald-300 hover:underline">
+            <Link href="/join" className="text-primary-emphasis hover:underline">
               Join a team
             </Link>
           </div>

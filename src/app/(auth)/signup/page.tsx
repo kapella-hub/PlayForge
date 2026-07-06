@@ -75,58 +75,58 @@ export default function SignupPage() {
         <motion.div
           animate={{ y: [0, -6, 0] }}
           transition={{ duration: 3, repeat: Infinity, ease: "easeInOut" }}
-          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-600 text-xl font-bold text-white shadow-[0_16px_40px_rgba(5,150,105,0.28)]"
+          className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-xl font-bold text-primary-foreground shadow-[0_16px_40px_rgba(15,118,110,0.28)]"
         >
           PF
         </motion.div>
-        <h1 className="text-3xl font-semibold text-white">Create your account</h1>
-        <p className="mt-2 text-sm text-zinc-400">Start building your playbook</p>
+        <h1 className="text-3xl font-semibold text-foreground">Create your account</h1>
+        <p className="mt-2 text-sm text-muted-foreground">Start building your playbook</p>
       </div>
 
       <Card>
         <CardContent className="pt-6">
           {error && (
-            <div className="mb-4 rounded-xl border border-red-500/20 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+            <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
             </div>
           )}
 
           <form onSubmit={handleSignup} className="space-y-4">
             <div>
-              <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-zinc-300">Your name</label>
+              <label htmlFor="name" className="mb-1.5 block text-sm font-medium text-foreground/85">Your name</label>
               <Input id="name" placeholder="Coach Johnson" value={form.name} onChange={field("name")} required />
             </div>
             <div>
-              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-zinc-300">Email</label>
+              <label htmlFor="email" className="mb-1.5 block text-sm font-medium text-foreground/85">Email</label>
               <Input id="email" type="email" placeholder="coach@school.edu" value={form.email} onChange={field("email")} required />
             </div>
             <div>
-              <label htmlFor="orgName" className="mb-1.5 block text-sm font-medium text-zinc-300">Team / Program name</label>
+              <label htmlFor="orgName" className="mb-1.5 block text-sm font-medium text-foreground/85">Team / Program name</label>
               <Input id="orgName" placeholder="Lincoln High Varsity" value={form.orgName} onChange={field("orgName")} required />
             </div>
             <div>
-              <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-zinc-300">Password</label>
+              <label htmlFor="password" className="mb-1.5 block text-sm font-medium text-foreground/85">Password</label>
               <div className="relative">
                 <Input id="password" type={showPassword ? "text" : "password"} placeholder="Min. 8 characters" value={form.password} onChange={field("password")} required />
                 <button
                   type="button"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
             </div>
             <div>
-              <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-zinc-300">Confirm password</label>
+              <label htmlFor="confirmPassword" className="mb-1.5 block text-sm font-medium text-foreground/85">Confirm password</label>
               <div className="relative">
                 <Input id="confirmPassword" type={showConfirmPassword ? "text" : "password"} placeholder="••••••••" value={form.confirmPassword} onChange={field("confirmPassword")} required />
                 <button
                   type="button"
                   aria-label={showConfirmPassword ? "Hide confirm password" : "Show confirm password"}
                   onClick={() => setShowConfirmPassword((v) => !v)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-zinc-200 transition-colors"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
                   {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
@@ -137,9 +137,9 @@ export default function SignupPage() {
             </Button>
           </form>
 
-          <div className="mt-6 text-center text-sm text-zinc-500">
+          <div className="mt-6 text-center text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Link href="/login" className="text-emerald-300 hover:underline">Sign in</Link>
+            <Link href="/login" className="text-primary-emphasis hover:underline">Sign in</Link>
           </div>
         </CardContent>
       </Card>

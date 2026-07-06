@@ -29,13 +29,13 @@ export default async function CoachLayout({
   const notifications = generateCoachNotifications(analytics);
 
   return (
-    <div className="min-h-screen bg-[var(--background)]">
+    <div className="min-h-screen bg-background">
       <CoachSidebar notifications={notifications} />
 
       <div className="xl:pl-[240px]">
-        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-white/8 bg-[var(--background)]/75 px-4 pl-16 backdrop-blur-xl sm:px-6 sm:pl-20 xl:justify-end xl:pl-6">
+        <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b border-border bg-background/75 px-4 pl-16 backdrop-blur-xl sm:px-6 sm:pl-20 xl:justify-end xl:pl-6">
           <div className="xl:hidden">
-            <span data-display="true" className="text-sm font-semibold uppercase tracking-[0.18em] text-emerald-300/80">
+            <span data-display="true" className="text-sm font-semibold uppercase tracking-[0.18em] text-primary-emphasis/80">
               PlayForge
             </span>
           </div>

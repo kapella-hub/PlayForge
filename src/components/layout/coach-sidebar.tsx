@@ -56,10 +56,10 @@ function Tooltip({ children, label, show }: { children: React.ReactNode; label: 
         <RadixTooltip.Content
           side="right"
           sideOffset={8}
-          className="z-50 rounded-md bg-zinc-900 px-2.5 py-1.5 text-xs font-medium text-white shadow-lg"
+          className="z-50 rounded-md bg-card px-2.5 py-1.5 text-xs font-medium text-card-foreground shadow-lg"
         >
           {label}
-          <RadixTooltip.Arrow className="fill-zinc-900" />
+          <RadixTooltip.Arrow className="fill-card" />
         </RadixTooltip.Content>
       </RadixTooltip.Portal>
     </RadixTooltip.Root>
@@ -81,14 +81,14 @@ export function CoachSidebar({
       {/* Logo */}
       <div className="flex h-16 items-center justify-between px-4">
         <Link href="/dashboard" className="flex items-center gap-2">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 font-bold text-white text-sm shadow-[0_10px_24px_rgba(5,150,105,0.25)]">
+          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary font-bold text-primary-foreground text-sm shadow-[0_10px_24px_rgba(15,118,110,0.25)]">
             PF
           </div>
           {!collapsed && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-lg font-semibold text-white"
+              className="text-lg font-semibold text-foreground"
               data-display="true"
             >
               PlayForge
@@ -97,7 +97,7 @@ export function CoachSidebar({
         </Link>
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="hidden xl:flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-white/[0.06] hover:text-white"
+          className="hidden xl:flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
         >
           <ChevronLeft
             className={cn("h-4 w-4 transition-transform duration-200", collapsed && "rotate-180")}
@@ -110,7 +110,7 @@ export function CoachSidebar({
         {navItems.map((group) => (
           <div key={group.label}>
             {!collapsed && (
-              <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-zinc-500">
+              <div className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
                 {group.label}
               </div>
             )}
@@ -128,14 +128,14 @@ export function CoachSidebar({
                       className={cn(
                         "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
                         isActive
-                          ? "bg-emerald-600 text-white shadow-[0_10px_24px_rgba(5,150,105,0.2)]"
-                          : "text-zinc-400 hover:bg-white/[0.05] hover:text-white"
+                          ? "bg-primary text-primary-foreground shadow-[0_10px_24px_rgba(15,118,110,0.2)]"
+                          : "text-muted-foreground hover:bg-secondary hover:text-foreground"
                       )}
                     >
                       <span className="relative flex-shrink-0">
                         <item.icon className="h-5 w-5" />
                         {hasBadge && (
-                          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-orange-400" />
+                          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-accent" />
                         )}
                       </span>
                       {!collapsed && <span>{item.name}</span>}
@@ -149,7 +149,7 @@ export function CoachSidebar({
       </nav>
 
       {/* Notifications */}
-      <div className="space-y-1 border-t border-white/8 px-3 py-3">
+      <div className="space-y-1 border-t border-border px-3 py-3">
         <Tooltip label="Notifications" show={collapsed}>
           <NotificationBell incoming={notifications} />
         </Tooltip>
@@ -165,7 +165,7 @@ export function CoachSidebar({
         onClick={() => setMobileOpen(true)}
         aria-label="Open navigation"
         aria-expanded={mobileOpen}
-        className="fixed left-4 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-xl border border-white/10 bg-zinc-950/80 text-white shadow-lg backdrop-blur xl:hidden"
+        className="fixed left-4 top-3 z-50 flex h-11 w-11 items-center justify-center rounded-xl border border-border bg-background/80 text-foreground shadow-lg backdrop-blur xl:hidden"
       >
         <Menu className="h-5 w-5" />
       </button>
@@ -186,7 +186,7 @@ export function CoachSidebar({
               animate={{ x: 0 }}
               exit={{ x: -280 }}
               transition={{ type: "spring", damping: 25, stiffness: 200 }}
-              className="fixed inset-y-0 left-0 z-50 w-[290px] border-r border-white/8 bg-[linear-gradient(180deg,rgba(15,29,26,0.98),rgba(8,17,15,0.98))] xl:hidden"
+              className="fixed inset-y-0 left-0 z-50 w-[290px] border-r border-border surface-2 xl:hidden"
             >
               {sidebarContent}
             </motion.aside>
@@ -197,7 +197,7 @@ export function CoachSidebar({
       {/* Desktop sidebar */}
       <aside
         className={cn(
-          "hidden xl:flex xl:fixed xl:inset-y-0 xl:left-0 xl:z-30 xl:flex-col border-r border-white/8 bg-[linear-gradient(180deg,rgba(15,29,26,0.98),rgba(8,17,15,0.98))] transition-[width] duration-300 ease-in-out",
+          "hidden xl:flex xl:fixed xl:inset-y-0 xl:left-0 xl:z-30 xl:flex-col border-r border-border surface-2 transition-[width] duration-300 ease-in-out",
           collapsed ? "xl:w-[78px]" : "xl:w-[240px]"
         )}
       >
