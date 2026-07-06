@@ -154,6 +154,7 @@ model Membership {
   org  Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
 
   @@unique([userId, orgId])
+  @@index([orgId])
 }
 
 model Playbook {
@@ -170,6 +171,8 @@ model Playbook {
   createdBy User         @relation("PlaybookCreator", fields: [createdById], references: [id])
   plays     Play[]
   shares    PlaybookShare[]
+
+  @@index([orgId])
 }
 
 model Play {
@@ -225,6 +228,8 @@ model GamePlan {
   createdBy User         @relation("GamePlanCreator", fields: [createdById], references: [id])
   plays     GamePlanPlay[]
   quizzes   Quiz[]
+
+  @@index([orgId])
 }
 
 model GamePlanPlay {
@@ -254,6 +259,8 @@ model Quiz {
   createdBy User         @relation("QuizCreator", fields: [createdById], references: [id])
   questions QuizQuestion[]
   attempts  QuizAttempt[]
+
+  @@index([orgId])
 }
 
 model QuizQuestion {
@@ -329,6 +336,8 @@ model PracticePlan {
   org       Organization   @relation(fields: [orgId], references: [id], onDelete: Cascade)
   createdBy User           @relation("PracticePlanCreator", fields: [createdById], references: [id])
   periods   PracticePeriod[]
+
+  @@index([orgId])
 }
 
 model PracticePeriod {
@@ -369,4 +378,6 @@ model TeamFile {
 
   org       Organization @relation(fields: [orgId], references: [id], onDelete: Cascade)
   createdBy User         @relation("TeamFileCreator", fields: [createdById], references: [id])
+
+  @@index([orgId])
 }
