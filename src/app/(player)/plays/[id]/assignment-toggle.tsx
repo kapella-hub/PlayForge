@@ -23,13 +23,13 @@ export function PlayerAssignmentToggle({
     <div className="space-y-3">
       {/* Toggle */}
       {matchedPlayerId && (
-        <div className="flex rounded-lg bg-zinc-800/80 p-0.5 w-fit">
+        <div className="flex rounded-lg bg-secondary p-0.5 w-fit">
           <button
             onClick={() => setShowMyAssignment(false)}
             className={`rounded-md px-4 py-1.5 text-xs font-medium transition-colors ${
               !showMyAssignment
-                ? "bg-indigo-600 text-white"
-                : "text-zinc-400 hover:text-zinc-200"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             Full Play
@@ -38,8 +38,8 @@ export function PlayerAssignmentToggle({
             onClick={() => setShowMyAssignment(true)}
             className={`rounded-md px-4 py-1.5 text-xs font-medium transition-colors ${
               showMyAssignment
-                ? "bg-indigo-600 text-white"
-                : "text-zinc-400 hover:text-zinc-200"
+                ? "bg-primary text-primary-foreground"
+                : "text-muted-foreground hover:text-foreground"
             }`}
           >
             My Assignment
@@ -57,19 +57,19 @@ export function PlayerAssignmentToggle({
       {showMyAssignment && matchedPlayerId && (
         <Card>
           <CardContent className="p-4 space-y-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Your Assignment
             </h2>
             {assignmentDescription && (
-              <p className="text-sm text-zinc-200">{assignmentDescription}</p>
+              <p className="text-sm text-foreground">{assignmentDescription}</p>
             )}
             {playerNotes && (
-              <p className="whitespace-pre-wrap text-sm text-zinc-400">
+              <p className="whitespace-pre-wrap text-sm text-muted-foreground">
                 {playerNotes}
               </p>
             )}
             {!assignmentDescription && !playerNotes && (
-              <p className="text-sm text-zinc-500">
+              <p className="text-sm text-muted-foreground">
                 No specific assignment details available for your position.
               </p>
             )}

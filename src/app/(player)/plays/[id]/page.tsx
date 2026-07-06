@@ -81,14 +81,14 @@ export default async function PlayDetailPage({
     <div className="space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-xl font-bold text-white">{play.name}</h1>
+        <h1 className="text-xl font-bold text-foreground">{play.name}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-2">
           <Badge variant="outline">{play.formation}</Badge>
           <Badge variant="outline" className="text-[10px]">
             {play.playType.replace("_", " ")}
           </Badge>
           {playerPosition && (
-            <Badge variant="outline" className="border-indigo-500/40 text-indigo-400 text-[10px]">
+            <Badge variant="outline" className="border-primary/40 text-primary-emphasis text-[10px]">
               Your position: {playerPosition}
             </Badge>
           )}
@@ -106,7 +106,7 @@ export default async function PlayDetailPage({
       {/* Situation Tags */}
       {play.situationTags.length > 0 && (
         <div>
-          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
             Situations
           </h2>
           <div className="flex flex-wrap gap-1.5">
@@ -114,7 +114,7 @@ export default async function PlayDetailPage({
               <Badge
                 key={tag}
                 variant="outline"
-                className="text-[10px] text-zinc-400"
+                className="text-[10px] text-muted-foreground"
               >
                 {tag}
               </Badge>
@@ -127,10 +127,10 @@ export default async function PlayDetailPage({
       {play.notes && (
         <Card>
           <CardContent className="p-4">
-            <h2 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <h2 className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Coach Notes
             </h2>
-            <p className="whitespace-pre-wrap text-sm text-zinc-300">
+            <p className="whitespace-pre-wrap text-sm text-foreground/85">
               {play.notes}
             </p>
           </CardContent>

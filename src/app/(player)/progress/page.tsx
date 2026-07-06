@@ -18,10 +18,10 @@ import {
 export const dynamic = "force-dynamic";
 
 const MASTERY_COLORS: Record<string, { bg: string; text: string; bar: string }> = {
-  mastered: { bg: "bg-green-900/30", text: "text-green-400", bar: "bg-green-500" },
-  reviewing: { bg: "bg-indigo-900/30", text: "text-indigo-400", bar: "bg-indigo-500" },
-  learning: { bg: "bg-amber-900/30", text: "text-amber-400", bar: "bg-amber-500" },
-  new_play: { bg: "bg-red-900/30", text: "text-red-400", bar: "bg-red-500" },
+  mastered: { bg: "bg-success/20", text: "text-success", bar: "bg-success" },
+  reviewing: { bg: "bg-primary/20", text: "text-primary-emphasis", bar: "bg-primary" },
+  learning: { bg: "bg-warning/20", text: "text-warning", bar: "bg-warning" },
+  new_play: { bg: "bg-destructive/20", text: "text-destructive", bar: "bg-destructive" },
 };
 
 const MASTERY_LABELS: Record<string, string> = {
@@ -90,8 +90,8 @@ export default async function ProgressPage() {
   return (
     <div>
       <div className="mb-6">
-        <h1 className="text-xl font-bold text-white">Progress</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="text-xl font-bold text-foreground">Progress</h1>
+        <p className="text-sm text-muted-foreground">
           Track your mastery across all plays.
         </p>
       </div>
@@ -102,22 +102,22 @@ export default async function ProgressPage() {
           <CardContent className="p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-bold text-white">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-bold text-primary-foreground">
                   {levelInfo.level}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-white">
+                  <p className="text-sm font-semibold text-foreground">
                     {levelInfo.title}
                   </p>
-                  <p className="text-[10px] text-zinc-500">
+                  <p className="text-[10px] text-muted-foreground">
                     Level {levelInfo.level} &middot; {xp} XP
                   </p>
                 </div>
               </div>
               {currentStreak > 0 && (
-                <div className="flex items-center gap-1 rounded-full bg-amber-900/30 px-3 py-1">
+                <div className="flex items-center gap-1 rounded-full bg-accent/20 px-3 py-1">
                   <span className="text-sm">{"\uD83D\uDD25"}</span>
-                  <span className="text-xs font-semibold text-amber-400">
+                  <span className="text-xs font-semibold text-accent">
                     {currentStreak} day streak
                   </span>
                 </div>
@@ -125,13 +125,13 @@ export default async function ProgressPage() {
             </div>
             {/* XP Progress bar */}
             <div className="mt-3">
-              <div className="flex items-center justify-between text-[10px] text-zinc-500">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                 <span>{xp} XP</span>
                 <span>{levelInfo.nextLevelXP} XP</span>
               </div>
-              <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-zinc-800">
+              <div className="mt-1 h-2 w-full overflow-hidden rounded-full bg-secondary">
                 <div
-                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  className="h-full rounded-full bg-accent transition-all"
                   style={{ width: `${xpProgress}%` }}
                 />
               </div>
@@ -143,14 +143,14 @@ export default async function ProgressPage() {
         {rankInfo && rankInfo.rank !== null && (
           <Card>
             <CardContent className="flex items-center gap-3 p-4">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-amber-600/20">
-                <Trophy className="h-5 w-5 text-amber-400" />
+              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent/20">
+                <Trophy className="h-5 w-5 text-accent" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-white">
+                <p className="text-sm font-semibold text-foreground">
                   Your Rank: #{rankInfo.rank} of {rankInfo.total}
                 </p>
-                <p className="text-[10px] text-zinc-500">
+                <p className="text-[10px] text-muted-foreground">
                   Composite score: {rankInfo.compositeScore} — based on mastery,
                   quizzes, study time, and streaks
                 </p>
@@ -162,7 +162,7 @@ export default async function ProgressPage() {
         {/* Badges */}
         <Card>
           <CardContent className="p-4">
-            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               Badges Earned ({earnedBadges.length}/{BADGES.length})
             </h2>
             {earnedBadges.length > 0 && (
@@ -170,11 +170,11 @@ export default async function ProgressPage() {
                 {earnedBadges.map((badge) => (
                   <div
                     key={badge.id}
-                    className="flex flex-col items-center gap-1 rounded-lg bg-zinc-800/50 p-2"
+                    className="surface-1 flex flex-col items-center gap-1 rounded-lg p-2"
                     title={badge.description}
                   >
                     <span className="text-xl">{badge.icon}</span>
-                    <span className="text-center text-[9px] leading-tight text-zinc-300">
+                    <span className="text-center text-[9px] leading-tight text-secondary-foreground">
                       {badge.name}
                     </span>
                   </div>
@@ -186,11 +186,11 @@ export default async function ProgressPage() {
                 {lockedBadges.map((badge) => (
                   <div
                     key={badge.id}
-                    className="flex flex-col items-center gap-1 rounded-lg bg-zinc-800/20 p-2 opacity-40"
+                    className="surface-1 flex flex-col items-center gap-1 rounded-lg p-2 opacity-40"
                     title={badge.description}
                   >
                     <span className="text-xl">?</span>
-                    <span className="text-center text-[9px] leading-tight text-zinc-500">
+                    <span className="text-center text-[9px] leading-tight text-muted-foreground">
                       {badge.name}
                     </span>
                   </div>
@@ -202,10 +202,10 @@ export default async function ProgressPage() {
       </div>
 
       {total === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-          <BarChart3 className="mb-4 h-12 w-12 text-zinc-700" />
-          <p className="text-sm text-zinc-500">No progress yet</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+          <BarChart3 className="mb-4 h-12 w-12 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">No progress yet</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Start viewing plays to track your mastery.
           </p>
         </div>
@@ -226,7 +226,7 @@ export default async function ProgressPage() {
                           {counts[level]}
                         </span>
                       </div>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-muted-foreground">
                         {MASTERY_LABELS[level]}
                       </p>
                     </CardContent>
@@ -239,7 +239,7 @@ export default async function ProgressPage() {
           {/* Mastery Breakdown Bar */}
           <Card>
             <CardContent className="p-4">
-              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-zinc-500">
+              <h2 className="mb-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Mastery Breakdown
               </h2>
               <div className="flex h-3 w-full overflow-hidden rounded-full">
@@ -264,7 +264,7 @@ export default async function ProgressPage() {
                       <div
                         className={`h-2 w-2 rounded-full ${MASTERY_COLORS[level].bar}`}
                       />
-                      <span className="text-[10px] text-zinc-500">
+                      <span className="text-[10px] text-muted-foreground">
                         {MASTERY_LABELS[level]} ({counts[level]})
                       </span>
                     </div>
@@ -276,7 +276,7 @@ export default async function ProgressPage() {
 
           {/* Play List */}
           <div className="space-y-2">
-            <h2 className="text-xs font-semibold uppercase tracking-wider text-zinc-500">
+            <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               All Plays
             </h2>
             {progress.map((p) => {
@@ -285,10 +285,10 @@ export default async function ProgressPage() {
                 <Card key={p.id}>
                   <CardContent className="flex items-center justify-between p-3">
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-white">
+                      <p className="truncate text-sm font-medium text-foreground">
                         {p.play.name}
                       </p>
-                      <p className="text-[10px] text-zinc-600">
+                      <p className="text-[10px] text-muted-foreground/70">
                         {p.play.playbook?.name} &middot; {p.views} view
                         {p.views !== 1 ? "s" : ""}
                       </p>

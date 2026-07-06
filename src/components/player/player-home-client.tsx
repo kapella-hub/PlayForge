@@ -41,7 +41,7 @@ export function PlayerTimeGreeting({ firstName }: { firstName: string }) {
   else if (hour < 17) greeting = "Good afternoon";
 
   return (
-    <h1 className="text-xl font-bold text-white">
+    <h1 className="text-xl font-bold text-foreground">
       {greeting}, {firstName}
     </h1>
   );
@@ -56,9 +56,9 @@ export function AnimatedProgressBar({ percentage }: { percentage: number }) {
   }, [percentage]);
 
   return (
-    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+    <div className="mt-2 h-1.5 w-full overflow-hidden rounded-full bg-secondary">
       <motion.div
-        className="h-full rounded-full bg-green-500"
+        className="h-full rounded-full bg-success"
         initial={{ width: 0 }}
         animate={{ width: `${width}%` }}
         transition={{ duration: 0.8, ease: "easeOut", delay: 0.3 }}
@@ -77,7 +77,7 @@ export function PulseWrapper({
   if (!pulse) return <>{children}</>;
   return (
     <motion.div
-      animate={{ boxShadow: ["0 0 0 0 rgba(245, 158, 11, 0)", "0 0 0 4px rgba(245, 158, 11, 0.1)", "0 0 0 0 rgba(245, 158, 11, 0)"] }}
+      animate={{ boxShadow: ["0 0 0 0 rgba(217, 119, 6, 0)", "0 0 0 4px rgba(217, 119, 6, 0.1)", "0 0 0 0 rgba(217, 119, 6, 0)"] }}
       transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       className="rounded-xl"
     >

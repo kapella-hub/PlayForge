@@ -27,10 +27,10 @@ export default async function QuizDetailPage({
 
   if (quiz.questions.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-20">
-        <FileQuestion className="mb-4 h-12 w-12 text-zinc-700" />
-        <p className="text-sm text-zinc-500">This quiz has no questions yet</p>
-        <p className="mt-1 text-xs text-zinc-600">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-20">
+        <FileQuestion className="mb-4 h-12 w-12 text-muted-foreground/60" />
+        <p className="text-sm text-muted-foreground">This quiz has no questions yet</p>
+        <p className="mt-1 text-xs text-muted-foreground/70">
           Your coach is still building this quiz.
         </p>
       </div>

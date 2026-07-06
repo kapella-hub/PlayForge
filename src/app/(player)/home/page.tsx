@@ -79,25 +79,25 @@ export default async function PlayerHomePage() {
           <div className="flex items-center gap-2">
             <PlayerTimeGreeting firstName={firstName} />
             {totalPlays > 0 && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-indigo-600/20 px-2.5 py-0.5 text-xs font-medium text-indigo-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-accent/20 px-2.5 py-0.5 text-xs font-medium text-accent">
                 Lv.{levelInfo.level} {levelInfo.title}
               </span>
             )}
           </div>
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-muted-foreground">
             {hasContent
               ? "Here\u2019s what\u2019s on your plate today."
               : "Your study feed is empty. Check back when your coach assigns plays."}
           </p>
           {totalPlays > 0 && (
             <div className="mt-2">
-              <div className="flex items-center justify-between text-[10px] text-zinc-500">
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground">
                 <span>{xp} XP</span>
                 <span>{levelInfo.nextLevelXP} XP</span>
               </div>
-              <div className="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-zinc-800">
+              <div className="mt-0.5 h-1 w-full overflow-hidden rounded-full bg-secondary">
                 <div
-                  className="h-full rounded-full bg-indigo-500 transition-all"
+                  className="h-full rounded-full bg-accent transition-all"
                   style={{ width: `${xpProgress}%` }}
                 />
               </div>
@@ -108,12 +108,12 @@ export default async function PlayerHomePage() {
 
       {!hasContent ? (
         <PlayerCard>
-          <Card className="border-l-4 border-l-amber-500">
+          <Card className="border-l-4 border-l-warning">
             <CardContent className="py-4">
-              <div className="text-[11px] font-semibold text-amber-400">
+              <div className="text-[11px] font-semibold text-warning">
                 NO PLAYS ASSIGNED
               </div>
-              <div className="mt-1 text-sm font-medium text-white">
+              <div className="mt-1 text-sm font-medium text-foreground">
                 Your coach hasn&apos;t assigned any plays yet. Check back soon.
               </div>
             </CardContent>
@@ -125,9 +125,9 @@ export default async function PlayerHomePage() {
           {dueForReview.length > 0 && (
             <PlayerCard>
               <PulseWrapper pulse={hasOverdue}>
-                <Card className="border-l-4 border-l-amber-500">
+                <Card className="border-l-4 border-l-warning">
                   <CardContent className="py-4">
-                    <div className="mb-2 text-[11px] font-semibold text-amber-400">
+                    <div className="mb-2 text-[11px] font-semibold text-warning">
                       DUE FOR REVIEW
                     </div>
                     <div className="space-y-2">
@@ -135,15 +135,15 @@ export default async function PlayerHomePage() {
                         <Link
                           key={item.id}
                           href={`/plays/${item.playId}`}
-                          className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-zinc-800/50"
+                          className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-secondary/50"
                         >
                           <div className="flex items-center gap-2">
-                            <BookOpen className="h-4 w-4 text-amber-400" />
-                            <span className="text-sm font-medium text-white">
+                            <BookOpen className="h-4 w-4 text-warning" />
+                            <span className="text-sm font-medium text-foreground">
                               {item.play.name}
                             </span>
                           </div>
-                          <span className="text-[10px] text-zinc-500">
+                          <span className="text-[10px] text-muted-foreground">
                             {item.play.formation}
                           </span>
                         </Link>
@@ -158,9 +158,9 @@ export default async function PlayerHomePage() {
           {/* Pending Quizzes */}
           {quizzes.length > 0 && (
             <PlayerCard>
-              <Card className="border-l-4 border-l-indigo-500">
+              <Card className="border-l-4 border-l-primary">
                 <CardContent className="py-4">
-                  <div className="mb-2 text-[11px] font-semibold text-indigo-400">
+                  <div className="mb-2 text-[11px] font-semibold text-primary-emphasis">
                     QUIZZES
                   </div>
                   <div className="space-y-2">
@@ -168,16 +168,16 @@ export default async function PlayerHomePage() {
                       <Link
                         key={quiz.id}
                         href={`/quiz/${quiz.id}`}
-                        className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-zinc-800/50"
+                        className="flex items-center justify-between rounded-md p-2 transition-colors hover:bg-secondary/50"
                       >
                         <div className="flex items-center gap-2">
-                          <FileQuestion className="h-4 w-4 text-indigo-400" />
-                          <span className="text-sm font-medium text-white">
+                          <FileQuestion className="h-4 w-4 text-primary-emphasis" />
+                          <span className="text-sm font-medium text-foreground">
                             {quiz.name}
                           </span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-[10px] text-zinc-500">
+                          <span className="text-[10px] text-muted-foreground">
                             {quiz._count.questions} Q
                           </span>
                           {quiz.dueDate && (
@@ -202,17 +202,17 @@ export default async function PlayerHomePage() {
                 <CardContent className="py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                      <Trophy className="h-4 w-4 text-green-400" />
-                      <span className="text-sm font-medium text-white">
+                      <Trophy className="h-4 w-4 text-success" />
+                      <span className="text-sm font-medium text-foreground">
                         Mastery
                       </span>
                     </div>
-                    <span className="text-sm font-semibold text-zinc-400">
+                    <span className="text-sm font-semibold text-muted-foreground">
                       {masteredCount}/{totalPlays}
                     </span>
                   </div>
                   <AnimatedProgressBar percentage={masteryPct} />
-                  <p className="mt-1.5 text-[10px] text-zinc-600">
+                  <p className="mt-1.5 text-[10px] text-muted-foreground/70">
                     {masteryPct}% of plays mastered
                   </p>
                 </CardContent>
@@ -225,13 +225,13 @@ export default async function PlayerHomePage() {
             <PlayerCard>
               <Card>
                 <CardContent className="py-4">
-                  <div className="mb-1 text-[11px] font-semibold text-zinc-500">
+                  <div className="mb-1 text-[11px] font-semibold text-muted-foreground">
                     ACTIVE GAME PLAN
                   </div>
-                  <p className="text-sm font-medium text-white">
+                  <p className="text-sm font-medium text-foreground">
                     {activeGamePlan.name}
                   </p>
-                  <p className="mt-0.5 text-[10px] text-zinc-600">
+                  <p className="mt-0.5 text-[10px] text-muted-foreground/70">
                     {activeGamePlan.plays.length} play
                     {activeGamePlan.plays.length !== 1 ? "s" : ""}
                     {activeGamePlan.opponent
