@@ -7,14 +7,12 @@ import {
   qualityFromScore,
   masteryFromInterval,
 } from "@/lib/spaced-repetition/sm2";
-import type { MasteryLevel } from "@prisma/client";
-import { AuthzError } from "@/lib/authz";
+import type { MasteryLevel, Prisma } from "@prisma/client";
+import { requirePlayAccess, AuthzError } from "@/lib/authz";
 
 export async function recordPlayView(playId: string) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-
-  const userId = session.user.id;
+  const { membership } = await requirePlayAccess(playId);
+  const userId = membership.userId;
   const now = new Date();
 
   const existing = await db.playerProgress.findUnique({
@@ -55,14 +53,16 @@ export async function recordPlayView(playId: string) {
   });
 }
 
-export async function recordQuizScore(playId: string, score: number) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error("Unauthorized");
-
-  const userId = session.user.id;
+export async function recordQuizScore(
+  playId: string,
+  score: number,
+  client: Prisma.TransactionClient = db,
+) {
+  const { membership } = await requirePlayAccess(playId);
+  const userId = membership.userId;
   const now = new Date();
 
-  const existing = await db.playerProgress.findUnique({
+  const existing = await client.playerProgress.findUnique({
     where: { userId_playId: { userId, playId } },
   });
 
@@ -80,7 +80,7 @@ export async function recordQuizScore(playId: string, score: number) {
 
   const quizScores = existing ? [...existing.quizScores, score] : [score];
 
-  return db.playerProgress.upsert({
+  return client.playerProgress.upsert({
     where: { userId_playId: { userId, playId } },
     create: {
       userId,
