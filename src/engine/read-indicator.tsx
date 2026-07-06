@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Circle, Text } from "react-konva";
+import { FIELD } from "./constants";
 
 interface ReadIndicatorProps {
   x: number;
@@ -25,11 +26,11 @@ export default function ReadIndicator({
 
   const colors = {
     active: {
-      fill: "#f59e0b",
-      stroke: "#fbbf24",
-      text: "#000",
+      fill: FIELD.COLORS.SELECTED,
+      stroke: FIELD.COLORS.SELECTED_GLOW,
+      text: FIELD.COLORS.READ_ACTIVE_TEXT,
       opacity: 1,
-      glowColor: "#fbbf24",
+      glowColor: FIELD.COLORS.SELECTED_GLOW,
       glowRadius: 12,
     },
     past: {

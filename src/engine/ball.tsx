@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Ellipse, Circle } from "react-konva";
+import { FIELD } from "./constants";
 
 interface BallProps {
   position: { x: number; y: number };
@@ -32,8 +33,8 @@ export default function Ball({ position, visible, rotation }: BallProps) {
       <Ellipse
         radiusX={8}
         radiusY={5}
-        fill="#8B4513"
-        stroke="#5C2D0A"
+        fill={FIELD.COLORS.BALL_BODY}
+        stroke={FIELD.COLORS.BALL_STROKE}
         strokeWidth={1}
         rotation={rotation}
         shadowColor="rgba(0,0,0,0.5)"

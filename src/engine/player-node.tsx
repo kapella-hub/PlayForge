@@ -22,7 +22,7 @@ function getPlayerColors(player: CanvasPlayer, isSelected: boolean) {
     return {
       inner: FIELD.COLORS.SELECTED,
       outer: FIELD.COLORS.SELECTED_GLOW,
-      ring: "#ffffff",
+      ring: FIELD.COLORS.PLAYER_RING_SELECTED,
       ringWidth: 3,
       glowColor: FIELD.COLORS.SELECTED_GLOW,
       glowRadius: 10,
@@ -158,7 +158,7 @@ export default function PlayerNode({
         fontSize={11}
         fontStyle="bold"
         fontFamily="Arial, sans-serif"
-        fill="#ffffff"
+        fill={FIELD.COLORS.PLAYER_LABEL}
         align="center"
         verticalAlign="middle"
         width={R * 2}

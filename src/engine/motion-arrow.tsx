@@ -1,6 +1,7 @@
 "use client";
 
 import { Group, Arrow, Circle } from "react-konva";
+import { FIELD } from "./constants";
 import type { MotionPath } from "./types";
 
 interface MotionArrowProps {
@@ -8,7 +9,7 @@ interface MotionArrowProps {
   opacity?: number;
 }
 
-const MOTION_COLOR = "#06b6d4"; // bright cyan/teal
+const MOTION_COLOR = FIELD.COLORS.MOTION; // bright cyan/teal
 
 export default function MotionArrow({ motion, opacity = 1 }: MotionArrowProps) {
   const points = [motion.fromX, motion.fromY, motion.toX, motion.toY];

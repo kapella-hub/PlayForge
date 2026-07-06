@@ -36,6 +36,18 @@ export const FIELD = {
     GRASS_STRIPE: "rgba(255,255,255,0.025)",
     WAYPOINT: "rgba(255,255,255,0.6)",
     PREVIEW_LINE: "rgba(255,255,255,0.5)",
+    // Route / player accents (formerly inline literals)
+    ROUTE_SELECTED: "#ffffff",
+    ROUTE_GLOW_DEFENSE: "rgba(252,165,165,0.3)",
+    PLAYER_RING_SELECTED: "#ffffff",
+    PLAYER_LABEL: "#ffffff",
+    // Read-indicator active-state number
+    READ_ACTIVE_TEXT: "#000",
+    // Motion arrow
+    MOTION: "#06b6d4",
+    // Ball
+    BALL_BODY: "#8B4513",
+    BALL_STROKE: "#5C2D0A",
   },
   /** NFL hash marks at 1/3 width from each sideline */
   HASH_LEFT_RATIO: 0.373,

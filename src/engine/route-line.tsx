@@ -34,7 +34,7 @@ export default function RouteLine({
   const glowColor =
     side === "offense"
       ? FIELD.COLORS.ROUTE_GLOW
-      : "rgba(252,165,165,0.3)";
+      : FIELD.COLORS.ROUTE_GLOW_DEFENSE;
 
   const isDashed = route.type === "dashed";
   const isThick = route.type === "thick";
@@ -70,9 +70,9 @@ export default function RouteLine({
         {/* Main arrow */}
         <Arrow
           points={allPoints}
-          stroke={isSelected ? "#ffffff" : baseColor}
+          stroke={isSelected ? FIELD.COLORS.ROUTE_SELECTED : baseColor}
           strokeWidth={strokeWidth}
-          fill={isSelected ? "#ffffff" : baseColor}
+          fill={isSelected ? FIELD.COLORS.ROUTE_SELECTED : baseColor}
           dash={isDashed ? [10, 8] : undefined}
           pointerLength={pointerLength}
           pointerWidth={pointerWidth}
@@ -125,7 +125,7 @@ export default function RouteLine({
       {/* Main path */}
       <Line
         points={mainPoints}
-        stroke={isSelected ? "#ffffff" : baseColor}
+        stroke={isSelected ? FIELD.COLORS.ROUTE_SELECTED : baseColor}
         strokeWidth={strokeWidth}
         dash={isDashed ? [10, 8] : undefined}
         lineCap="round"
@@ -135,9 +135,9 @@ export default function RouteLine({
       {/* Last segment with arrow */}
       <Arrow
         points={lastSegment}
-        stroke={isSelected ? "#ffffff" : baseColor}
+        stroke={isSelected ? FIELD.COLORS.ROUTE_SELECTED : baseColor}
         strokeWidth={strokeWidth}
-        fill={isSelected ? "#ffffff" : baseColor}
+        fill={isSelected ? FIELD.COLORS.ROUTE_SELECTED : baseColor}
         dash={isDashed ? [10, 8] : undefined}
         pointerLength={pointerLength}
         pointerWidth={pointerWidth}
