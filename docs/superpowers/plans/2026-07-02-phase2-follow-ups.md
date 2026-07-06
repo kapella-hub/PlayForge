@@ -54,3 +54,24 @@ Triage source: final review of `phase-1-stabilize` (1267c3b..d9d75f8). Items bel
 - streak tests don't exercise i<10 cap or current>0 gate; quiz-score all-supported no-op unpinned; newBadges toEqual([]) tightening; hasPerfectQuiz true→true case.
 - special_teams playbooks styled as defense (binary ternary over tri-state Side enum in playbooks pages) — add a special_teams badge treatment when the feature matters
 - AI generate-play route: add server-side error logging (client message now generic; no log exists in the catch)
+
+## Phase 3a resolution (2026-07-06)
+
+Phase 3a (`phase-3a-hardening`, spec `docs/superpowers/specs/2026-07-06-phase3a-hardening-design.md`) burned down this backlog. **Resolved:** notification key user-scoping; join P2002→409; recordPlayView/recordQuizScore org-scoping; submitQuizAttempt transaction; resetMemberPassword any-multi-org guard + AuthzError consistency; AI route logging; coach-layout light query; org indexes; login `?created=1` banner; quiz rename feedback; week clamp; team-files pending split; draft-strip pointer-events; dark on-accent contrast (theme-split `--accent-foreground`); QR dark-on-light; rgba/rgb + src/lib gates; `cyan:`→`accent:` rename; ConfirmDialog type/hover + unit test; dead getQuizAttempts; setActiveGamePlan @deprecated; practice revalidatePath; all lint errors → 0; the test-rigor nits batch.
+
+### Still open (carried forward / newly deferred by Phase 3a reviews)
+
+- **recordQuizScore authz reads escape the transaction** (Task 4 final-review item): `requirePlayAccess` inside the loop runs on plain `db` — N distinct plays = N non-tx round trips inside the open interactive transaction (Prisma 5s default timeout risk) + a second pool connection. Fix = thread the tx client through the authz resolvers or hoist play-authz out of the loop (authz API change).
+- Join P2002 branch + AI-route console.error lack test coverage; no route-level join integration test.
+- `getCoachNotificationData`: two sequential findMany calls could be `Promise.all`'d; the 3-day-inactivity window + no-views-filter semantics are duplicated vs `getTeamAnalytics` with only prose guarding drift — extract shared constants/helper.
+- PlayCanvas has zero unit-test coverage (Phase 3a QA covered it manually; the engine's adjust-state-during-render blocks are pinned by nothing automated).
+- Designer toolbar "Preview" button only arms the scrubber; playback is the separate Play control — label reads as if it plays (3c designer-power candidate).
+
+### Added by Phase 3a final review (2026-07-06)
+
+- Designer draft localStorage key (`playforge-draft-*`, designer/page.tsx:278) is not user-scoped — same class as the fixed bell bug; pre-existing, coach-only, low sensitivity (3c candidate).
+- `recordQuizScore`'s `client` param sits on a `"use server"` export, making the tx client part of the RPC-callable signature (deserialized args can't carry the client; worst case TypeError noise). Cleaner shape: internal helper + thin action wrapper. Score-writing actions remain client-trusted (documented out-of-scope).
+- Join route: a membership-unique P2002 (double-submit join race) returns the email-exists message — right 409 status, wrong copy; distinguish via `error.meta.target`.
+- Reset-guard check-then-write window: a player joining a second team mid-reset can slip the multi-team guard (tiny window, requires the target's cooperation).
+- Gate regex hygiene: gate 3 matches `translate-` via `slate-` (~25 false positives) — tighten to `\b(zinc|slate|gray|neutral)-`; gate 4's allowlist prose should name the two sanctioned AA-passing `text-white` sites (button destructive, bell badge 4.83:1).
+- Carried from earlier triage, still open: mastery-from-viewing redesign; client-trusted quiz grading; streak XP on the quiz finish screen; `--category-*` tokens; SVG viz palette; dialog unit tests beyond ConfirmDialog; `@custom-variant dark` revisit (end of Phase 3); leaderboard gold+bronze both accent; routes-library vs assignment-panel vocabulary; rapid double-reorder last-write-wins; special_teams badge treatment.
