@@ -301,7 +301,7 @@ model PlayerProgress {
   masteryLevel  MasteryLevel @default(new_play)
   easeFactor    Float        @default(2.5)
   intervalDays  Float        @default(0)
-  nextReviewAt  DateTime     @default(now())
+  nextReviewAt  DateTime?
   quizScores    Float[]
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)

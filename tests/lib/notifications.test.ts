@@ -90,4 +90,12 @@ describe("generatePlayerNotifications", () => {
       ]),
     );
   });
+
+  it("does not flag a never-quizzed play (null nextReviewAt) as due", () => {
+    const unscheduled: PlayerProgress[] = [
+      { playId: "c", masteryLevel: "learning", nextReviewAt: null, views: 3 },
+    ];
+    const ids = generatePlayerNotifications(unscheduled, []).map((n) => n.id);
+    expect(ids).not.toContain("player:due-review");
+  });
 });

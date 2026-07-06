@@ -19,7 +19,7 @@ export interface TeamAnalytics {
 export interface PlayerProgress {
   playId: string;
   masteryLevel: string;
-  nextReviewAt: Date;
+  nextReviewAt: Date | null;
   views: number;
 }
 
@@ -95,7 +95,7 @@ export function generatePlayerNotifications(
 
   // Plays due for review
   const dueForReview = progress.filter(
-    (p) => new Date(p.nextReviewAt) <= now && p.views > 0,
+    (p) => p.nextReviewAt != null && new Date(p.nextReviewAt) <= now && p.views > 0,
   );
   if (dueForReview.length > 0) {
     notifications.push({
