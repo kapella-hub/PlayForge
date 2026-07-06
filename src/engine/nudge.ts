@@ -1,4 +1,5 @@
 import type { CanvasPlayer } from "./types";
+import { FIELD } from "./constants";
 
 /** FIELD units moved per arrow press / Shift+arrow press. */
 export const NUDGE_STEP = 0.5;
@@ -16,7 +17,7 @@ export function isNewNudgeBurst(
   return now - lastNudgeAt > gapMs;
 }
 
-/** Return a new players array with `playerId` moved by (dx, dy) in FIELD units. */
+/** Return a new players array with `playerId` moved by (dx, dy) in FIELD units, clamped to field bounds. */
 export function nudgePlayers(
   players: CanvasPlayer[],
   playerId: string,
@@ -24,6 +25,12 @@ export function nudgePlayers(
   dy: number,
 ): CanvasPlayer[] {
   return players.map((p) =>
-    p.id === playerId ? { ...p, x: p.x + dx, y: p.y + dy } : p,
+    p.id === playerId
+      ? {
+          ...p,
+          x: Math.max(0, Math.min(p.x + dx, FIELD.WIDTH)),
+          y: Math.max(0, Math.min(p.y + dy, FIELD.HEIGHT)),
+        }
+      : p,
   );
 }

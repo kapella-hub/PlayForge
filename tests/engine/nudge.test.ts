@@ -3,7 +3,10 @@ import {
   isNewNudgeBurst,
   nudgePlayers,
   NUDGE_BURST_MS,
+  NUDGE_STEP,
+  NUDGE_STEP_SHIFT,
 } from "@/engine/nudge";
+import { FIELD } from "@/engine/constants";
 import type { CanvasPlayer } from "@/engine/types";
 
 const players: CanvasPlayer[] = [
@@ -31,5 +34,39 @@ describe("nudgePlayers", () => {
   it("is a no-op copy when the player id is absent", () => {
     const out = nudgePlayers(players, "zzz", 5, 5);
     expect(out).toEqual(players);
+  });
+
+  it("clamps x to [0, FIELD.WIDTH]", () => {
+    // Nudge left edge past 0
+    const leftClamp = nudgePlayers(players, "a", -200, 0);
+    expect(leftClamp[0].x).toBe(0);
+    expect(leftClamp[0].y).toBe(200);
+
+    // Nudge right edge past FIELD.WIDTH
+    const rightClamp = nudgePlayers(players, "a", 950, 0);
+    expect(rightClamp[0].x).toBe(FIELD.WIDTH);
+    expect(rightClamp[0].y).toBe(200);
+  });
+
+  it("clamps y to [0, FIELD.HEIGHT]", () => {
+    // Nudge top edge past 0
+    const topClamp = nudgePlayers(players, "a", 0, -300);
+    expect(topClamp[0].x).toBe(100);
+    expect(topClamp[0].y).toBe(0);
+
+    // Nudge bottom edge past FIELD.HEIGHT
+    const bottomClamp = nudgePlayers(players, "a", 0, 500);
+    expect(bottomClamp[0].x).toBe(100);
+    expect(bottomClamp[0].y).toBe(FIELD.HEIGHT);
+  });
+});
+
+describe("nudge constants", () => {
+  it("defines NUDGE_STEP as 0.5", () => {
+    expect(NUDGE_STEP).toBe(0.5);
+  });
+
+  it("defines NUDGE_STEP_SHIFT as 2", () => {
+    expect(NUDGE_STEP_SHIFT).toBe(2);
   });
 });
