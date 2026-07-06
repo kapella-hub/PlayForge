@@ -46,7 +46,7 @@ export async function createGamePlan(data: {
     data: {
       orgId: data.orgId,
       name: data.name,
-      week: data.week,
+      week: data.week !== undefined ? Math.max(1, data.week) : undefined,
       opponent: data.opponent,
       createdById: membership.userId,
     },

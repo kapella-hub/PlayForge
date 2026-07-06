@@ -50,7 +50,7 @@ export function CreateGamePlanDialog({ orgId }: { orgId: string }) {
           orgId,
           name: trimmed,
           opponent: opponent.trim() || undefined,
-          week: Number.isFinite(parsedWeek) ? parsedWeek : undefined,
+          week: Number.isFinite(parsedWeek) ? Math.max(1, parsedWeek) : undefined,
         });
         toast.success("Game plan created");
         setOpen(false);

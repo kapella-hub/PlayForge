@@ -682,8 +682,8 @@ export default function DesignerPage() {
 
         {/* Draft restore banner */}
         {draftKey && (
-          <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-3">
-            <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 text-xs text-foreground shadow-lg backdrop-blur-sm">
+          <div className="pointer-events-none absolute inset-x-0 top-24 z-30 flex justify-center px-3">
+            <div className="pointer-events-auto flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 text-xs text-foreground shadow-lg backdrop-blur-sm">
               <span>Restore your unsaved draft?</span>
               <button
                 onClick={handleRestoreDraft}

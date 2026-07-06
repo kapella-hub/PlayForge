@@ -79,6 +79,7 @@ export default function TeamFilesPage() {
   const [editTitle, setEditTitle] = useState("");
   const [editUrl, setEditUrl] = useState("");
   const [savingEdit, startSaveEdit] = useTransition();
+  const [deletingFile, startDelete] = useTransition();
 
   // Delete confirmation
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
@@ -142,7 +143,7 @@ export default function TeamFilesPage() {
     const previous = files;
     setFiles((prev) => prev.filter((f) => f.id !== id));
     setConfirmDeleteId(null);
-    startSaveEdit(async () => {
+    startDelete(async () => {
       try {
         await deleteTeamFile(id);
         toast.success("Link deleted");
@@ -405,7 +406,8 @@ export default function TeamFilesPage() {
                             </button>
                             <button
                               onClick={() => setConfirmDeleteId(file.id)}
-                              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive"
+                              disabled={deletingFile}
+                              className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive disabled:opacity-50"
                               title="Delete"
                             >
                               <Trash2 className="h-4 w-4" />

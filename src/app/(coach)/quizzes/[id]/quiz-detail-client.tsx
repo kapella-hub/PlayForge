@@ -27,7 +27,11 @@ export function QuizDetailClient({
 
   function handleSaveName() {
     const next = draftName.trim();
-    if (!next || next === name) {
+    if (!next) {
+      toast.error("Name can't be empty");
+      return; // keep editing state
+    }
+    if (next === name) {
       setEditing(false);
       setDraftName(name);
       return;
@@ -73,6 +77,7 @@ export function QuizDetailClient({
               }
             }}
             className="max-w-sm"
+            disabled={savingName}
             autoFocus
           />
           <button
