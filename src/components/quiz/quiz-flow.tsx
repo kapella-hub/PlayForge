@@ -141,7 +141,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
     );
   }
 
-  const options = (question?.options ?? []) as { text: string }[];
+  const options = question?.options ?? [];
 
   return (
     <div className="space-y-6">

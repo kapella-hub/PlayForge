@@ -26,15 +26,19 @@ export function MultipleChoice({
     correct: boolean;
     correctText: string | null;
   } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   async function handleSelect(index: number) {
     if (checking || result !== null) return;
+    setError(null);
     setSelected(index);
     setChecking(true);
     try {
       const res = await checkAnswer(questionId, options[index].text);
       setResult(res);
       onAnswer(res.correct, options[index].text);
+    } catch {
+      setError("Couldn't check your answer. Tap to try again.");
     } finally {
       setChecking(false);
     }
@@ -89,6 +93,12 @@ export function MultipleChoice({
           );
         })}
       </div>
+
+      {error && (
+        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          {error}
+        </p>
+      )}
     </div>
   );
 }
