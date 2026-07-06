@@ -1,3 +1,5 @@
+import { computeStreak } from "@/lib/streak";
+
 export interface Badge {
   id: string;
   name: string;
@@ -134,18 +136,25 @@ export function getLevel(xp: number): {
 export type RewardBadge = Pick<Badge, "id" | "name" | "description" | "icon">;
 
 export function playerStatsFromProgress(
-  rows: { views: number; masteryLevel: string; quizScores: number[] }[],
+  rows: {
+    views: number;
+    masteryLevel: string;
+    quizScores: number[];
+    lastViewedAt: Date | null;
+  }[],
+  now: Date = new Date(),
 ): PlayerStats {
+  const { current, longest, daysActive } = computeStreak(rows, now);
   return {
     totalViews: rows.reduce((sum, r) => sum + r.views, 0),
     totalQuizzes: rows.reduce((sum, r) => sum + r.quizScores.length, 0),
     averageScore: 0,
     hasPerfectQuiz: rows.some((r) => r.quizScores.some((s) => s >= 1)),
-    currentStreak: 0,
-    longestStreak: 0,
+    currentStreak: current,
+    longestStreak: longest,
     playsMastered: rows.filter((r) => r.masteryLevel === "mastered").length,
     totalPlays: rows.length,
-    daysActive: 0,
+    daysActive,
   };
 }
 

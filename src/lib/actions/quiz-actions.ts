@@ -175,6 +175,7 @@ export async function submitQuizAttempt(data: {
   scorePercent: number;
   correctCount: number;
   supportedCount: number;
+  streak: { current: number; extended: boolean };
 }> {
   const { membership } = await requireQuizAccess(data.quizId);
   const userId = membership.userId;
@@ -189,12 +190,14 @@ export async function submitQuizAttempt(data: {
   });
 
   return db.$transaction(async (tx) => {
+    const now = new Date();
+
     // Snapshot stats BEFORE recording the attempt.
     const beforeRows = await tx.playerProgress.findMany({
       where: { userId },
-      select: { views: true, masteryLevel: true, quizScores: true },
+      select: { views: true, masteryLevel: true, quizScores: true, lastViewedAt: true },
     });
-    const beforeStats = playerStatsFromProgress(beforeRows);
+    const beforeStats = playerStatsFromProgress(beforeRows, now);
 
     // Fetch the quiz's questions and grade server-side.
     const quiz = await tx.quiz.findUnique({
@@ -242,15 +245,19 @@ export async function submitQuizAttempt(data: {
     // Snapshot stats AFTER, then return the reward delta + server score.
     const afterRows = await tx.playerProgress.findMany({
       where: { userId },
-      select: { views: true, masteryLevel: true, quizScores: true },
+      select: { views: true, masteryLevel: true, quizScores: true, lastViewedAt: true },
     });
-    const afterStats = playerStatsFromProgress(afterRows);
+    const afterStats = playerStatsFromProgress(afterRows, now);
 
     return {
       ...computeQuizReward(beforeStats, afterStats),
       scorePercent: computeScorePercent(grade.correctCount, grade.supportedCount),
       correctCount: grade.correctCount,
       supportedCount: grade.supportedCount,
+      streak: {
+        current: afterStats.currentStreak,
+        extended: afterStats.currentStreak > beforeStats.currentStreak,
+      },
     };
   });
 }

@@ -37,8 +37,8 @@ describe("Perfect Score badge", () => {
 describe("playerStatsFromProgress", () => {
   it("sums views and quiz-score counts and counts mastered plays", () => {
     const stats = playerStatsFromProgress([
-      { views: 3, masteryLevel: "mastered", quizScores: [0.8, 1] },
-      { views: 1, masteryLevel: "learning", quizScores: [] },
+      { views: 3, masteryLevel: "mastered", quizScores: [0.8, 1], lastViewedAt: new Date() },
+      { views: 1, masteryLevel: "learning", quizScores: [], lastViewedAt: new Date() },
     ]);
     expect(stats.totalViews).toBe(4);
     expect(stats.totalQuizzes).toBe(2);
@@ -55,14 +55,37 @@ describe("playerStatsFromProgress", () => {
 
   it("sets hasPerfectQuiz when any recorded quiz score is 100%, mirroring Home", () => {
     const withPerfect = playerStatsFromProgress([
-      { views: 1, masteryLevel: "learning", quizScores: [0.5, 1] },
+      { views: 1, masteryLevel: "learning", quizScores: [0.5, 1], lastViewedAt: null },
     ]);
     expect(withPerfect.hasPerfectQuiz).toBe(true);
 
     const withoutPerfect = playerStatsFromProgress([
-      { views: 1, masteryLevel: "learning", quizScores: [0.5, 0.9] },
+      { views: 1, masteryLevel: "learning", quizScores: [0.5, 0.9], lastViewedAt: null },
     ]);
     expect(withoutPerfect.hasPerfectQuiz).toBe(false);
+  });
+
+  it("computes currentStreak and daysActive from lastViewedAt via computeStreak", () => {
+    const now = new Date("2026-07-06T12:00:00Z");
+    const stats = playerStatsFromProgress(
+      [
+        {
+          views: 1,
+          masteryLevel: "learning",
+          quizScores: [],
+          lastViewedAt: new Date("2026-07-06T09:00:00Z"),
+        },
+        {
+          views: 1,
+          masteryLevel: "learning",
+          quizScores: [],
+          lastViewedAt: new Date("2026-07-05T09:00:00Z"),
+        },
+      ],
+      now,
+    );
+    expect(stats.currentStreak).toBe(2);
+    expect(stats.daysActive).toBe(2);
   });
 });
 

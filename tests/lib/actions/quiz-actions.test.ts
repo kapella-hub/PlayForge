@@ -106,9 +106,34 @@ describe("submitQuizAttempt (transactional)", () => {
       scorePercent: 0,
       correctCount: 0,
       supportedCount: 0,
+      streak: { current: 0, extended: false },
     });
     // the attempt write went through the tx client, not the root db
     expect((db as unknown as { __tx: { quizAttempt: { create: ReturnType<typeof vi.fn> } } }).__tx.quizAttempt.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("reports streak.extended when the after-snapshot streak exceeds before", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as {
+      __tx: { playerProgress: { findMany: ReturnType<typeof vi.fn> } };
+    }).__tx;
+    tx.playerProgress.findMany
+      .mockResolvedValueOnce([]) // before: no activity → streak 0
+      .mockResolvedValueOnce([
+        {
+          views: 0,
+          masteryLevel: "learning",
+          quizScores: [1],
+          lastViewedAt: new Date(),
+        },
+      ]); // after: studied today → streak 1
+
+    const result = await submitQuizAttempt({ quizId: "q1", answers: [] });
+    expect(result.streak).toEqual({ current: 1, extended: true });
   });
 
   it("passes the tx client (not db) into recordQuizScore", async () => {
