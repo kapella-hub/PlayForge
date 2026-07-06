@@ -60,7 +60,7 @@ export default async function PlaybookDetailPage({
           <div className="flex items-center gap-3">
             <h1 className="text-2xl font-bold text-white">{playbook.name}</h1>
             <Badge
-              variant={playbook.side === "offense" ? "default" : "destructive"}
+              variant={playbook.side === "offense" ? "offense" : "defense"}
             >
               {playbook.side}
             </Badge>

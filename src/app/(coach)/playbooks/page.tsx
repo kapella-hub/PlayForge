@@ -52,7 +52,7 @@ export default async function PlaybooksPage() {
                   <CardTitle className="flex items-center justify-between">
                     <span className="truncate">{pb.name}</span>
                     <Badge
-                      variant={pb.side === "offense" ? "default" : "destructive"}
+                      variant={pb.side === "offense" ? "offense" : "defense"}
                       className="ml-2 shrink-0"
                     >
                       {pb.side}
@@ -97,8 +97,8 @@ export default async function PlaybooksPage() {
                       <Badge
                         variant={
                           share.playbook.side === "offense"
-                            ? "default"
-                            : "destructive"
+                            ? "offense"
+                            : "defense"
                         }
                       >
                         {share.playbook.side}
