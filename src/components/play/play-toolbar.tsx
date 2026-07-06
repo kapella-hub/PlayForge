@@ -207,7 +207,7 @@ export function PlayToolbar({
           icon={<MoveRight className="h-3.5 w-3.5" />}
           label="Motion"
           active={motionActive}
-          color="cyan"
+          color="accent"
           tooltip="Motion Tool (M)"
           disabled={!hasFormation}
           onClick={() => handleModeSelect("motion")}
@@ -412,14 +412,14 @@ function ModeButton({
   icon: React.ReactNode;
   label: string;
   active: boolean;
-  color: "emerald" | "cyan" | "amber";
+  color: "emerald" | "accent" | "amber";
   disabled?: boolean;
   onClick: () => void;
   tooltip: string;
 }) {
   const activeClass = {
     emerald: "bg-primary text-primary-foreground",
-    cyan: "bg-accent text-primary-foreground",
+    accent: "bg-accent text-accent-foreground",
     amber: "bg-success text-primary-foreground",
   }[color];
 

@@ -214,14 +214,16 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
 
           {showQR && qrDataUrl && (
             <div className="flex flex-col items-center gap-3 rounded-lg bg-secondary p-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={qrDataUrl}
-                alt={`QR code for invite ${code}`}
-                width={200}
-                height={200}
-                className="rounded-lg"
-              />
+              <div className="rounded-lg bg-white p-2">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={qrDataUrl}
+                  alt={`QR code for invite ${code}`}
+                  width={200}
+                  height={200}
+                  className="rounded"
+                />
+              </div>
               <p className="text-xs text-muted-foreground">
                 Scan to join your team instantly
               </p>

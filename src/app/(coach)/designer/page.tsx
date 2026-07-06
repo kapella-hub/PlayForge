@@ -733,7 +733,7 @@ export default function DesignerPage() {
               transition={{ duration: 0.15 }}
               className="absolute inset-x-0 top-24 z-10 flex justify-center px-3"
             >
-              <div className="flex max-w-full items-center gap-2 rounded-full bg-accent/90 px-4 py-1.5 text-center text-xs font-medium text-primary-foreground shadow-lg backdrop-blur-sm">
+              <div className="flex max-w-full items-center gap-2 rounded-full bg-accent/90 px-4 py-1.5 text-center text-xs font-medium text-accent-foreground shadow-lg backdrop-blur-sm">
                 <MoveRight className="h-3 w-3" />
                 {motionPlayerId
                   ? "Click the field to set motion destination"

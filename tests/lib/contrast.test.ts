@@ -37,6 +37,25 @@ function token(name: string): string {
   return v;
 }
 
+/** Parse the committed dark (:root) palette (hex tokens only) from globals.css */
+function readDarkPalette(): Record<string, string> {
+  const css = readFileSync(join(process.cwd(), "src/app/globals.css"), "utf8");
+  const block = css.match(/:root\s*\{([^}]*)\}/)?.[1] ?? "";
+  const vars: Record<string, string> = {};
+  for (const m of block.matchAll(/--([\w-]+):\s*(#[0-9a-fA-F]{3,8})\s*;/g)) {
+    vars[m[1]] = m[2];
+  }
+  return vars;
+}
+
+const d = readDarkPalette();
+
+function darkToken(name: string): string {
+  const v = d[name];
+  if (!v) throw new Error(`missing --${name} (hex) in :root palette of globals.css`);
+  return v;
+}
+
 const AA = 4.5; // normal-size text
 
 describe("light palette meets WCAG AA (4.5:1) for core text pairs", () => {
@@ -73,4 +92,20 @@ describe("offense/defense badge text meets AA in either badge design", () => {
     void expect(contrast("#ffffff", token("offense"))).toBeGreaterThanOrEqual(AA));
   it("white on defense", () =>
     void expect(contrast("#ffffff", token("defense"))).toBeGreaterThanOrEqual(AA));
+});
+
+describe("accent-foreground on accent meets WCAG AA in both themes", () => {
+  it("light: accent-foreground on accent", () =>
+    void expect(contrast(token("accent-foreground"), token("accent"))).toBeGreaterThanOrEqual(AA));
+  it("dark: accent-foreground on accent", () =>
+    void expect(contrast(darkToken("accent-foreground"), darkToken("accent"))).toBeGreaterThanOrEqual(AA));
+});
+
+describe("dark palette meets WCAG AA (4.5:1) for core text pairs", () => {
+  it("primary-foreground on primary", () =>
+    void expect(contrast(darkToken("primary-foreground"), darkToken("primary"))).toBeGreaterThanOrEqual(AA));
+  it("foreground on background", () =>
+    void expect(contrast(darkToken("foreground"), darkToken("background"))).toBeGreaterThanOrEqual(AA));
+  it("foreground on card", () =>
+    void expect(contrast(darkToken("foreground"), darkToken("card"))).toBeGreaterThanOrEqual(AA));
 });

@@ -9,8 +9,8 @@ export async function generateInviteQR(
     width: 256,
     margin: 2,
     color: {
-      dark: "#ffffff",
-      light: "#0a0a14",
+      dark: "#10201d",
+      light: "#ffffff",
     },
   });
 }

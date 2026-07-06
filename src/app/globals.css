@@ -15,6 +15,7 @@
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-border: var(--border);
   --color-ring: var(--ring);
@@ -38,6 +39,7 @@
   --muted: #1d322d;
   --muted-foreground: #9ab0aa;
   --accent: #d97706;
+  --accent-foreground: #1c1409;
   --destructive: #dc2626;
   --border: #24413a;
   --ring: #14b8a6;
@@ -71,6 +73,7 @@
   --muted: #d4dfd8;
   --muted-foreground: #5e746d;
   --accent: #b45309;
+  --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --border: #c9d7cf;
   --ring: #0f766e;
