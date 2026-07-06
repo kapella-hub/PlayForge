@@ -177,15 +177,6 @@ export async function submitQuizAttempt(data: {
   });
 }
 
-export async function getQuizAttempts(quizId: string, userId: string) {
-  const { membership } = await requireQuizAccess(quizId);
-  if (userId !== membership.userId) throw new AuthzError();
-  return db.quizAttempt.findMany({
-    where: { quizId, userId },
-    orderBy: { startedAt: "desc" },
-  });
-}
-
 export async function updateQuiz(id: string, data: { name: string }) {
   await requireQuizAccess(id, { coach: true });
   return db.quiz.update({

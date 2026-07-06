@@ -44,6 +44,7 @@ export function ConfirmDialog({
             </Button>
           </DialogClose>
           <Button
+            type="button"
             size="sm"
             variant={destructive ? "destructive" : "default"}
             onClick={() => {

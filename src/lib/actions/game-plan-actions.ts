@@ -53,7 +53,10 @@ export async function createGamePlan(data: {
   });
 }
 
-export async function setActiveGamePlan(orgId: string, gamePlanId: string) {
+export async function setActiveGamePlan(
+  /** @deprecated orgId unused — resolved from the game plan */ orgId: string,
+  gamePlanId: string,
+) {
   const { gamePlan } = await requireGamePlanAccess(gamePlanId, { coach: true });
 
   // Deactivate all game plans for the game plan's org (validated, not client-supplied)

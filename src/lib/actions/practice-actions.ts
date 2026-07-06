@@ -1,6 +1,7 @@
 "use server";
 
 import { db } from "@/lib/db";
+import { revalidatePath } from "next/cache";
 import {
   requireOrgAccess,
   requirePracticePlanAccess,
@@ -56,6 +57,7 @@ export async function createPracticePlan(data: {
     },
   });
 
+  revalidatePath("/practice");
   return plan;
 }
 
@@ -76,6 +78,8 @@ export async function updatePracticePlan(
     },
   });
 
+  revalidatePath("/practice");
+  revalidatePath(`/practice/${id}`);
   return plan;
 }
 
@@ -83,6 +87,7 @@ export async function deletePracticePlan(id: string) {
   await requirePracticePlanAccess(id, { coach: true });
 
   await db.practicePlan.delete({ where: { id } });
+  revalidatePath("/practice");
 }
 
 export async function addPracticePeriod(data: {
@@ -112,6 +117,7 @@ export async function addPracticePeriod(data: {
     },
   });
 
+  revalidatePath(`/practice/${data.practicePlanId}`);
   return period;
 }
 
@@ -141,6 +147,7 @@ export async function updatePracticePeriod(
     },
   });
 
+  revalidatePath(`/practice/${period.practicePlanId}`);
   return updated;
 }
 
@@ -153,6 +160,7 @@ export async function deletePracticePeriod(id: string) {
   await requireOrgAccess(period.practicePlan.orgId, { coach: true });
 
   await db.practicePeriod.delete({ where: { id } });
+  revalidatePath(`/practice/${period.practicePlanId}`);
 }
 
 export async function reorderPracticePeriods(
@@ -169,4 +177,6 @@ export async function reorderPracticePeriods(
       }),
     ),
   );
+
+  revalidatePath(`/practice/${planId}`);
 }
