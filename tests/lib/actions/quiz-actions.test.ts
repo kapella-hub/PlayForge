@@ -349,6 +349,49 @@ describe("submitQuizAttempt (transactional)", () => {
     expect(result.newBadges.map((b) => b.id)).not.toContain("perfect-quiz");
   });
 
+  it("regression: submitting one known-correct answer against a 4-question quiz (1 per play) does not inflate the score or award Perfect Score, and zeros out the unanswered plays", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as {
+      __tx: {
+        quiz: { findUnique: ReturnType<typeof vi.fn> };
+        quizAttempt: { count: ReturnType<typeof vi.fn> };
+      };
+    }).__tx;
+    tx.quizAttempt.count.mockResolvedValueOnce(0);
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [
+        { id: "qq1", playId: "p1", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+        { id: "qq2", playId: "p2", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+        { id: "qq3", playId: "p3", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+        { id: "qq4", playId: "p4", questionType: "multiple_choice", options: [{ text: "a", correct: true }] },
+      ],
+    });
+
+    // A crafted call: only the one question whose correct answer was learned
+    // via checkAnswer is submitted; the other three plays are left unanswered.
+    // Pre-fix, supportedCount was submission-based, so this graded as a
+    // perfect 1/1 = 100% instead of the true 1/4 = 25%.
+    const result = await submitQuizAttempt({
+      quizId: "q1",
+      answers: [{ questionId: "qq1", answer: "a" }],
+    });
+
+    expect(result.correctCount).toBe(1);
+    expect(result.supportedCount).toBe(4);
+    expect(result.scorePercent).toBe(25);
+    expect(result.newBadges.map((b) => b.id)).not.toContain("perfect-quiz");
+
+    expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith("p1", 1, tx);
+    expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith("p2", 0, tx);
+    expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith("p3", 0, tx);
+    expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith("p4", 0, tx);
+  });
+
   it("does not re-award perfect-quiz when the player already has a prior perfect attempt", async () => {
     const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
     mockedRequire.mockResolvedValue({

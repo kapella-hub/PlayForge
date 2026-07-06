@@ -1,3 +1,5 @@
+import { countSupportedQuestions } from "@/lib/quiz-score";
+
 export interface GradingQuestion {
   id: string;
   questionType: string;
@@ -45,7 +47,6 @@ export function gradeAnswers(
   const byId = new Map(questions.map((q) => [q.id, q]));
   const graded: GradedAnswer[] = [];
   let correctCount = 0;
-  let supportedCount = 0;
 
   for (const { questionId, answer } of submitted) {
     const question = byId.get(questionId);
@@ -54,11 +55,15 @@ export function gradeAnswers(
       continue;
     }
     const { correct } = matchMultipleChoice(question.options, answer);
-    supportedCount += 1;
     if (correct) correctCount += 1;
     graded.push({ questionId, answer, correct });
   }
 
+  // Denominated on the quiz's own supported questions, not the submitted
+  // set: a crafted call submitting only known-correct answers must not be
+  // able to shrink the denominator and inflate the score. Any supported
+  // question the player didn't answer counts as wrong.
+  const supportedCount = countSupportedQuestions(questions);
   const score = supportedCount > 0 ? correctCount / supportedCount : 0;
   return { graded, correctCount, supportedCount, score };
 }

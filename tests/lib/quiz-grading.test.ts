@@ -104,15 +104,28 @@ describe("gradeAnswers", () => {
     });
   });
 
-  it("treats an unknown questionId as unsupported (not counted)", () => {
+  it("treats an unknown questionId as unsupported for correctness, but the quiz's own question still fills the denominator", () => {
     const res = gradeAnswers(
       [q("q1", "Cover 2")],
       [{ questionId: "ghost", answer: "Cover 2" }],
     );
-    expect(res.supportedCount).toBe(0);
+    // q1 is a supported question in the quiz and went unanswered, so it
+    // still counts toward supportedCount and drags the score down to 0.
+    expect(res.supportedCount).toBe(1);
+    expect(res.correctCount).toBe(0);
     expect(res.score).toBe(0);
     expect(res.graded).toEqual([
       { questionId: "ghost", answer: "Cover 2", correct: false },
     ]);
+  });
+
+  it("counts an unanswered supported question in the denominator as wrong (regression: denominator must be quiz-based, not submission-based)", () => {
+    const res = gradeAnswers(
+      [q("q1", "Cover 2"), q("q2", "Cover 3")],
+      [{ questionId: "q1", answer: "Cover 2" }],
+    );
+    expect(res.correctCount).toBe(1);
+    expect(res.supportedCount).toBe(2);
+    expect(res.score).toBe(0.5);
   });
 });

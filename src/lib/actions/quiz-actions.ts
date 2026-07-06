@@ -244,18 +244,21 @@ export async function submitQuizAttempt(data: {
       },
     });
 
-    // Update progress per play, from the graded (server-truth) results.
+    // Update progress per play. Denominated on each play's supported
+    // questions in the quiz (mirrors the quiz-level fix in gradeAnswers),
+    // not on what was submitted: a play with an unanswered supported
+    // question must not be skipped or silently score 100%.
     if (quiz) {
+      const gradedById = new Map(grade.graded.map((g) => [g.questionId, g]));
       const playScores = new Map<string, { correct: number; total: number }>();
-      for (const g of grade.graded) {
-        const question = quiz.questions.find((q) => q.id === g.questionId);
-        if (!question || question.questionType !== "multiple_choice") continue;
+      for (const question of quiz.questions) {
+        if (question.questionType !== "multiple_choice") continue;
         const existing = playScores.get(question.playId) ?? {
           correct: 0,
           total: 0,
         };
         existing.total += 1;
-        if (g.correct) existing.correct += 1;
+        if (gradedById.get(question.id)?.correct) existing.correct += 1;
         playScores.set(question.playId, existing);
       }
       for (const [playId, counts] of playScores) {
