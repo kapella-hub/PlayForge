@@ -3,6 +3,7 @@
 import { cache } from "react";
 import { db } from "@/lib/db";
 import { requireOrgAccess } from "@/lib/authz";
+import type { CoachNotificationData } from "@/lib/notifications";
 
 export const getTeamAnalytics = cache(async (orgId: string) => {
   await requireOrgAccess(orgId, { coach: true });
@@ -124,6 +125,94 @@ export const getTeamAnalytics = cache(async (orgId: string) => {
       })) ?? [],
   };
 });
+
+/**
+ * Lean input for generateCoachNotifications — fetches ONLY the four fields it
+ * reads, avoiding the per-player playerProgress/quizAttempts includes that
+ * getTeamAnalytics pulls. Behavior-matched to getTeamAnalytics:
+ *  - installCompletion counts ANY progress row for a game-plan play (no views filter)
+ *  - inactivePlayers = players with no lastViewedAt in the last 3 days (or never viewed)
+ */
+export const getCoachNotificationData = cache(
+  async (orgId: string): Promise<CoachNotificationData> => {
+    await requireOrgAccess(orgId, { coach: true });
+    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+
+    const [players, activeGamePlan, recentAttempts] = await Promise.all([
+      db.membership.findMany({
+        where: { orgId, role: "player" },
+        select: { user: { select: { id: true, name: true, email: true } } },
+      }),
+      db.gamePlan.findFirst({
+        where: { orgId, isActive: true },
+        select: { name: true, plays: { select: { playId: true } } },
+      }),
+      db.quizAttempt.findMany({
+        where: { quiz: { orgId } },
+        orderBy: { startedAt: "desc" },
+        take: 20,
+        select: { score: true },
+      }),
+    ]);
+
+    const totalPlayers = players.length;
+    const playerIds = players.map((p) => p.user.id);
+    const gamePlanPlayIds = activeGamePlan?.plays.map((gpp) => gpp.playId) ?? [];
+
+    // Install completion: % of players who have a progress row for EVERY
+    // game-plan play. (userId,playId) is unique in PlayerProgress, so a row-count
+    // per user among the game-plan plays IS the viewed-play count.
+    let installCompletion = 0;
+    if (gamePlanPlayIds.length > 0 && totalPlayers > 0) {
+      const rows = await db.playerProgress.findMany({
+        where: { userId: { in: playerIds }, playId: { in: gamePlanPlayIds } },
+        select: { userId: true },
+      });
+      const viewedCount = new Map<string, number>();
+      for (const r of rows) {
+        viewedCount.set(r.userId, (viewedCount.get(r.userId) ?? 0) + 1);
+      }
+      let completedPlayers = 0;
+      for (const id of playerIds) {
+        if ((viewedCount.get(id) ?? 0) === gamePlanPlayIds.length) {
+          completedPlayers++;
+        }
+      }
+      installCompletion = Math.round((completedPlayers / totalPlayers) * 100);
+    }
+
+    // Inactive players: no lastViewedAt within the last 3 days. A player with a
+    // recent view is "active"; everyone else (including never-viewed) is inactive.
+    const activeUserIds = new Set(
+      (
+        await db.playerProgress.findMany({
+          where: { userId: { in: playerIds }, lastViewedAt: { gte: threeDaysAgo } },
+          select: { userId: true },
+          distinct: ["userId"],
+        })
+      ).map((r) => r.userId),
+    );
+    const inactivePlayers = players
+      .filter((p) => !activeUserIds.has(p.user.id))
+      .map((p) => ({ id: p.user.id, name: p.user.name ?? p.user.email }));
+
+    const avgQuizScore =
+      recentAttempts.length > 0
+        ? Math.round(
+            (recentAttempts.reduce((sum, a) => sum + a.score, 0) /
+              recentAttempts.length) *
+              100,
+          )
+        : 0;
+
+    return {
+      gamePlanName: activeGamePlan?.name ?? null,
+      installCompletion,
+      avgQuizScore,
+      inactivePlayers,
+    };
+  },
+);
 
 export async function getInstallProgress(orgId: string) {
   await requireOrgAccess(orgId, { coach: true });

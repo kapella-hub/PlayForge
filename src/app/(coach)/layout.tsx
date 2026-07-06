@@ -5,7 +5,7 @@ import { CoachSidebar } from "@/components/layout/coach-sidebar";
 import { UserMenu } from "@/components/layout/user-menu";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PageTransition } from "@/components/ui/page-transition";
-import { getTeamAnalytics } from "@/lib/actions/analytics-actions";
+import { getCoachNotificationData } from "@/lib/actions/analytics-actions";
 import { generateCoachNotifications } from "@/lib/notifications";
 
 export const dynamic = "force-dynamic";
@@ -26,8 +26,8 @@ export default async function CoachLayout({
     redirect("/home");
   }
 
-  const analytics = await getTeamAnalytics(membership.orgId);
-  const notifications = generateCoachNotifications(analytics);
+  const data = await getCoachNotificationData(membership.orgId);
+  const notifications = generateCoachNotifications(data);
 
   return (
     <div className="min-h-screen bg-background">

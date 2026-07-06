@@ -30,8 +30,15 @@ export interface QuizInfo {
   attempted: boolean;
 }
 
+export interface CoachNotificationData {
+  gamePlanName: string | null;
+  installCompletion: number;
+  avgQuizScore: number;
+  inactivePlayers: { id: string; name: string }[];
+}
+
 export function generateCoachNotifications(
-  analytics: TeamAnalytics,
+  analytics: CoachNotificationData,
 ): Notification[] {
   const notifications: Notification[] = [];
   const now = new Date();
