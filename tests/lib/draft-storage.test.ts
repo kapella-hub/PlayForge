@@ -30,6 +30,11 @@ describe("draft key helpers", () => {
     expect(isOwnDraftKey("playforge-draft-9", "alice")).toBe(false);
   });
 
+  it("distinguishes users with overlapping names (e.g., 'team' vs 'team-a')", () => {
+    expect(isOwnDraftKey("playforge-draft:team-a-1700000000000", "team")).toBe(false);
+    expect(isOwnDraftKey("playforge-draft:team-a-1700000000000", "team-a")).toBe(true);
+  });
+
   it("recognizes only legacy keys", () => {
     expect(isLegacyDraftKey("playforge-draft-9")).toBe(true);
     expect(isLegacyDraftKey("playforge-draft:alice-9")).toBe(false);
@@ -78,5 +83,47 @@ describe("adoptLegacyDraftKeys", () => {
     expect(() => adoptLegacyDraftKeys(s, "alice")).not.toThrow();
     expect(s.getItem("playforge-draft:alice-2")).toBe("ok");
     expect(s.getItem("playforge-draft-2")).toBeNull();
+  });
+
+  it("is best-effort: keys() failure does not propagate", () => {
+    class FlakyKeysStorage extends MemoryStorage {
+      override keys(): string[] {
+        throw new Error("storage corrupted");
+      }
+    }
+    const s = new FlakyKeysStorage({
+      "playforge-draft-1": "legacy",
+    });
+    expect(() => adoptLegacyDraftKeys(s, "alice")).not.toThrow();
+  });
+});
+
+describe("scoped draft round-trip", () => {
+  it("save and scan via findLatestOwnDraftKey round-trip", () => {
+    const s = new MemoryStorage();
+    const ts = 1700000000;
+    const key = scopedDraftKey("alice", ts);
+    s.setItem(key, JSON.stringify({ content: "draft" }));
+    expect(findLatestOwnDraftKey(s.keys(), "alice")).toBe(key);
+    expect(s.getItem(key)).toBe(JSON.stringify({ content: "draft" }));
+  });
+});
+
+describe("adoptLegacyDraftKeys idempotence", () => {
+  it("is idempotent: second call changes nothing and draft remains discoverable", () => {
+    const s = new MemoryStorage({
+      "playforge-draft-777": JSON.stringify({ name: "Old" }),
+    });
+    adoptLegacyDraftKeys(s, "alice");
+    const afterFirst = s.keys().sort();
+    const adoptedKey = "playforge-draft:alice-777";
+    expect(s.getItem(adoptedKey)).toBe(JSON.stringify({ name: "Old" }));
+    expect(findLatestOwnDraftKey(afterFirst, "alice")).toBe(adoptedKey);
+
+    adoptLegacyDraftKeys(s, "alice");
+    const afterSecond = s.keys().sort();
+    expect(afterSecond).toEqual(afterFirst);
+    expect(s.getItem(adoptedKey)).toBe(JSON.stringify({ name: "Old" }));
+    expect(findLatestOwnDraftKey(afterSecond, "alice")).toBe(adoptedKey);
   });
 });

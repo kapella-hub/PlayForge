@@ -12,12 +12,16 @@ export function scopedDraftKey(userId: string, timestamp: number): string {
   return `${SCOPED_PREFIX}${userId}-${timestamp}`;
 }
 
-function ownPrefix(userId: string): string {
-  return `${SCOPED_PREFIX}${userId}-`;
-}
-
 export function isOwnDraftKey(key: string, userId: string): boolean {
-  return key.startsWith(ownPrefix(userId));
+  if (!key.startsWith(SCOPED_PREFIX)) return false;
+  const withoutPrefix = key.slice(SCOPED_PREFIX.length);
+  const lastDashIndex = withoutPrefix.lastIndexOf('-');
+  if (lastDashIndex === -1) return false;
+  const extractedUserId = withoutPrefix.slice(0, lastDashIndex);
+  const timestamp = withoutPrefix.slice(lastDashIndex + 1);
+  // Verify timestamp is all digits
+  if (!/^\d+$/.test(timestamp)) return false;
+  return extractedUserId === userId;
 }
 
 export function isLegacyDraftKey(key: string): boolean {
@@ -35,26 +39,30 @@ export function findLatestOwnDraftKey(
 
 /**
  * One-time, best-effort migration of legacy `playforge-draft-*` keys into the
- * current user's namespace, preserving each key's timestamp. Each key is
- * migrated inside its own try/catch so a single failure (e.g. quota) never
- * aborts the rest or breaks designer load.
+ * current user's namespace, preserving each key's timestamp. The entire operation
+ * is wrapped so any failure (e.g. quota, or storage.keys() error) never
+ * aborts or throws, ensuring designer load is never broken.
  */
 export function adoptLegacyDraftKeys(
   storage: DraftStorage,
   userId: string,
   now: () => number = Date.now,
 ): void {
-  for (const key of storage.keys()) {
-    if (!isLegacyDraftKey(key)) continue;
-    try {
-      const value = storage.getItem(key);
-      if (value === null) continue;
-      const rawTs = key.slice(LEGACY_PREFIX.length);
-      const ts = /^\d+$/.test(rawTs) ? Number(rawTs) : now();
-      storage.setItem(scopedDraftKey(userId, ts), value);
-      storage.removeItem(key);
-    } catch {
-      // best-effort: skip this key
+  try {
+    for (const key of storage.keys()) {
+      if (!isLegacyDraftKey(key)) continue;
+      try {
+        const value = storage.getItem(key);
+        if (value === null) continue;
+        const rawTs = key.slice(LEGACY_PREFIX.length);
+        const ts = /^\d+$/.test(rawTs) ? Number(rawTs) : now();
+        storage.setItem(scopedDraftKey(userId, ts), value);
+        storage.removeItem(key);
+      } catch {
+        // best-effort: skip this key
+      }
     }
+  } catch {
+    // best-effort: if keys() fails, abandon the entire migration
   }
 }
