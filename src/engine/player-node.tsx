@@ -10,6 +10,8 @@ interface PlayerNodeProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDragEnd: (id: string, x: number, y: number) => void;
+  /** Fires continuously during a drag (designer only) with the live Konva event. */
+  onDragMove?: (id: string, e: KonvaEventObject<DragEvent>) => void;
   /** When provided, overrides player.x/y for animation playback */
   animatedPosition?: { x: number; y: number };
   /** Previous position for motion trail ghost effect */
@@ -57,6 +59,7 @@ export default function PlayerNode({
   isSelected,
   onSelect,
   onDragEnd,
+  onDragMove,
   animatedPosition,
   ghostPosition,
 }: PlayerNodeProps) {
@@ -69,6 +72,10 @@ export default function PlayerNode({
   const handleDragEnd = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
     onDragEnd(player.id, node.x(), node.y());
+  };
+
+  const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
+    onDragMove?.(player.id, e);
   };
 
   // Check if ghost is far enough from current to render
@@ -105,6 +112,7 @@ export default function PlayerNode({
         onClick={() => onSelect(player.id)}
         onTap={() => onSelect(player.id)}
         onDragEnd={handleDragEnd}
+        onDragMove={handleDragMove}
         onMouseEnter={(e) => {
           if (isAnimating) return;
           const stage = e.target.getStage();

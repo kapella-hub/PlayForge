@@ -36,6 +36,8 @@ export const FIELD = {
     GRASS_STRIPE: "rgba(255,255,255,0.025)",
     WAYPOINT: "rgba(255,255,255,0.6)",
     PREVIEW_LINE: "rgba(255,255,255,0.5)",
+    // Alignment snap guide (designer drag only)
+    SNAP_GUIDE: "rgba(245,158,11,0.9)",
     // Route / player accents (formerly inline literals)
     ROUTE_SELECTED: "#ffffff",
     ROUTE_GLOW_DEFENSE: "rgba(252,165,165,0.3)",

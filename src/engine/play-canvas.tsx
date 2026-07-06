@@ -9,6 +9,7 @@ import PlayerNode from "./player-node";
 import RouteLine from "./route-line";
 import { CoverageOverlay } from "./coverage-zone";
 import { FIELD, detectRouteType } from "./constants";
+import { computeSnap, type SnapGuide } from "./snapping";
 import type { AnimationState } from "./animation-engine";
 import Ball from "./ball";
 import ReadIndicator from "./read-indicator";
@@ -86,6 +87,8 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
   const [cursorPos, setCursorPos] = useState<{ x: number; y: number } | null>(
     null,
   );
+  /** Active alignment guides during a designer drag (event-handler state only). */
+  const [activeGuides, setActiveGuides] = useState<SnapGuide[]>([]);
 
   // Measure container and listen for resizes
   useEffect(() => {
@@ -130,9 +133,28 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
     [scaleX, scaleY],
   );
 
+  const handlePlayerDragMove = useCallback(
+    (id: string, e: KonvaEventObject<DragEvent>) => {
+      if (readOnly) return;
+      const node = e.target;
+      const proposed = { x: node.x() / scaleX, y: node.y() / scaleY };
+      const player = canvasData.players.find((p) => p.id === id);
+      if (!player) return;
+      const { x, y, guides } = computeSnap(id, proposed, canvasData.players, {
+        altHeld: e.evt.altKey,
+        preDragY: player.y,
+      });
+      node.x(x * scaleX);
+      node.y(y * scaleY);
+      setActiveGuides(guides);
+    },
+    [readOnly, scaleX, scaleY, canvasData.players],
+  );
+
   const handlePlayerDragEnd = useCallback(
     (id: string, x: number, y: number) => {
       if (readOnly) return;
+      setActiveGuides([]);
       const canvasX = x / scaleX;
       const canvasY = y / scaleY;
 
@@ -497,6 +519,22 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
             </>
           )}
 
+          {/* Alignment snap guides (designer drag) */}
+          {activeGuides.map((g, i) => (
+            <Line
+              key={`guide-${g.axis}-${i}`}
+              points={
+                g.axis === "x"
+                  ? [g.coord, 0, g.coord, FIELD.HEIGHT]
+                  : [0, g.coord, FIELD.WIDTH, g.coord]
+              }
+              stroke={FIELD.COLORS.SNAP_GUIDE}
+              strokeWidth={1.5}
+              dash={[8, 6]}
+              listening={false}
+            />
+          ))}
+
           {/* Players */}
           {canvasData.players.map((player: CanvasPlayer) => {
             const playerOpacity =
@@ -512,6 +550,7 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
                   isSelected={player.id === selectedPlayerId}
                   onSelect={handleSelectPlayer}
                   onDragEnd={handlePlayerDragEnd}
+                  onDragMove={readOnly ? undefined : handlePlayerDragMove}
                   animatedPosition={
                     isAnimating
                       ? animationState.playerPositions.get(player.id)
