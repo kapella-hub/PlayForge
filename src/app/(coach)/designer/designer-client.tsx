@@ -283,7 +283,7 @@ export function DesignerClient({ userId }: { userId: string }) {
       }));
       setDirty(true);
     },
-    [previewMode, selectedPlayerId, pushHistory],
+    [previewMode, selectedPlayerId, canvasData, pushHistory],
   );
 
   const handleSave = useCallback(async () => {
