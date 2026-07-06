@@ -33,6 +33,14 @@ export function VersionHistory({
   const [restoring, startRestore] = useTransition();
   const [previewId, setPreviewId] = useState<string | null>(null);
 
+  // Invalidate the loaded snapshot on each reopen so the panel refetches
+  // instead of showing stale versions from a prior open (adjust-during-render).
+  const [prevOpen, setPrevOpen] = useState(isOpen);
+  if (isOpen !== prevOpen) {
+    setPrevOpen(isOpen);
+    if (isOpen) setLoadedKey(null);
+  }
+
   const loading = isOpen && !!playId && loadedKey !== playId;
 
   useEffect(() => {
