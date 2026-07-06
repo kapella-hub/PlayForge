@@ -206,4 +206,20 @@ describe("checkAnswer", () => {
       correctText: null,
     });
   });
+
+  it("throws AuthzError without leaking correctness when access is denied (foreign org)", async () => {
+    vi.mocked(db.quizQuestion.findUnique).mockResolvedValue({
+      id: "qq3",
+      quizId: "q1",
+      questionType: "multiple_choice",
+      options: [
+        { text: "Cover 2", correct: true },
+        { text: "Cover 3", correct: false },
+      ],
+    } as never);
+    mockedRequire.mockRejectedValue(new AuthzError("denied"));
+
+    await expect(checkAnswer("qq3", "Cover 2")).rejects.toBeInstanceOf(AuthzError);
+    expect(mockedRequire).toHaveBeenCalledWith("q1");
+  });
 });
