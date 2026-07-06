@@ -42,6 +42,12 @@ export interface PlayCanvasHandle {
   getStageRef: () => React.RefObject<Konva.Stage | null>;
 }
 
+/** Shallow-compare two guide arrays by axis+coord (computeSnap's order is stable per call). */
+function guidesEqual(a: SnapGuide[], b: SnapGuide[]): boolean {
+  if (a.length !== b.length) return false;
+  return a.every((g, i) => g.axis === b[i].axis && g.coord === b[i].coord);
+}
+
 export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function PlayCanvas({
   canvasData,
   onChange,
@@ -89,6 +95,8 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
   );
   /** Active alignment guides during a designer drag (event-handler state only). */
   const [activeGuides, setActiveGuides] = useState<SnapGuide[]>([]);
+  /** Mirrors activeGuides for cheap same-frame comparison; written only in the drag handlers below. */
+  const activeGuidesRef = useRef<SnapGuide[]>([]);
 
   // Measure container and listen for resizes
   useEffect(() => {
@@ -146,7 +154,10 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
       });
       node.x(x * scaleX);
       node.y(y * scaleY);
-      setActiveGuides(guides);
+      if (!guidesEqual(activeGuidesRef.current, guides)) {
+        activeGuidesRef.current = guides;
+        setActiveGuides(guides);
+      }
     },
     [readOnly, scaleX, scaleY, canvasData.players],
   );
@@ -154,6 +165,7 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
   const handlePlayerDragEnd = useCallback(
     (id: string, x: number, y: number) => {
       if (readOnly) return;
+      activeGuidesRef.current = [];
       setActiveGuides([]);
       const canvasX = x / scaleX;
       const canvasY = y / scaleY;
