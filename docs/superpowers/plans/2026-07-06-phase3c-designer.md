@@ -573,6 +573,8 @@ git commit -m "feat(designer): add user-scoped draft storage helpers"
 
 ### Task 4: Nudge helpers (pure)
 
+> **AMENDMENT (2026-07-06, post-review controller decision):** `nudgePlayers` clamps the moved player to field bounds — x to `[0, FIELD.WIDTH]`, y to `[0, FIELD.HEIGHT]`. The original task omitted clamping; without it, held arrow keys push a player outside the visible canvas where it can't be seen or grabbed (drag is implicitly mouse-bounded; keyboard isn't). Signature unchanged; four edge-clamp tests + direct step-constant assertions added.
+
 **Files:**
 - Create: `src/engine/nudge.ts`
 - Test: `tests/engine/nudge.test.ts`
