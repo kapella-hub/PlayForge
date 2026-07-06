@@ -1,16 +1,31 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { requireMembership, AuthzError } from "@/lib/authz";
 import { generatePlayFromDescription } from "@/lib/ai/play-generator";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+/** Requests/minute per user for AI play generation; env-tunable, default 10. */
+function resolveRpm(): number {
+  const parsed = Number(process.env.AI_GENERATE_RPM);
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 10;
+}
 
+export async function POST(req: Request) {
   try {
+    const membership = await requireMembership({ coach: true });
+
+    const gate = checkRateLimit(membership.userId, resolveRpm());
+    if (!gate.allowed) {
+      return NextResponse.json(
+        {
+          error:
+            "You're generating plays too quickly. Please wait a moment and try again.",
+        },
+        { status: 429, headers: { "Retry-After": String(gate.retryAfter) } },
+      );
+    }
+
     const body = await req.json();
     const { description, side, formation, gameFormat } = body as {
       description?: string;
@@ -34,6 +49,12 @@ export async function POST(req: Request) {
 
     return NextResponse.json({ canvasData });
   } catch (error) {
+    if (error instanceof AuthzError) {
+      return NextResponse.json(
+        { error: "Only coaches can generate plays." },
+        { status: 403 },
+      );
+    }
     const message =
       error instanceof Error ? error.message : "Failed to generate play";
     const status = message.includes("ANTHROPIC_API_KEY") ? 503 : 500;
