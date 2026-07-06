@@ -1413,9 +1413,9 @@ git commit -m "feat: theme-aware --accent-foreground token; on-accent AA fixes; 
 
 ---
 
-### Task 11: Lint to zero — the remaining five errors (§5)
+### Task 11: Lint to zero — the remaining errors (§5)
 
-Fix the five remaining lint errors with proper structural changes (no disables). Two use the SSR-safe `useSyncExternalStore` client-mount / external-store idiom; one is a declaration reorder in an engine file (behavior frozen); one is a `const`; one derives loading state.
+Fix the six remaining lint errors with proper structural changes (no disables) — five visible at baseline plus one UNMASKED in `play-canvas.tsx` (see the amendment after Step 2). Two use the SSR-safe `useSyncExternalStore` client-mount / external-store idiom; one is a declaration reorder in an engine file (behavior frozen); one is a `const`; one derives loading state; one converts a ref-read-during-render to derived previous-state.
 
 **Files:**
 - Modify: `src/components/play/play-library.tsx`
@@ -1442,6 +1442,39 @@ After the move, `handleSelectPlayer`'s dependency array (currently line 224) bec
     [drawingRoute, drawingPlayerId, canvasData, onChange, onSelectPlayer, motionMode, onMotionPlayerSelect, finishCurrentRoute],
 ```
 `finishCurrentRoute`'s own deps stay `[drawingPlayerId, canvasData, onChange]` — all declared earlier (state at lines 98/100, props), so there is no new forward reference.
+
+> **AMENDMENT (2026-07-06, empirical):** Step 2's reorder alone does NOT clear `play-canvas.tsx`. The React Compiler lint rule reports only the first blocking violation per component, then bails — so fixing the line-196 use-before-declare UNMASKS a second error in this file: `play-canvas.tsx:513:35 — Cannot access refs during render` (the `prevPositionsRef.current.get(player.id)` read at line 534, inside the players `.map()` JSX). This task is six errors, not five. Fix it with Step 2b below. The lint budget (→ 0 after this task) is unchanged.
+
+- [ ] **Step 2b: `play-canvas.tsx:534` — ghost positions: ref-read-during-render → derived previous-state**
+
+The ghost trail reads `prevPositionsRef.current` during render. Replace the ref and its maintenance effect (lines 67–92: the `prevPositionsRef` declaration plus the entire "Update previous positions" `useEffect`) with the React-sanctioned "adjust state during render when props change" idiom, which keeps the PREVIOUS `animationState`'s positions in state:
+
+```tsx
+  // Ghost trail: previous animation tick's positions, derived during render
+  // (React "adjust state when props change" idiom — no effect, no ref-in-render).
+  const [prevPositions, setPrevPositions] = useState<Map<string, { x: number; y: number }>>(
+    () => new Map(),
+  );
+  const [lastAnimationState, setLastAnimationState] = useState(animationState);
+  if (animationState !== lastAnimationState) {
+    setLastAnimationState(animationState);
+    setPrevPositions(
+      lastAnimationState ? new Map(lastAnimationState.playerPositions) : new Map(),
+    );
+  }
+```
+
+Then change the JSX read (the `ghostPosition` prop, line ~534) to use the state:
+
+```tsx
+                  ghostPosition={
+                    isAnimating
+                      ? prevPositions.get(player.id)
+                      : undefined
+                  }
+```
+
+`useState` is already imported. Keep the `useEffect` import — other effects in the file use it. Notes for the reviewer: the old effect's `newPrev` map was computed and never used (dead code); its rAF write made the ghost show the previous tick's positions, which the derived-state version preserves exactly (when `animationState` advances from S₁ to S₂, `prevPositions` becomes S₁'s positions). **One disclosed behavior difference:** at animation START the old code could show the PREVIOUS run's stale ghost for one frame (the ref was never cleared when an animation ended); the new code shows no ghost on the first frame. The stale flash was a latent bug, not behavior to preserve. Canvas behavior is otherwise unchanged; the animation suite must stay green.
 
 - [ ] **Step 3: `dashboard-client.tsx:56` (TimeGreeting) — derive greeting via a mount flag, no effect**
 
@@ -1906,7 +1939,7 @@ git commit -m "chore: phase-3a hardening close-out — gates green, QA passed" -
 **Deviations from the brief (flagged for the team lead):**
 1. **accent-foreground is theme-split, not `#1c1409` in both palettes** — the single value fails light-theme AA (3.63). Dark `:root` = `#1c1409` (5.71), light `.light` = `#ffffff` (5.02). Without this, the contrast test in Task 10 would fail its own gate.
 2. **Lint inventory differs from the brief's guess** — the 7 errors are in `dashboard-client`, `play-library` (prefer-const), `version-history`, `theme-provider`, `notification-bell` ×2, `play-canvas`. `quiz-card.tsx`, `animation-engine.ts`, `ball.tsx` have **no errors** (only unused-var warnings), so they are not touched by the lint task.
-3. **Two justified `eslint-disable` in notification-bell** (Task 1) — the other five errors get proper structural fixes; these two are legitimate client-only localStorage sync where the setState-after-mount is required for hydration.
+3. **Two justified `eslint-disable` in notification-bell** (Task 1) — the other errors (five at baseline, six once the play-canvas unmask is counted — see Task 11's amendment) get proper structural fixes; these two are legitimate client-only localStorage sync where the setState-after-mount is required for hydration.
 4. **Coach bell lives in `CoachSidebar`, not the coach layout** — Task 1 threads `userId` through `coach layout → CoachSidebar → NotificationBell` (both bells get scoped). Making `userId` required also forces this wiring or `tsc` fails.
 5. **practice `revalidatePath` targets real route paths** (`/practice`, `/practice/[id]`) — the brief says "mirror game-plan-actions," but that file has no `revalidatePath` to mirror.
 6. **`getQuizAttempts` had no test coverage** to remove.
