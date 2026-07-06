@@ -11,6 +11,7 @@ vi.mock("@/lib/db", () => {
   return {
     db: {
       quiz: { update: vi.fn(), delete: vi.fn(), findUnique: vi.fn() },
+      quizQuestion: { findUnique: vi.fn() },
       $transaction: vi.fn(async (fn: (t: unknown) => unknown) => fn(tx)),
       __tx: tx,
     },
@@ -28,7 +29,7 @@ vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 // relative `./progress-actions` import, so vitest intercepts it.
 vi.mock("@/lib/actions/progress-actions", () => ({ recordQuizScore: vi.fn() }));
 
-import { updateQuiz, deleteQuiz, getPlayerQuiz } from "@/lib/actions/quiz-actions";
+import { updateQuiz, deleteQuiz, getPlayerQuiz, checkAnswer } from "@/lib/actions/quiz-actions";
 import { db } from "@/lib/db";
 import { requireQuizAccess, requireOrgAccess, AuthzError } from "@/lib/authz";
 import { recordQuizScore } from "@/lib/actions/progress-actions";
@@ -161,5 +162,48 @@ describe("getPlayerQuiz", () => {
   it("returns null when the quiz does not exist", async () => {
     vi.mocked(db.quiz.findUnique).mockResolvedValue(null as never);
     expect(await getPlayerQuiz("nope")).toBeNull();
+  });
+});
+
+describe("checkAnswer", () => {
+  it("authorizes via the question's quiz, then returns correctness + correctText", async () => {
+    vi.mocked(db.quizQuestion.findUnique).mockResolvedValue({
+      id: "qq1",
+      quizId: "q1",
+      questionType: "multiple_choice",
+      options: [
+        { text: "Cover 2", correct: true },
+        { text: "Cover 3", correct: false },
+      ],
+    } as never);
+    mockedRequire.mockResolvedValue({ quiz: { id: "q1" }, membership: {} } as never);
+
+    const right = await checkAnswer("qq1", "Cover 2");
+    expect(mockedRequire).toHaveBeenCalledWith("q1");
+    expect(right).toEqual({ correct: true, correctText: "Cover 2" });
+
+    const wrong = await checkAnswer("qq1", "Cover 3");
+    expect(wrong).toEqual({ correct: false, correctText: "Cover 2" });
+  });
+
+  it("throws AuthzError and never leaks correctness for an unknown question", async () => {
+    vi.mocked(db.quizQuestion.findUnique).mockResolvedValue(null as never);
+    await expect(checkAnswer("ghost", "x")).rejects.toBeInstanceOf(AuthzError);
+    expect(mockedRequire).not.toHaveBeenCalled();
+  });
+
+  it("returns a non-correct result for unsupported question types", async () => {
+    vi.mocked(db.quizQuestion.findUnique).mockResolvedValue({
+      id: "qq2",
+      quizId: "q1",
+      questionType: "tap_field",
+      options: null,
+    } as never);
+    mockedRequire.mockResolvedValue({ quiz: { id: "q1" }, membership: {} } as never);
+
+    expect(await checkAnswer("qq2", "x")).toEqual({
+      correct: false,
+      correctText: null,
+    });
   });
 });

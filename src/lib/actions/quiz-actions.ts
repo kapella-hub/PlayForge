@@ -10,6 +10,7 @@ import {
   computeQuizReward,
   type RewardBadge,
 } from "@/lib/gamification";
+import { matchMultipleChoice } from "@/lib/quiz-grading";
 
 export async function getQuizzes(orgId: string) {
   await requireOrgAccess(orgId, { coach: true });
@@ -73,6 +74,26 @@ export async function getPlayerQuiz(id: string) {
       };
     }),
   };
+}
+
+export async function checkAnswer(
+  questionId: string,
+  answer: string,
+): Promise<{ correct: boolean; correctText: string | null }> {
+  const question = await db.quizQuestion.findUnique({
+    where: { id: questionId },
+    select: { quizId: true, questionType: true, options: true },
+  });
+  if (!question) throw new AuthzError();
+  await requireQuizAccess(question.quizId);
+
+  if (question.questionType !== "multiple_choice") {
+    return { correct: false, correctText: null };
+  }
+  const options = question.options as
+    | { text: string; correct: boolean }[]
+    | null;
+  return matchMultipleChoice(options, answer);
 }
 
 export async function getPlayerQuizzes(orgId: string) {
