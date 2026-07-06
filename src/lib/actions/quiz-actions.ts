@@ -116,62 +116,65 @@ export async function submitQuizAttempt(data: {
   const { membership } = await requireQuizAccess(data.quizId);
   const userId = membership.userId;
 
-  // Snapshot stats BEFORE recording the attempt.
-  const beforeRows = await db.playerProgress.findMany({
-    where: { userId },
-    select: { views: true, masteryLevel: true, quizScores: true },
-  });
-  const beforeStats = playerStatsFromProgress(beforeRows);
+  return db.$transaction(async (tx) => {
+    // Snapshot stats BEFORE recording the attempt.
+    const beforeRows = await tx.playerProgress.findMany({
+      where: { userId },
+      select: { views: true, masteryLevel: true, quizScores: true },
+    });
+    const beforeStats = playerStatsFromProgress(beforeRows);
 
-  const correctCount = data.answers.filter((a) => a.correct).length;
-  const score = data.answers.length > 0 ? correctCount / data.answers.length : 0;
+    const correctCount = data.answers.filter((a) => a.correct).length;
+    const score =
+      data.answers.length > 0 ? correctCount / data.answers.length : 0;
 
-  await db.quizAttempt.create({
-    data: {
-      quizId: data.quizId,
-      userId,
-      score,
-      answers: data.answers,
-      completedAt: new Date(),
-    },
-  });
+    await tx.quizAttempt.create({
+      data: {
+        quizId: data.quizId,
+        userId,
+        score,
+        answers: data.answers,
+        completedAt: new Date(),
+      },
+    });
 
-  // Update progress per play
-  const quiz = await db.quiz.findUnique({
-    where: { id: data.quizId },
-    include: { questions: true },
-  });
+    // Update progress per play
+    const quiz = await tx.quiz.findUnique({
+      where: { id: data.quizId },
+      include: { questions: true },
+    });
 
-  if (quiz) {
-    const playScores = new Map<string, { correct: number; total: number }>();
+    if (quiz) {
+      const playScores = new Map<string, { correct: number; total: number }>();
 
-    for (const answer of data.answers) {
-      const question = quiz.questions.find((q) => q.id === answer.questionId);
-      if (!question) continue;
+      for (const answer of data.answers) {
+        const question = quiz.questions.find((q) => q.id === answer.questionId);
+        if (!question) continue;
 
-      const existing = playScores.get(question.playId) ?? {
-        correct: 0,
-        total: 0,
-      };
-      existing.total += 1;
-      if (answer.correct) existing.correct += 1;
-      playScores.set(question.playId, existing);
+        const existing = playScores.get(question.playId) ?? {
+          correct: 0,
+          total: 0,
+        };
+        existing.total += 1;
+        if (answer.correct) existing.correct += 1;
+        playScores.set(question.playId, existing);
+      }
+
+      for (const [playId, counts] of playScores) {
+        const playScore = counts.total > 0 ? counts.correct / counts.total : 0;
+        await recordQuizScore(playId, playScore, tx);
+      }
     }
 
-    for (const [playId, counts] of playScores) {
-      const playScore = counts.total > 0 ? counts.correct / counts.total : 0;
-      await recordQuizScore(playId, playScore);
-    }
-  }
+    // Snapshot stats AFTER, then return the reward delta.
+    const afterRows = await tx.playerProgress.findMany({
+      where: { userId },
+      select: { views: true, masteryLevel: true, quizScores: true },
+    });
+    const afterStats = playerStatsFromProgress(afterRows);
 
-  // Snapshot stats AFTER, then return the reward delta.
-  const afterRows = await db.playerProgress.findMany({
-    where: { userId },
-    select: { views: true, masteryLevel: true, quizScores: true },
+    return computeQuizReward(beforeStats, afterStats);
   });
-  const afterStats = playerStatsFromProgress(afterRows);
-
-  return computeQuizReward(beforeStats, afterStats);
 }
 
 export async function getQuizAttempts(quizId: string, userId: string) {
