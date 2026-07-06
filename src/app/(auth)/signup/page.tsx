@@ -53,7 +53,7 @@ export default function SignupPage() {
           password: form.password,
           redirect: false,
         });
-        router.push(signInResult?.error ? "/login" : "/dashboard");
+        router.push(signInResult?.error ? "/login?created=1" : "/dashboard");
       } else {
         const data = await res.json();
         setError(data.error || "Signup failed. Please try again.");

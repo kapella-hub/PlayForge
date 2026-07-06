@@ -192,7 +192,7 @@ function JoinPageContent() {
           password: form.password,
           redirect: false,
         });
-        router.push(signInResult?.error ? "/login" : "/home");
+        router.push(signInResult?.error ? "/login?created=1" : "/home");
       } else {
         const data = await res.json();
         setError(data.error || "Failed to join team. Please try again.");

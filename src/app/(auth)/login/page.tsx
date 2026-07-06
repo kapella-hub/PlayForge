@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import { useSearchParams } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +13,15 @@ import { motion } from "framer-motion";
 
 const isDev = process.env.NODE_ENV !== "production";
 
-export default function LoginPage() {
+function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError]   = useState<string | null>(null);
   const [form, setForm]     = useState({ email: "", password: "" });
   const [devEmail, setDevEmail] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const searchParams = useSearchParams();
+  const justCreated = searchParams.get("created") === "1";
 
   async function handleCredentials(e: React.FormEvent) {
     e.preventDefault();
@@ -95,6 +99,12 @@ export default function LoginPage() {
 
       <Card>
         <CardContent className="pt-6">
+          {justCreated && (
+            <div className="mb-4 rounded-xl border border-primary/20 bg-primary/10 px-4 py-3 text-sm text-primary-emphasis">
+              Account created — sign in to continue.
+            </div>
+          )}
+
           {error && (
             <div className="mb-4 rounded-xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
               {error}
@@ -207,5 +217,13 @@ export default function LoginPage() {
         </CardContent>
       </Card>
     </motion.div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
