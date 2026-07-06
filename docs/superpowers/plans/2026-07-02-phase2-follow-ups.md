@@ -29,6 +29,10 @@ Triage source: final review of `phase-1-stabilize` (1267c3b..d9d75f8). Items bel
 - Designer: routes-library naming vocabulary never matches assignment-panel pills (pre-existing); legacy lowercase routeType stops pill-highlighting (self-heals on next click).
 - Focus-restoration check: change-password dialog closes with its dropdown trigger unmounted (runtime-verify; smoke pass).
 
+## Added during Phase 2 planning (2026-07-05)
+- Tokenize the play-library play-type categorical palette as `--category-*` (kept as-is + allowlisted in Phase 2).
+- Migrate SVG `stroke=`/`fill=` hex props (route/formation/minimap previews) to a named viz palette (parked with the engine silo in Phase 2).
+
 ## Cleanup
 - Delete dead `SkeletonCard`/`SkeletonText`/`SkeletonImage` exports in skeleton.tsx (page-skeleton has its own local SkeletonCard).
 - `getQuizAttempts` has no UI caller (guarded dead code) — wire or remove.
