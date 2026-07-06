@@ -60,4 +60,32 @@ describe("computeSnap", () => {
     const r = computeSnap("a", { x: 700, y: 50 }, players, { altHeld: false, preDragY: 999 });
     expect(r).toEqual({ x: 700, y: 50, guides: [] });
   });
+
+  it("nearest-wins: picks the closer candidate when multiple are within threshold", () => {
+    // Players: b at x=300, c at x=301; proposed x=300.6 is 0.6 from b, 0.4 from c
+    const playersMultiple: CanvasPlayer[] = [
+      { id: "a", label: "A", x: 100, y: 200, side: "offense" },
+      { id: "b", label: "B", x: 300, y: 400, side: "offense" },
+      { id: "c", label: "C", x: 301, y: 420, side: "offense" },
+    ];
+    const r = computeSnap("a", { x: 300.6, y: 50 }, playersMultiple, { altHeld: false, preDragY: 999 });
+    expect(r.x).toBe(301); // snaps to the nearer candidate
+    expect(r.guides).toContainEqual({ axis: "x", coord: 301 });
+  });
+
+  it("simultaneous x+y snaps to different players with both guides", () => {
+    // a at (100, 200), b at (300, 400), c at (100, 500)
+    // proposed (300.5, 500.4) snaps x to b (300) and y to c (500)
+    const playersMultiple: CanvasPlayer[] = [
+      { id: "a", label: "A", x: 100, y: 200, side: "offense" },
+      { id: "b", label: "B", x: 300, y: 400, side: "offense" },
+      { id: "c", label: "C", x: 100, y: 500, side: "offense" },
+    ];
+    const r = computeSnap("a", { x: 300.5, y: 500.4 }, playersMultiple, { altHeld: false, preDragY: 200 });
+    expect(r.x).toBe(300);
+    expect(r.y).toBe(500);
+    expect(r.guides).toContainEqual({ axis: "x", coord: 300 });
+    expect(r.guides).toContainEqual({ axis: "y", coord: 500 });
+    expect(r.guides).toHaveLength(2);
+  });
 });
