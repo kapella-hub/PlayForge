@@ -26,6 +26,7 @@ import {
 import { cn } from "@/lib/utils";
 import { GAME_FORMATS, type GameFormat } from "@/engine/constants";
 import { COVERAGE_SCHEMES } from "@/engine/coverage-zone";
+import { Select } from "@/components/ui/select";
 
 interface PlayToolbarProps {
   // ── play metadata ──
@@ -258,15 +259,15 @@ export function PlayToolbar({
                 <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-zinc-500">
                   Format
                 </label>
-                <select
+                <Select
                   value={gameFormat}
                   onChange={(e) => onGameFormatChange(e.target.value as GameFormat)}
-                  className="w-full rounded-lg border border-white/10 bg-white/[0.04] px-2 py-1.5 text-xs font-medium text-zinc-300 outline-none"
+                  className="h-auto rounded-lg px-2 py-1.5 text-xs font-medium"
                 >
                   {formatOptions.map((opt) => (
                     <option key={opt.value} value={opt.value}>{opt.label}</option>
                   ))}
-                </select>
+                </Select>
               </div>
             )}
 
@@ -277,16 +278,16 @@ export function PlayToolbar({
                   Coverage
                 </label>
                 <div className="relative">
-                  <select
+                  <Select
                     value={coverageOverlay}
                     onChange={(e) => onCoverageChange(e.target.value)}
-                    className="w-full rounded-lg border border-white/10 bg-white/[0.04] py-1.5 pl-6 pr-2 text-xs font-medium text-zinc-300 outline-none"
+                    className="h-auto rounded-lg py-1.5 pl-6 pr-2 text-xs font-medium"
                   >
                     <option value="">None</option>
                     {COVERAGE_SCHEMES.map((s) => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
-                  </select>
+                  </Select>
                   <Shield className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-zinc-500" />
                 </div>
               </div>

@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Sparkles, X, Loader2, Check } from "lucide-react";
 import type { CanvasData } from "@/engine/types";
 import { FORMATIONS } from "@/engine/constants";
+import { Select } from "@/components/ui/select";
 
 const EXAMPLE_PROMPTS = [
   "Play action bootleg with corner route and flat",
@@ -130,10 +131,9 @@ export function AIGenerator({
               <label className="mb-1.5 block text-xs font-medium text-zinc-400">
                 Formation (optional)
               </label>
-              <select
+              <Select
                 value={formation}
                 onChange={(e) => setFormation(e.target.value)}
-                className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/80 px-3 py-2 text-sm text-zinc-300 outline-none transition-colors focus:border-violet-500/50"
               >
                 <option value="">Auto-select</option>
                 {offenseFormations.map((f) => (
@@ -141,7 +141,7 @@ export function AIGenerator({
                     {f.name}
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             {/* Generate button */}

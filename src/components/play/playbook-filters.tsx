@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { PlayCard } from "./play-card";
 import { Search, SlidersHorizontal, ArrowUpDown } from "lucide-react";
+import { Select } from "@/components/ui/select";
 
 interface Play {
   id: string;
@@ -109,10 +110,10 @@ export function PlaybookFilters({ plays, playbookId }: PlaybookFiltersProps) {
 
           {/* Formation filter */}
           {formations.length > 1 && (
-            <select
+            <Select
               value={formationFilter}
               onChange={(e) => setFormationFilter(e.target.value)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-300 outline-none transition-colors focus:border-indigo-500/50"
+              className="w-auto"
             >
               <option value="all">All Formations</option>
               {formations.map((f) => (
@@ -120,21 +121,21 @@ export function PlaybookFilters({ plays, playbookId }: PlaybookFiltersProps) {
                   {f}
                 </option>
               ))}
-            </select>
+            </Select>
           )}
 
           {/* Sort */}
           <div className="flex items-center gap-1.5">
             <ArrowUpDown className="h-3.5 w-3.5 text-zinc-500" />
-            <select
+            <Select
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value as SortKey)}
-              className="rounded-lg border border-zinc-800 bg-zinc-900/50 px-2 py-2 text-sm text-zinc-300 outline-none transition-colors focus:border-indigo-500/50"
+              className="w-auto px-2"
             >
               <option value="createdAt">Newest</option>
               <option value="name">Name</option>
               <option value="formation">Formation</option>
-            </select>
+            </Select>
           </div>
         </div>
 

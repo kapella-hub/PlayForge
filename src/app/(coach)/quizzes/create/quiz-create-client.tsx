@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { PLAY_LIBRARY } from "@/engine/plays-library";
 import { createQuiz, addQuizQuestion } from "@/lib/actions/quiz-actions";
 import { useToast } from "@/components/ui/toast";
+import { Select } from "@/components/ui/select";
 
 // ── Types ──────────────────────────────────────────────────────────
 
@@ -376,10 +377,9 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
               <label className="mb-1 block text-xs font-medium text-zinc-400">
                 Select Play
               </label>
-              <select
+              <Select
                 value={selectedPlayId}
                 onChange={(e) => setSelectedPlayId(e.target.value)}
-                className="flex h-10 w-full rounded-lg border border-zinc-700 bg-zinc-800/50 px-3 py-2 text-sm text-zinc-100 outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <option value="">Choose a play...</option>
                 {PLAY_LIBRARY.map((p) => (
@@ -387,7 +387,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                     {p.name} ({p.formation})
                   </option>
                 ))}
-              </select>
+              </Select>
             </div>
 
             {/* Question template */}
