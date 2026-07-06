@@ -277,13 +277,13 @@ export function DesignerClient({ userId }: { userId: string }) {
         pushHistory(canvasData);
       }
       lastNudgeAtRef.current = now; // ref write in an event handler: lint-safe
-      setCanvasData({
-        ...canvasData,
-        players: nudgePlayers(canvasData.players, selectedPlayerId, dx, dy),
-      });
+      setCanvasData((prev) => ({
+        ...prev,
+        players: nudgePlayers(prev.players, selectedPlayerId, dx, dy),
+      }));
       setDirty(true);
     },
-    [previewMode, selectedPlayerId, canvasData, pushHistory],
+    [previewMode, selectedPlayerId, pushHistory],
   );
 
   const handleSave = useCallback(async () => {
