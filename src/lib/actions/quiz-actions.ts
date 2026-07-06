@@ -38,7 +38,7 @@ export async function getQuiz(id: string) {
     },
   });
   if (!quiz) return null;
-  await requireOrgAccess(quiz.orgId);
+  await requireOrgAccess(quiz.orgId, { coach: true });
   return quiz;
 }
 

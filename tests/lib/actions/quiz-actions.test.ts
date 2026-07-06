@@ -32,7 +32,7 @@ vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 // relative `./progress-actions` import, so vitest intercepts it.
 vi.mock("@/lib/actions/progress-actions", () => ({ recordQuizScore: vi.fn() }));
 
-import { updateQuiz, deleteQuiz, getPlayerQuiz, checkAnswer } from "@/lib/actions/quiz-actions";
+import { updateQuiz, deleteQuiz, getQuiz, getPlayerQuiz, checkAnswer } from "@/lib/actions/quiz-actions";
 import { db } from "@/lib/db";
 import { requireQuizAccess, requireOrgAccess, AuthzError } from "@/lib/authz";
 import { recordQuizScore } from "@/lib/actions/progress-actions";
@@ -418,6 +418,41 @@ describe("submitQuizAttempt (transactional)", () => {
     });
 
     expect(result.newBadges.map((b) => b.id)).not.toContain("perfect-quiz");
+  });
+});
+
+describe("getQuiz", () => {
+  it("throws AuthzError for a player-role caller (coach-only: carries the full answer key)", async () => {
+    vi.mocked(db.quiz.findUnique).mockResolvedValue({
+      id: "q1",
+      orgId: "o1",
+      name: "Coverages",
+      questions: [],
+    } as never);
+    vi.mocked(requireOrgAccess).mockRejectedValue(new AuthzError("denied"));
+
+    await expect(getQuiz("q1")).rejects.toBeInstanceOf(AuthzError);
+    expect(vi.mocked(requireOrgAccess)).toHaveBeenCalledWith("o1", { coach: true });
+  });
+
+  it("returns the quiz (with answer key) for a coach caller", async () => {
+    vi.mocked(db.quiz.findUnique).mockResolvedValue({
+      id: "q1",
+      orgId: "o1",
+      name: "Coverages",
+      questions: [],
+    } as never);
+    vi.mocked(requireOrgAccess).mockResolvedValue({} as never);
+
+    const quiz = await getQuiz("q1");
+
+    expect(quiz).toMatchObject({ id: "q1", name: "Coverages" });
+    expect(vi.mocked(requireOrgAccess)).toHaveBeenCalledWith("o1", { coach: true });
+  });
+
+  it("returns null when the quiz does not exist", async () => {
+    vi.mocked(db.quiz.findUnique).mockResolvedValue(null as never);
+    expect(await getQuiz("nope")).toBeNull();
   });
 });
 
