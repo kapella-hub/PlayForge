@@ -46,7 +46,7 @@ describe("playerStatsFromProgress", () => {
     expect(stats.totalPlays).toBe(2);
   });
 
-  it("returns zeroed placeholders for streak/averageScore/daysActive", () => {
+  it("computes zero streak/daysActive from empty rows; averageScore stays placeholder", () => {
     const stats = playerStatsFromProgress([]);
     expect(stats.averageScore).toBe(0);
     expect(stats.currentStreak).toBe(0);

@@ -136,6 +136,44 @@ describe("submitQuizAttempt (transactional)", () => {
     expect(result.streak).toEqual({ current: 1, extended: true });
   });
 
+  it("does not extend the streak (or award phantom streak XP) when already active today", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as {
+      __tx: { playerProgress: { findMany: ReturnType<typeof vi.fn> } };
+    }).__tx;
+    // One captured value reused for both rows, so before/after land on the
+    // exact same day bucket regardless of when computeStreak's internal
+    // `new Date()` resolves relative to this test.
+    const today = new Date();
+    tx.playerProgress.findMany
+      .mockResolvedValueOnce([
+        {
+          views: 0,
+          masteryLevel: "learning",
+          quizScores: [],
+          lastViewedAt: today,
+        },
+      ]) // before: already studied today → streak 1
+      .mockResolvedValueOnce([
+        {
+          views: 0,
+          masteryLevel: "learning",
+          quizScores: [1],
+          lastViewedAt: today,
+        },
+      ]); // after: still today, one more quiz scored → streak still 1
+
+    const result = await submitQuizAttempt({ quizId: "q1", answers: [] });
+
+    expect(result.streak).toEqual({ current: 1, extended: false });
+    // +50 for the newly-scored quiz only; a phantom streak bump would add +25
+    expect(result.xpEarned).toBe(50);
+  });
+
   it("passes the tx client (not db) into recordQuizScore", async () => {
     const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
     mockedRequire.mockResolvedValue({
