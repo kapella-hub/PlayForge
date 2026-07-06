@@ -683,17 +683,17 @@ export default function DesignerPage() {
         {/* Draft restore banner */}
         {draftKey && (
           <div className="absolute inset-x-0 top-24 z-30 flex justify-center px-3">
-            <div className="flex items-center gap-3 rounded-full border border-white/10 bg-zinc-900/95 px-4 py-2 text-xs text-zinc-200 shadow-lg backdrop-blur-sm">
+            <div className="flex items-center gap-3 rounded-full border border-border bg-card px-4 py-2 text-xs text-foreground shadow-lg backdrop-blur-sm">
               <span>Restore your unsaved draft?</span>
               <button
                 onClick={handleRestoreDraft}
-                className="rounded-md bg-emerald-600 px-3 py-1 font-medium text-white transition-colors hover:bg-emerald-500"
+                className="rounded-md bg-primary px-3 py-1 font-medium text-primary-foreground transition-colors hover:bg-primary/90"
               >
                 Restore
               </button>
               <button
                 onClick={handleDismissDraft}
-                className="rounded-md px-2 py-1 text-zinc-400 transition-colors hover:text-white"
+                className="rounded-md px-2 py-1 text-muted-foreground transition-colors hover:text-foreground"
               >
                 Dismiss
               </button>
@@ -711,10 +711,10 @@ export default function DesignerPage() {
               transition={{ duration: 0.15 }}
               className="absolute inset-x-0 top-24 z-10 flex justify-center px-3"
             >
-              <div className="flex max-w-full items-center gap-2 rounded-full bg-emerald-600/90 px-4 py-1.5 text-center text-xs font-medium text-white shadow-lg backdrop-blur-sm">
+              <div className="flex max-w-full items-center gap-2 rounded-full bg-primary/90 px-4 py-1.5 text-center text-xs font-medium text-primary-foreground shadow-lg backdrop-blur-sm">
                 <Pen className="h-3 w-3" />
                 Drawing Route — Click to add points, Double-click to finish,{" "}
-                <kbd className="rounded bg-white/20 px-1.5 py-0.5 text-[10px]">
+                <kbd className="rounded bg-primary-foreground/20 px-1.5 py-0.5 text-[10px]">
                   Esc
                 </kbd>{" "}
                 to cancel
@@ -733,14 +733,14 @@ export default function DesignerPage() {
               transition={{ duration: 0.15 }}
               className="absolute inset-x-0 top-24 z-10 flex justify-center px-3"
             >
-              <div className="flex max-w-full items-center gap-2 rounded-full bg-cyan-600/90 px-4 py-1.5 text-center text-xs font-medium text-white shadow-lg backdrop-blur-sm">
+              <div className="flex max-w-full items-center gap-2 rounded-full bg-accent/90 px-4 py-1.5 text-center text-xs font-medium text-primary-foreground shadow-lg backdrop-blur-sm">
                 <MoveRight className="h-3 w-3" />
                 {motionPlayerId
                   ? "Click the field to set motion destination"
                   : "Click a player to set as motion man"
                 }
                 {" "}
-                <kbd className="rounded bg-white/20 px-1.5 py-0.5 text-[10px]">
+                <kbd className="rounded bg-primary-foreground/20 px-1.5 py-0.5 text-[10px]">
                   Esc
                 </kbd>{" "}
                 to cancel
@@ -769,25 +769,25 @@ export default function DesignerPage() {
           ) : (
             /* Empty state */
             <div className="flex h-full flex-col items-center justify-center gap-4">
-              <div className="rounded-2xl border border-dashed border-zinc-700 bg-zinc-900/50 px-8 py-10 text-center">
-                <LayoutGrid className="mx-auto mb-3 h-10 w-10 text-zinc-600" />
-                <h3 className="mb-1 text-lg font-semibold text-zinc-300">
+              <div className="rounded-2xl border border-dashed border-border bg-card px-8 py-10 text-center">
+                <LayoutGrid className="mx-auto mb-3 h-10 w-10 text-muted-foreground/70" />
+                <h3 className="mb-1 text-lg font-semibold text-foreground/85">
                   Select a formation to get started
                 </h3>
-                <p className="mb-4 text-sm text-zinc-500">
+                <p className="mb-4 text-sm text-muted-foreground">
                   Choose from offense or defense formations to place players on the field.
                 </p>
                 <div className="flex flex-col items-center justify-center gap-3 sm:flex-row">
                   <button
                     onClick={() => setFormationPanelOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-xl bg-emerald-600 px-5 py-2.5 text-sm font-medium text-white shadow-[0_12px_30px_rgba(5,150,105,0.28)] transition-colors hover:bg-emerald-500"
+                    className="inline-flex items-center gap-2 rounded-xl bg-primary px-5 py-2.5 text-sm font-medium text-primary-foreground shadow-[0_12px_30px_rgba(15,118,110,0.28)] transition-colors hover:bg-primary/90"
                   >
                     <LayoutGrid className="h-4 w-4" />
                     Open Formations
                   </button>
                   <button
                     onClick={() => setPlayLibraryOpen(true)}
-                    className="inline-flex items-center gap-2 rounded-xl border border-white/10 bg-white/[0.04] px-5 py-2.5 text-sm font-medium text-zinc-300 transition-colors hover:bg-white/[0.08] hover:text-white"
+                    className="inline-flex items-center gap-2 rounded-xl border border-border bg-secondary px-5 py-2.5 text-sm font-medium text-foreground/85 transition-colors hover:bg-secondary hover:text-foreground"
                   >
                     <BookOpen className="h-4 w-4" />
                     Play Library
@@ -795,18 +795,18 @@ export default function DesignerPage() {
                 </div>
                 <button
                     onClick={() => setAiPanelOpen(true)}
-                    className="mt-3 inline-flex items-center gap-2 rounded-xl border border-amber-500/30 bg-amber-500/10 px-5 py-2.5 text-sm font-medium text-amber-200 transition-colors hover:bg-amber-500/20 hover:text-amber-100"
+                    className="mt-3 inline-flex items-center gap-2 rounded-xl border border-accent/30 bg-accent/10 px-5 py-2.5 text-sm font-medium text-accent transition-colors hover:bg-accent/20 hover:text-accent"
                   >
                     <Sparkles className="h-4 w-4" />
                     AI Generator
                   </button>
-                <p className="mt-3 text-[11px] text-zinc-600">
+                <p className="mt-3 text-[11px] text-muted-foreground/70">
                   or press{" "}
-                  <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">F</kbd>
+                  <kbd className="rounded bg-secondary px-1.5 py-0.5 text-muted-foreground">F</kbd>
                   {" "}for formations,{" "}
-                  <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">L</kbd>
+                  <kbd className="rounded bg-secondary px-1.5 py-0.5 text-muted-foreground">L</kbd>
                   {" "}for play library,{" "}
-                  <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">A</kbd>
+                  <kbd className="rounded bg-secondary px-1.5 py-0.5 text-muted-foreground">A</kbd>
                   {" "}for AI
                 </p>
               </div>
@@ -822,7 +822,7 @@ export default function DesignerPage() {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -16 }}
               transition={{ duration: 0.2, ease: "easeOut" }}
-              className="absolute inset-x-3 bottom-3 top-24 z-30 overflow-hidden rounded-[24px] border border-white/[0.08] bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-xl sm:left-4 sm:right-auto sm:w-72"
+              className="absolute inset-x-3 bottom-3 top-24 z-30 overflow-hidden rounded-[24px] border border-border bg-card p-4 shadow-2xl backdrop-blur-xl sm:left-4 sm:right-auto sm:w-72"
             >
               {/* Side toggle */}
               <SegmentedControl
@@ -907,11 +907,11 @@ export default function DesignerPage() {
             {/* Pick Route from Library button */}
             <button
               onClick={() => setRoutePickerOpen(true)}
-              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-700/60 bg-zinc-900/80 px-4 py-2.5 text-xs font-medium text-zinc-300 shadow-lg backdrop-blur-xl transition-colors hover:border-emerald-500/40 hover:bg-zinc-800 hover:text-white"
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-border/60 bg-card px-4 py-2.5 text-xs font-medium text-foreground/85 shadow-lg backdrop-blur-xl transition-colors hover:border-primary/40 hover:bg-secondary hover:text-foreground"
             >
               <RouteIcon className="h-3.5 w-3.5" />
               Pick Route from Library
-              <kbd className="ml-1 rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-500">
+              <kbd className="ml-1 rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">
                 R
               </kbd>
             </button>
@@ -922,15 +922,15 @@ export default function DesignerPage() {
         {hasFormation && !selectedPlayer && !previewMode && (
           <div className="absolute bottom-4 right-4 z-20">
             {filmPanelOpen ? (
-              <div className="w-64 rounded-2xl border border-white/[0.06] bg-zinc-900/95 p-4 shadow-2xl backdrop-blur-xl">
+              <div className="w-64 rounded-2xl border border-border bg-card p-4 shadow-2xl backdrop-blur-xl">
                 <div className="mb-2 flex items-center justify-between">
-                  <div className="flex items-center gap-2 text-xs font-semibold text-zinc-300">
+                  <div className="flex items-center gap-2 text-xs font-semibold text-foreground/85">
                     <Film className="h-3.5 w-3.5" />
                     Film Clip
                   </div>
                   <button
                     onClick={() => setFilmPanelOpen(false)}
-                    className="rounded p-0.5 text-zinc-500 transition-colors hover:text-zinc-300"
+                    className="rounded p-0.5 text-muted-foreground transition-colors hover:text-foreground/85"
                   >
                     <X className="h-3.5 w-3.5" />
                   </button>
@@ -952,7 +952,7 @@ export default function DesignerPage() {
               <button
                 onClick={() => setFilmPanelOpen(true)}
                 title="Film Clip"
-                className={`rounded-xl border border-white/[0.06] bg-zinc-900/80 p-3 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-800 hover:text-zinc-200 ${filmUrl ? "text-amber-400" : "text-zinc-400"}`}
+                className={`rounded-xl border border-border bg-card p-3 shadow-lg backdrop-blur-xl transition-colors hover:bg-secondary hover:text-foreground ${filmUrl ? "text-accent" : "text-muted-foreground"}`}
               >
                 <Film className="h-5 w-5" />
               </button>
@@ -965,7 +965,7 @@ export default function DesignerPage() {
           <button
             onClick={() => setFormationPanelOpen(true)}
             title="Toggle Formations (F)"
-            className="absolute bottom-4 left-4 z-20 rounded-xl border border-white/[0.06] bg-zinc-900/80 p-3 text-zinc-400 shadow-lg backdrop-blur-xl transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+            className="absolute bottom-4 left-4 z-20 rounded-xl border border-border bg-card p-3 text-muted-foreground shadow-lg backdrop-blur-xl transition-colors hover:bg-secondary hover:text-foreground"
           >
             <LayoutGrid className="h-5 w-5" />
           </button>
@@ -1010,16 +1010,16 @@ export default function DesignerPage() {
           />
 
           {/* Preview info */}
-          <div className="mb-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">
-            <p className="text-xs text-zinc-400">
+          <div className="mb-4 rounded-xl border border-border bg-secondary p-4">
+            <p className="text-xs text-muted-foreground">
               {printMode === "playbook" ? (
                 <>Full-page layout with play name, diagram, and route assignments. One play per page.</>
               ) : (
                 <>Compact 4x4 grid for wristband cards. Play name and mini diagram per cell.</>
               )}
             </p>
-            <div className="mt-2 text-xs text-zinc-500">
-              <span className="font-medium text-zinc-300">{playName}</span>
+            <div className="mt-2 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground/85">{playName}</span>
               {formationName && <> &middot; {formationName}</>}
               {" "}&middot; {canvasData.routes.length} route(s)
             </div>
@@ -1028,7 +1028,7 @@ export default function DesignerPage() {
           {/* Print button */}
           <button
             onClick={handlePrint}
-            className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-emerald-500/25 transition-colors hover:bg-emerald-500"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-colors hover:bg-primary/90"
           >
             <Printer className="h-4 w-4" />
             Print

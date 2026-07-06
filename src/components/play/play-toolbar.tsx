@@ -139,7 +139,7 @@ export function PlayToolbar({
   );
 
   return (
-    <div className="flex items-center gap-2 rounded-[20px] border border-white/[0.08] bg-zinc-950/80 px-3 py-2 shadow-2xl backdrop-blur-xl">
+    <div className="flex items-center gap-2 rounded-[20px] border border-border bg-card px-3 py-2 shadow-2xl backdrop-blur-xl">
 
       {/* ── Play name ── */}
       <input
@@ -148,25 +148,25 @@ export function PlayToolbar({
         onFocus={() => setNameEditing(true)}
         onBlur={() => setNameEditing(false)}
         className={cn(
-          "w-32 min-w-0 shrink bg-transparent text-sm font-semibold text-white outline-none transition-all sm:w-44",
+          "w-32 min-w-0 shrink bg-transparent text-sm font-semibold text-foreground outline-none transition-all sm:w-44",
           nameEditing
-            ? "rounded-xl border border-emerald-500/50 px-2 py-1"
-            : "border border-transparent px-2 py-1 hover:border-white/10",
+            ? "rounded-xl border border-ring/50 px-2 py-1"
+            : "border border-transparent px-2 py-1 hover:border-border",
         )}
         placeholder="Play name…"
       />
 
       {/* Formation badge */}
       {formation && (
-        <span className="hidden shrink-0 rounded-full bg-zinc-800 px-2.5 py-0.5 text-[11px] font-medium text-zinc-400 sm:inline-block">
+        <span className="hidden shrink-0 rounded-full bg-secondary px-2.5 py-0.5 text-[11px] font-medium text-muted-foreground sm:inline-block">
           {formation}
         </span>
       )}
 
-      <div className="h-4 w-px shrink-0 bg-zinc-700/60" />
+      <div className="h-4 w-px shrink-0 bg-border" />
 
       {/* ── Play type ── */}
-      <div className="flex shrink-0 rounded-xl bg-white/[0.05] p-0.5">
+      <div className="flex shrink-0 rounded-xl bg-secondary p-0.5">
         {playTypes.map((pt) => (
           <button
             key={pt.value}
@@ -174,8 +174,8 @@ export function PlayToolbar({
             className={cn(
               "rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all",
               playType === pt.value
-                ? "bg-emerald-600 text-white shadow-sm"
-                : "text-zinc-400 hover:text-zinc-200",
+                ? "bg-primary text-primary-foreground shadow-sm"
+                : "text-muted-foreground hover:text-foreground",
             )}
           >
             {pt.label}
@@ -183,10 +183,10 @@ export function PlayToolbar({
         ))}
       </div>
 
-      <div className="h-4 w-px shrink-0 bg-zinc-700/60" />
+      <div className="h-4 w-px shrink-0 bg-border" />
 
       {/* ── Mode selector: Select | Draw | Motion | Preview ── */}
-      <div className="flex shrink-0 items-center rounded-xl bg-white/[0.05] p-0.5">
+      <div className="flex shrink-0 items-center rounded-xl bg-secondary p-0.5">
         <ModeButton
           icon={<MousePointer2 className="h-3.5 w-3.5" />}
           label="Select"
@@ -223,7 +223,7 @@ export function PlayToolbar({
         />
       </div>
 
-      <div className="h-4 w-px shrink-0 bg-zinc-700/60" />
+      <div className="h-4 w-px shrink-0 bg-border" />
 
       {/* ── Undo / Redo ── */}
       <div className="flex shrink-0 items-center gap-0.5">
@@ -240,8 +240,8 @@ export function PlayToolbar({
           <button
             title="More options"
             className={cn(
-              "rounded-xl p-2 text-zinc-400 transition-colors hover:bg-white/[0.08] hover:text-zinc-200",
-              overflowOpen && "bg-white/[0.08] text-zinc-200",
+              "rounded-xl p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground",
+              overflowOpen && "bg-secondary text-foreground",
             )}
           >
             <MoreHorizontal className="h-4 w-4" />
@@ -251,12 +251,12 @@ export function PlayToolbar({
           <Popover.Content
             align="end"
             sideOffset={8}
-            className="z-50 w-52 rounded-2xl border border-white/[0.08] bg-zinc-950/95 p-2 shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 duration-100"
+            className="z-50 w-52 rounded-2xl border border-border bg-card p-2 shadow-2xl backdrop-blur-xl data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 duration-100"
           >
             {/* Game format */}
             {gameFormat && onGameFormatChange && (
               <div className="mb-1 px-2 py-1">
-                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-zinc-500">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                   Format
                 </label>
                 <Select
@@ -274,7 +274,7 @@ export function PlayToolbar({
             {/* Coverage overlay */}
             {!previewMode && (
               <div className="mb-1 px-2 py-1">
-                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-zinc-500">
+                <label className="mb-1 block text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                   Coverage
                 </label>
                 <div className="relative">
@@ -288,12 +288,12 @@ export function PlayToolbar({
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
                   </Select>
-                  <Shield className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-zinc-500" />
+                  <Shield className="pointer-events-none absolute left-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-muted-foreground" />
                 </div>
               </div>
             )}
 
-            <div className="my-1.5 border-t border-white/[0.06]" />
+            <div className="my-1.5 border-t border-border" />
 
             {/* Mirror */}
             {!previewMode && (
@@ -344,7 +344,7 @@ export function PlayToolbar({
             {/* History */}
             {showHistory && onToggleHistory && (
               <>
-                <div className="my-1.5 border-t border-white/[0.06]" />
+                <div className="my-1.5 border-t border-border" />
                 <OverflowItem
                   icon={<History className="h-3.5 w-3.5" />}
                   label="Version History"
@@ -362,13 +362,13 @@ export function PlayToolbar({
         <div className="hidden items-center gap-1.5 text-xs sm:flex">
           {dirty ? (
             <>
-              <Circle className="h-2 w-2 fill-amber-400 text-amber-400" />
-              <span className="text-zinc-500">Unsaved</span>
+              <Circle className="h-2 w-2 fill-warning text-warning" />
+              <span className="text-muted-foreground">Unsaved</span>
             </>
           ) : (
             <>
-              <Check className="h-3 w-3 text-emerald-500" />
-              <span className="text-zinc-500">Saved</span>
+              <Check className="h-3 w-3 text-success" />
+              <span className="text-muted-foreground">Saved</span>
             </>
           )}
         </div>
@@ -378,8 +378,8 @@ export function PlayToolbar({
           className={cn(
             "inline-flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-sm font-medium transition-all",
             dirty
-              ? "bg-emerald-600 text-white shadow-[0_8px_24px_rgba(5,150,105,0.28)] hover:bg-emerald-500"
-              : "bg-white/[0.05] text-zinc-500",
+              ? "bg-primary text-primary-foreground shadow-[0_8px_24px_rgba(15,118,110,0.28)] hover:bg-primary/90"
+              : "bg-secondary text-muted-foreground",
             "disabled:pointer-events-none disabled:opacity-50",
           )}
         >
@@ -389,7 +389,7 @@ export function PlayToolbar({
             <Save className="h-4 w-4" />
           )}
           <span className="hidden sm:inline">Save</span>
-          <kbd className="hidden rounded bg-white/10 px-1 py-0.5 text-[10px] font-normal text-white/50 lg:inline-block">
+          <kbd className="hidden rounded bg-primary-foreground/10 px-1 py-0.5 text-[10px] font-normal text-primary-foreground/50 lg:inline-block">
             ⌘S
           </kbd>
         </button>
@@ -418,9 +418,9 @@ function ModeButton({
   tooltip: string;
 }) {
   const activeClass = {
-    emerald: "bg-emerald-600 text-white",
-    cyan: "bg-cyan-600 text-white",
-    amber: "bg-amber-500 text-white",
+    emerald: "bg-primary text-primary-foreground",
+    cyan: "bg-accent text-primary-foreground",
+    amber: "bg-success text-primary-foreground",
   }[color];
 
   return (
@@ -430,7 +430,7 @@ function ModeButton({
       title={tooltip}
       className={cn(
         "flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all",
-        active ? activeClass : "text-zinc-400 hover:text-zinc-200",
+        active ? activeClass : "text-muted-foreground hover:text-foreground",
         disabled && "pointer-events-none opacity-30",
       )}
     >
@@ -457,7 +457,7 @@ function IconButton({
       disabled={disabled}
       title={tooltip}
       className={cn(
-        "rounded-lg p-2 text-zinc-400 transition-all hover:bg-white/[0.08] hover:text-zinc-200",
+        "rounded-lg p-2 text-muted-foreground transition-all hover:bg-secondary hover:text-foreground",
         disabled && "pointer-events-none opacity-30",
       )}
     >
@@ -485,14 +485,14 @@ function OverflowItem({
       className={cn(
         "flex w-full items-center gap-2.5 rounded-xl px-2.5 py-2 text-xs font-medium transition-colors",
         active
-          ? "bg-emerald-600/20 text-emerald-300"
-          : "text-zinc-300 hover:bg-white/[0.06] hover:text-white",
+          ? "bg-primary/20 text-primary-emphasis"
+          : "text-foreground/85 hover:bg-secondary hover:text-foreground",
       )}
     >
-      <span className="text-zinc-500">{icon}</span>
+      <span className="text-muted-foreground">{icon}</span>
       <span className="flex-1 text-left">{label}</span>
       {kbd && (
-        <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] text-zinc-500">{kbd}</kbd>
+        <kbd className="rounded bg-secondary px-1.5 py-0.5 text-[10px] text-muted-foreground">{kbd}</kbd>
       )}
     </button>
   );
