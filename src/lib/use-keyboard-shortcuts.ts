@@ -28,7 +28,12 @@ export interface KeyboardShortcut {
  */
 export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
   const shortcutsRef = useRef(shortcuts);
-  shortcutsRef.current = shortcuts;
+
+  // Keep the ref current without touching it during render (react-hooks/refs).
+  // The handler reads shortcutsRef.current at event time, always after commit.
+  useEffect(() => {
+    shortcutsRef.current = shortcuts;
+  });
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     const target = e.target as HTMLElement;
