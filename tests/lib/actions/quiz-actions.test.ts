@@ -100,7 +100,13 @@ describe("submitQuizAttempt (transactional)", () => {
     const result = await submitQuizAttempt({ quizId: "q1", answers: [] });
 
     expect(vi.mocked(db.$transaction)).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({ xpEarned: 0, newBadges: [] });
+    expect(result).toEqual({
+      xpEarned: 0,
+      newBadges: [],
+      scorePercent: 0,
+      correctCount: 0,
+      supportedCount: 0,
+    });
     // the attempt write went through the tx client, not the root db
     expect((db as unknown as { __tx: { quizAttempt: { create: ReturnType<typeof vi.fn> } } }).__tx.quizAttempt.create).toHaveBeenCalledTimes(1);
   });
@@ -114,15 +120,84 @@ describe("submitQuizAttempt (transactional)", () => {
     const tx = (db as unknown as { __tx: { quiz: { findUnique: ReturnType<typeof vi.fn> } } }).__tx;
     tx.quiz.findUnique.mockResolvedValueOnce({
       id: "q1",
-      questions: [{ id: "qq1", playId: "p1" }],
+      questions: [
+        {
+          id: "qq1",
+          playId: "p1",
+          questionType: "multiple_choice",
+          options: [{ text: "a", correct: true }],
+        },
+      ],
     });
 
     await submitQuizAttempt({
       quizId: "q1",
-      answers: [{ questionId: "qq1", answer: "a", correct: true }],
+      answers: [{ questionId: "qq1", answer: "a" }],
     });
 
     expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith("p1", 1, tx);
+  });
+
+  it("dedupes answers by questionId, keeping only the first occurrence", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as { __tx: { quiz: { findUnique: ReturnType<typeof vi.fn> } } }).__tx;
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [
+        {
+          id: "qq1",
+          playId: "p1",
+          questionType: "multiple_choice",
+          options: [{ text: "a", correct: true }],
+        },
+      ],
+    });
+
+    // A crafted call submits two entries for the same question; only the
+    // first (correct) should count, so a second contradictory entry can't
+    // double-weight the denominator or flip the verdict.
+    const result = await submitQuizAttempt({
+      quizId: "q1",
+      answers: [
+        { questionId: "qq1", answer: "a" },
+        { questionId: "qq1", answer: "wrong" },
+      ],
+    });
+
+    expect(result.supportedCount).toBe(1);
+    expect(result.correctCount).toBe(1);
+  });
+
+  it("grades case/whitespace-differing answers as incorrect (exact match only)", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as { __tx: { quiz: { findUnique: ReturnType<typeof vi.fn> } } }).__tx;
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [
+        {
+          id: "qq1",
+          playId: "p1",
+          questionType: "multiple_choice",
+          options: [{ text: "Cover 2", correct: true }],
+        },
+      ],
+    });
+
+    const result = await submitQuizAttempt({
+      quizId: "q1",
+      answers: [{ questionId: "qq1", answer: "cover 2" }],
+    });
+
+    expect(result.correctCount).toBe(0);
+    expect(result.supportedCount).toBe(1);
   });
 });
 

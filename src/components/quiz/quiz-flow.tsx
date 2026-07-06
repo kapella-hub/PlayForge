@@ -6,7 +6,6 @@ import { ArrowRight, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { MultipleChoice } from "./multiple-choice";
 import { submitQuizAttempt } from "@/lib/actions/quiz-actions";
-import { countSupportedQuestions, computeScorePercent } from "@/lib/quiz-score";
 
 interface QuizQuestion {
   id: string;
@@ -25,7 +24,6 @@ interface QuizFlowProps {
 interface Answer {
   questionId: string;
   answer: string;
-  correct: boolean;
 }
 
 export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
@@ -38,6 +36,9 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
   const [reward, setReward] = useState<{
     xpEarned: number;
     newBadges: { id: string; name: string; description: string; icon: string }[];
+    scorePercent: number;
+    correctCount: number;
+    supportedCount: number;
   } | null>(null);
 
   const question = questions[currentIndex];
@@ -45,11 +46,8 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
   const progress =
     totalQuestions > 0 ? ((currentIndex + (finished ? 1 : 0)) / totalQuestions) * 100 : 0;
 
-  function handleAnswer(correct: boolean, answer: string) {
-    setAnswers((prev) => [
-      ...prev,
-      { questionId: question.id, answer, correct },
-    ]);
+  function handleAnswer(answer: string) {
+    setAnswers((prev) => [...prev, { questionId: question.id, answer }]);
     setShowResult(true);
   }
 
@@ -77,9 +75,9 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
   }
 
   if (finished) {
-    const correctCount = answers.filter((a) => a.correct).length;
-    const supportedCount = countSupportedQuestions(questions);
-    const scorePercent = computeScorePercent(correctCount, supportedCount);
+    const scorePercent = reward?.scorePercent ?? 0;
+    const correctCount = reward?.correctCount ?? 0;
+    const supportedCount = reward?.supportedCount ?? 0;
 
     return (
       <div className="flex flex-col items-center gap-6 py-12 text-center">

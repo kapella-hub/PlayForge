@@ -9,7 +9,7 @@ interface MultipleChoiceProps {
   questionId: string;
   questionText: string;
   options: { text: string }[];
-  onAnswer: (correct: boolean, answer: string) => void;
+  onAnswer: (answer: string) => void;
 }
 
 const LABELS = ["A", "B", "C", "D"] as const;
@@ -36,7 +36,7 @@ export function MultipleChoice({
     try {
       const res = await checkAnswer(questionId, options[index].text);
       setResult(res);
-      onAnswer(res.correct, options[index].text);
+      onAnswer(options[index].text);
     } catch {
       setError("Couldn't check your answer. Tap to try again.");
     } finally {

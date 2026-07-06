@@ -3,14 +3,15 @@
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { recordQuizScore } from "./progress-actions";
-import type { QuestionType } from "@prisma/client";
+import type { Prisma, QuestionType } from "@prisma/client";
 import { requireOrgAccess, requireQuizAccess, AuthzError } from "@/lib/authz";
 import {
   playerStatsFromProgress,
   computeQuizReward,
   type RewardBadge,
 } from "@/lib/gamification";
-import { matchMultipleChoice } from "@/lib/quiz-grading";
+import { gradeAnswers, matchMultipleChoice } from "@/lib/quiz-grading";
+import { computeScorePercent } from "@/lib/quiz-score";
 
 export async function getQuizzes(orgId: string) {
   await requireOrgAccess(orgId, { coach: true });
@@ -167,10 +168,25 @@ export async function addQuizQuestion(data: {
 
 export async function submitQuizAttempt(data: {
   quizId: string;
-  answers: { questionId: string; answer: string; correct: boolean }[];
-}): Promise<{ xpEarned: number; newBadges: RewardBadge[] }> {
+  answers: { questionId: string; answer: string }[];
+}): Promise<{
+  xpEarned: number;
+  newBadges: RewardBadge[];
+  scorePercent: number;
+  correctCount: number;
+  supportedCount: number;
+}> {
   const { membership } = await requireQuizAccess(data.quizId);
   const userId = membership.userId;
+
+  // One answer per question: a crafted call could submit duplicate
+  // questionIds to double-weight the denominator, so keep only the first.
+  const seenQuestionIds = new Set<string>();
+  const dedupedAnswers = data.answers.filter((a) => {
+    if (seenQuestionIds.has(a.questionId)) return false;
+    seenQuestionIds.add(a.questionId);
+    return true;
+  });
 
   return db.$transaction(async (tx) => {
     // Snapshot stats BEFORE recording the attempt.
@@ -180,56 +196,62 @@ export async function submitQuizAttempt(data: {
     });
     const beforeStats = playerStatsFromProgress(beforeRows);
 
-    const correctCount = data.answers.filter((a) => a.correct).length;
-    const score =
-      data.answers.length > 0 ? correctCount / data.answers.length : 0;
+    // Fetch the quiz's questions and grade server-side.
+    const quiz = await tx.quiz.findUnique({
+      where: { id: data.quizId },
+      include: { questions: true },
+    });
+    const gradingQuestions =
+      quiz?.questions.map((q) => ({
+        id: q.id,
+        questionType: q.questionType,
+        options: q.options as { text: string; correct: boolean }[] | null,
+      })) ?? [];
+    const grade = gradeAnswers(gradingQuestions, dedupedAnswers);
 
     await tx.quizAttempt.create({
       data: {
         quizId: data.quizId,
         userId,
-        score,
-        answers: data.answers,
+        score: grade.score,
+        answers: grade.graded as unknown as Prisma.InputJsonValue,
         completedAt: new Date(),
       },
     });
 
-    // Update progress per play
-    const quiz = await tx.quiz.findUnique({
-      where: { id: data.quizId },
-      include: { questions: true },
-    });
-
+    // Update progress per play, from the graded (server-truth) results.
     if (quiz) {
       const playScores = new Map<string, { correct: number; total: number }>();
-
-      for (const answer of data.answers) {
-        const question = quiz.questions.find((q) => q.id === answer.questionId);
-        if (!question) continue;
-
+      for (const g of grade.graded) {
+        const question = quiz.questions.find((q) => q.id === g.questionId);
+        if (!question || question.questionType !== "multiple_choice") continue;
         const existing = playScores.get(question.playId) ?? {
           correct: 0,
           total: 0,
         };
         existing.total += 1;
-        if (answer.correct) existing.correct += 1;
+        if (g.correct) existing.correct += 1;
         playScores.set(question.playId, existing);
       }
-
       for (const [playId, counts] of playScores) {
         const playScore = counts.total > 0 ? counts.correct / counts.total : 0;
         await recordQuizScore(playId, playScore, tx);
       }
     }
 
-    // Snapshot stats AFTER, then return the reward delta.
+    // Snapshot stats AFTER, then return the reward delta + server score.
     const afterRows = await tx.playerProgress.findMany({
       where: { userId },
       select: { views: true, masteryLevel: true, quizScores: true },
     });
     const afterStats = playerStatsFromProgress(afterRows);
 
-    return computeQuizReward(beforeStats, afterStats);
+    return {
+      ...computeQuizReward(beforeStats, afterStats),
+      scorePercent: computeScorePercent(grade.correctCount, grade.supportedCount),
+      correctCount: grade.correctCount,
+      supportedCount: grade.supportedCount,
+    };
   });
 }
 
