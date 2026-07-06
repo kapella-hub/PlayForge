@@ -95,7 +95,7 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
 
   function handleOpenChange(next: boolean) {
     setOpen(next);
-    if (next && unreadCount > 0) markAllRead();
+    if (!next && unreadCount > 0) markAllRead();
   }
 
   return (
