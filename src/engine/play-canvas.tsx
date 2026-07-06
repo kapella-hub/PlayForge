@@ -4,6 +4,7 @@ import { useRef, useState, useEffect, useCallback, forwardRef, useImperativeHand
 import { Stage, Layer, Line, Circle, Group } from "react-konva";
 import type Konva from "konva";
 import type { KonvaEventObject } from "konva/lib/Node";
+import type { Vector2d } from "konva/lib/types";
 import FieldRenderer from "./field-renderer";
 import PlayerNode from "./player-node";
 import RouteLine from "./route-line";
@@ -141,25 +142,51 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
     [scaleX, scaleY],
   );
 
-  const handlePlayerDragMove = useCallback(
-    (id: string, e: KonvaEventObject<DragEvent>) => {
-      if (readOnly) return;
-      const node = e.target;
-      const proposed = { x: node.x() / scaleX, y: node.y() / scaleY };
+  /**
+   * Live Alt-key state for the snap bypass. dragBoundFunc receives no event
+   * object, so Alt has to be tracked out-of-band via window listeners; the
+   * ref lets a mid-drag Alt press/release take effect on the very next tick.
+   */
+  const altHeldRef = useRef(false);
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Alt") altHeldRef.current = true;
+    };
+    const handleKeyUp = (e: KeyboardEvent) => {
+      if (e.key === "Alt") altHeldRef.current = false;
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keyup", handleKeyUp);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keyup", handleKeyUp);
+    };
+  }, []);
+
+  /**
+   * Builds the Konva-idiomatic drag constraint for one player: Konva calls
+   * this during its own drag positioning with the proposed ABSOLUTE
+   * (stage-pixel) position and paints whatever is returned, so the snap here
+   * survives (unlike the old dragmove handler, which mutated node.position()
+   * only for Konva's own loop to re-assert the raw pointer position after).
+   */
+  const makeDragBoundFunc = useCallback(
+    (id: string) => (pos: Vector2d): Vector2d => {
+      if (!scaleX || !scaleY) return pos;
+      const proposed = { x: pos.x / scaleX, y: pos.y / scaleY };
       const player = canvasData.players.find((p) => p.id === id);
-      if (!player) return;
+      if (!player) return pos;
       const { x, y, guides } = computeSnap(id, proposed, canvasData.players, {
-        altHeld: e.evt.altKey,
+        altHeld: altHeldRef.current,
         preDragY: player.y,
       });
-      node.x(x * scaleX);
-      node.y(y * scaleY);
       if (!guidesEqual(activeGuidesRef.current, guides)) {
         activeGuidesRef.current = guides;
         setActiveGuides(guides);
       }
+      return { x: x * scaleX, y: y * scaleY };
     },
-    [readOnly, scaleX, scaleY, canvasData.players],
+    [scaleX, scaleY, canvasData.players],
   );
 
   const handlePlayerDragEnd = useCallback(
@@ -167,15 +194,17 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
       if (readOnly) return;
       activeGuidesRef.current = [];
       setActiveGuides([]);
-      const canvasX = x / scaleX;
-      const canvasY = y / scaleY;
-
+      // x/y arrive already in FIELD units: dragBoundFunc drives the node via
+      // Konva's setAbsolutePosition, which resolves back through the scaled
+      // Layer to the same local (FIELD-unit) space the Group is declared in
+      // — unlike the old raw dragmove override, no further /scaleX,/scaleY
+      // conversion is needed (or correct) here.
       const updatedPlayers = canvasData.players.map((p) =>
-        p.id === id ? { ...p, x: canvasX, y: canvasY } : p,
+        p.id === id ? { ...p, x, y } : p,
       );
       onChange({ ...canvasData, players: updatedPlayers });
     },
-    [canvasData, onChange, readOnly, scaleX, scaleY],
+    [canvasData, onChange, readOnly],
   );
 
   /** Finish the current route being drawn — detect route type and clear state */
@@ -562,7 +591,7 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
                   isSelected={player.id === selectedPlayerId}
                   onSelect={handleSelectPlayer}
                   onDragEnd={handlePlayerDragEnd}
-                  onDragMove={readOnly ? undefined : handlePlayerDragMove}
+                  dragBoundFunc={readOnly ? undefined : makeDragBoundFunc(player.id)}
                   animatedPosition={
                     isAnimating
                       ? animationState.playerPositions.get(player.id)

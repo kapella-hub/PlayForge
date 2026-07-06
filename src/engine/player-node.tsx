@@ -4,14 +4,20 @@ import { Group, Circle, Text } from "react-konva";
 import { FIELD, isOL } from "./constants";
 import type { CanvasPlayer } from "./types";
 import type { KonvaEventObject } from "konva/lib/Node";
+import type { Vector2d } from "konva/lib/types";
 
 interface PlayerNodeProps {
   player: CanvasPlayer;
   isSelected: boolean;
   onSelect: (id: string) => void;
   onDragEnd: (id: string, x: number, y: number) => void;
-  /** Fires continuously during a drag (designer only) with the live Konva event. */
-  onDragMove?: (id: string, e: KonvaEventObject<DragEvent>) => void;
+  /**
+   * Konva-idiomatic drag constraint (designer only): called during Konva's own
+   * drag positioning with the proposed ABSOLUTE (stage-pixel) position; the
+   * returned position is what Konva actually paints, so overrides here (unlike
+   * a dragmove handler mutating node.position()) survive.
+   */
+  dragBoundFunc?: (pos: Vector2d) => Vector2d;
   /** When provided, overrides player.x/y for animation playback */
   animatedPosition?: { x: number; y: number };
   /** Previous position for motion trail ghost effect */
@@ -59,7 +65,7 @@ export default function PlayerNode({
   isSelected,
   onSelect,
   onDragEnd,
-  onDragMove,
+  dragBoundFunc,
   animatedPosition,
   ghostPosition,
 }: PlayerNodeProps) {
@@ -72,10 +78,6 @@ export default function PlayerNode({
   const handleDragEnd = (e: KonvaEventObject<DragEvent>) => {
     const node = e.target;
     onDragEnd(player.id, node.x(), node.y());
-  };
-
-  const handleDragMove = (e: KonvaEventObject<DragEvent>) => {
-    onDragMove?.(player.id, e);
   };
 
   // Check if ghost is far enough from current to render
@@ -109,10 +111,10 @@ export default function PlayerNode({
         x={posX}
         y={posY}
         draggable={!isAnimating}
+        dragBoundFunc={dragBoundFunc}
         onClick={() => onSelect(player.id)}
         onTap={() => onSelect(player.id)}
         onDragEnd={handleDragEnd}
-        onDragMove={handleDragMove}
         onMouseEnter={(e) => {
           if (isAnimating) return;
           const stage = e.target.getStage();
