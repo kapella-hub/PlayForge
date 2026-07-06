@@ -73,5 +73,17 @@ Phase 3a (`phase-3a-hardening`, spec `docs/superpowers/specs/2026-07-06-phase3a-
 - `recordQuizScore`'s `client` param sits on a `"use server"` export, making the tx client part of the RPC-callable signature (deserialized args can't carry the client; worst case TypeError noise). Cleaner shape: internal helper + thin action wrapper. Score-writing actions remain client-trusted (documented out-of-scope).
 - Join route: a membership-unique P2002 (double-submit join race) returns the email-exists message — right 409 status, wrong copy; distinguish via `error.meta.target`.
 - Reset-guard check-then-write window: a player joining a second team mid-reset can slip the multi-team guard (tiny window, requires the target's cooperation).
-- Gate regex hygiene: gate 3 matches `translate-` via `slate-` (~25 false positives) — tighten to `\b(zinc|slate|gray|neutral)-`; gate 4's allowlist prose should name the two sanctioned AA-passing `text-white` sites (button destructive, bell badge 4.83:1).
+- Gate regex hygiene: gate 3 matches `translate-` via `slate-` (~25 false positives) — tighten to `\b(zinc|slate|gray|neutral)-`; gate 4's allowlist prose should name the two sanctioned AA-passing `text-white` sites (button destructive, bell badge 4.83:1). *(Gate 3 tightening shipped in Phase 3b's close-out task.)*
+
+## Phase 3b resolution (2026-07-06)
+
+Phase 3b (`phase-3b-engagement`, spec `docs/superpowers/specs/2026-07-06-phase3b-engagement-design.md`) closed the engagement loop. **Resolved:** client-trusted quiz grading (server-side now, answer key stripped from the player payload, per-question reveal via authz-gated `checkAnswer`); mastery-from-viewing redesign (views = familiarity only; quizzes sole SM-2 writer; `nextReviewAt` nullable so view-only rows are never due); streak XP + streak badges on the quiz finish screen (real streak in both reward snapshots; quizzing stamps `lastViewedAt`); quiz celebration (staged, reduced-motion-safe, token-only); Perfect Score badge moved to attempt-level identity (was per-play — over-triggered).
+
+### Still open (newly deferred by Phase 3b reviews/QA)
+
+- **Streak model is per-play `lastViewedAt` state, not an activity log** — a single-play player's day-over-day continuation can miss streak XP, and re-touching an already-counted play can shrink `daysActive`. Needs a data-model change (activity-log table or per-day marker). Bundle with it: `streak.ts:47`'s `i<10` heuristic can report an OLDER run's length as the *current* streak (active today + a 5-day run last month → current=5) — now feeds `extended`/streak XP.
+- `checkAnswer` is a designed answer oracle (spec trade-off): `correctText` returns on every call, harvestable one question at a time; retakes are free anyway. Rate limiting if it ever matters.
+- Authz resolver timing side-channel (unknown = 1 query, foreign = 3, same error) — pre-existing across authz.ts.
+- Join route: membership-unique P2002 (double-submit join) returns the email-exists copy — right status, wrong message (distinguish via `error.meta.target`). [carried from 3a]
+- Minor test/type hygiene: dead `findUnique` mock in recordPlayView test; quiz-score (4,4) duplicate-path test; `InputJsonValue` double-cast could be a type-alias cast.
 - Carried from earlier triage, still open: mastery-from-viewing redesign; client-trusted quiz grading; streak XP on the quiz finish screen; `--category-*` tokens; SVG viz palette; dialog unit tests beyond ConfirmDialog; `@custom-variant dark` revisit (end of Phase 3); leaderboard gold+bronze both accent; routes-library vs assignment-panel vocabulary; rapid double-reorder last-write-wins; special_teams badge treatment.
