@@ -177,9 +177,20 @@ export function DesignerClient({ userId }: { userId: string }) {
   const [animationData, setAnimationData] = useState<AnimationData | null>(null);
   const [animationState, setAnimationState] = useState<AnimationState | null>(null);
 
+  /**
+   * Mirrors previewMode for handleAnimationFrame's stale-frame guard below.
+   * Written synchronously in handleTogglePreview (not a useEffect): AnimationControls
+   * stays mounted with frozen props for the AnimatePresence exit fade after Stop, and
+   * its RAF loop keeps ticking during that fade and calling onFrameUpdate. A useEffect
+   * runs after paint, one tick too late to catch the first stale frame — the ref has to
+   * flip in the same tick as the click so every frame after Stop is rejected.
+   */
+  const previewModeRef = useRef(false);
+
   const handleTogglePreview = useCallback(() => {
     if (previewMode) {
       // Exit preview
+      previewModeRef.current = false;
       setPreviewMode(false);
       setAnimationData(null);
       setAnimationState(null);
@@ -187,6 +198,7 @@ export function DesignerClient({ userId }: { userId: string }) {
       // Enter preview: generate keyframes from current canvas
       if (canvasData.players.length === 0) return;
       const data = generateKeyframes(canvasData);
+      previewModeRef.current = true;
       setAnimationData(data);
       setPreviewMode(true);
       setDrawingRoute(false);
@@ -195,6 +207,8 @@ export function DesignerClient({ userId }: { userId: string }) {
   }, [previewMode, canvasData]);
 
   const handleAnimationFrame = useCallback((state: AnimationState) => {
+    // Ignore frames from an AnimationControls instance still fading out post-Stop.
+    if (!previewModeRef.current) return;
     setAnimationState(state);
   }, []);
 
