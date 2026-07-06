@@ -1,7 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
-import { useState, useEffect, type ReactNode } from "react";
+import { useSyncExternalStore, type ReactNode } from "react";
 
 const staggerContainer = {
   hidden: {},
@@ -46,17 +46,22 @@ export function DashboardFadeIn({ children, delay = 0 }: { children: ReactNode; 
   );
 }
 
-export function TimeGreeting({ name }: { name?: string | null }) {
-  // Empty initial state so server and client render the same empty string.
-  // useEffect runs only on the client after hydration and sets the real greeting.
-  const [greeting, setGreeting] = useState("");
+function timeGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour < 12) return "Good morning";
+  if (hour < 17) return "Good afternoon";
+  return "Good evening";
+}
 
-  useEffect(() => {
-    const hour = new Date().getHours();
-    if (hour < 12) setGreeting("Good morning");
-    else if (hour < 17) setGreeting("Good afternoon");
-    else setGreeting("Good evening");
-  }, []);
+export function TimeGreeting({ name }: { name?: string | null }) {
+  // SSR-safe client flag: server + hydration render "" (matching the server HTML),
+  // then the client swaps in the real greeting — no setState-in-effect.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+  const greeting = mounted ? timeGreeting() : "";
 
   return (
     <div>

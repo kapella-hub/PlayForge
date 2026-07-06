@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useSyncExternalStore } from "react";
 
 type Theme = "dark" | "light" | "system";
 
@@ -27,29 +27,41 @@ function applyTheme(theme: Theme) {
   root.classList.add(resolved);
 }
 
+const themeListeners = new Set<() => void>();
+
+function readStoredTheme(): Theme {
+  return (localStorage.getItem(STORAGE_KEY) as Theme | null) ?? "dark";
+}
+
+function subscribeTheme(callback: () => void) {
+  themeListeners.add(callback);
+  window.addEventListener("storage", callback);
+  return () => {
+    themeListeners.delete(callback);
+    window.removeEventListener("storage", callback);
+  };
+}
+
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("dark");
+  const theme = useSyncExternalStore(subscribeTheme, readStoredTheme, (): Theme => "dark");
 
+  // Apply the resolved class whenever the theme changes (DOM side-effect only).
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    const initial = stored ?? "dark";
-    setThemeState(initial);
-    applyTheme(initial);
-  }, []);
+    applyTheme(theme);
+  }, [theme]);
 
+  // Track the system preference while in "system" mode.
   useEffect(() => {
-    if (theme === "system") {
-      const mq = window.matchMedia("(prefers-color-scheme: dark)");
-      const handler = () => applyTheme("system");
-      mq.addEventListener("change", handler);
-      return () => mq.removeEventListener("change", handler);
-    }
+    if (theme !== "system") return;
+    const mq = window.matchMedia("(prefers-color-scheme: dark)");
+    const handler = () => applyTheme("system");
+    mq.addEventListener("change", handler);
+    return () => mq.removeEventListener("change", handler);
   }, [theme]);
 
   const setTheme = (t: Theme) => {
-    setThemeState(t);
     localStorage.setItem(STORAGE_KEY, t);
-    applyTheme(t);
+    themeListeners.forEach((l) => l()); // notify useSyncExternalStore to re-read
   };
 
   return (

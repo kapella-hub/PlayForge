@@ -29,17 +29,30 @@ export function VersionHistory({
   onRestore,
 }: VersionHistoryProps) {
   const [versions, setVersions] = useState<PlayVersion[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadedKey, setLoadedKey] = useState<string | null>(null);
   const [restoring, startRestore] = useTransition();
   const [previewId, setPreviewId] = useState<string | null>(null);
 
+  const loading = isOpen && !!playId && loadedKey !== playId;
+
   useEffect(() => {
-    if (!isOpen || !playId) return;
-    setLoading(true);
+    if (!isOpen || !playId || loadedKey === playId) return;
+    let active = true;
     getPlayVersions(playId)
-      .then((v) => setVersions(v as PlayVersion[]))
-      .finally(() => setLoading(false));
-  }, [isOpen, playId]);
+      .then((v) => {
+        if (!active) return;
+        setVersions(v as PlayVersion[]);
+        setLoadedKey(playId);
+      })
+      .catch(() => {
+        // Preserve the original's degrade-to-empty-state behavior: mark loaded so
+        // `loading` clears instead of spinning forever on a failed fetch.
+        if (active) setLoadedKey(playId);
+      });
+    return () => {
+      active = false;
+    };
+  }, [isOpen, playId, loadedKey]);
 
   const handleRestore = (version: PlayVersion) => {
     startRestore(async () => {

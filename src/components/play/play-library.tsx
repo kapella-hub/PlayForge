@@ -48,7 +48,7 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
   const [search, setSearch] = useState("");
 
   const plays = useMemo(() => {
-    let pool = activeCategory
+    const pool = activeCategory
       ? PLAY_LIBRARY.filter((p) => p.category === activeCategory)
       : PLAY_LIBRARY;
     if (!search.trim()) return pool;

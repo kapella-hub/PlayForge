@@ -64,32 +64,18 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
     getStageRef: () => stageRef,
   }));
 
-  // Track previous positions for ghost trail during animation
-  const prevPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
-
-  // Update previous positions when animation state changes
-  useEffect(() => {
-    if (animationState) {
-      // We capture the current positions BEFORE updating, to use as ghost
-      const current = prevPositionsRef.current;
-      const newPrev = new Map<string, { x: number; y: number }>();
-      for (const [id, pos] of animationState.playerPositions) {
-        const prev = current.get(id);
-        if (prev) {
-          newPrev.set(id, prev);
-        } else {
-          newPrev.set(id, pos);
-        }
-      }
-      // Schedule update for next render
-      const id = requestAnimationFrame(() => {
-        if (animationState) {
-          prevPositionsRef.current = new Map(animationState.playerPositions);
-        }
-      });
-      return () => cancelAnimationFrame(id);
-    }
-  }, [animationState]);
+  // Ghost trail: previous animation tick's positions, derived during render
+  // (React "adjust state when props change" idiom — no effect, no ref-in-render).
+  const [prevPositions, setPrevPositions] = useState<Map<string, { x: number; y: number }>>(
+    () => new Map(),
+  );
+  const [lastAnimationState, setLastAnimationState] = useState(animationState);
+  if (animationState !== lastAnimationState) {
+    setLastAnimationState(animationState);
+    setPrevPositions(
+      lastAnimationState ? new Map(lastAnimationState.playerPositions) : new Map(),
+    );
+  }
 
   // Compute read order for read indicators
   const readOrder = isAnimating ? getReadOrder(canvasData) : [];
@@ -120,12 +106,14 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
   }, []);
 
   // Reset drawing state when drawingRoute mode is turned off
-  useEffect(() => {
+  const [prevDrawingRoute, setPrevDrawingRoute] = useState(drawingRoute);
+  if (drawingRoute !== prevDrawingRoute) {
+    setPrevDrawingRoute(drawingRoute);
     if (!drawingRoute) {
       setDrawingPlayerId(null);
       setCursorPos(null);
     }
-  }, [drawingRoute]);
+  }
 
   const scaleX = dimensions.width / FIELD.WIDTH;
   const scaleY = dimensions.height / FIELD.HEIGHT;
@@ -155,6 +143,30 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
     },
     [canvasData, onChange, readOnly, scaleX, scaleY],
   );
+
+  /** Finish the current route being drawn — detect route type and clear state */
+  const finishCurrentRoute = useCallback(() => {
+    if (!drawingPlayerId) return;
+
+    // Auto-detect route type from shape
+    const route = canvasData.routes.find(
+      (r) => r.playerId === drawingPlayerId,
+    );
+    if (route && route.waypoints.length >= 2) {
+      const detectedType = detectRouteType(route.waypoints);
+      onChange({
+        ...canvasData,
+        routes: canvasData.routes.map((r) =>
+          r.playerId === drawingPlayerId
+            ? { ...r, routeType: detectedType }
+            : r,
+        ),
+      });
+    }
+
+    setDrawingPlayerId(null);
+    setCursorPos(null);
+  }, [drawingPlayerId, canvasData, onChange]);
 
   const handleSelectPlayer = useCallback(
     (id: string) => {
@@ -221,32 +233,8 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
       // Normal (non-drawing) mode
       onSelectPlayer(id);
     },
-    [drawingRoute, drawingPlayerId, canvasData, onChange, onSelectPlayer, motionMode, onMotionPlayerSelect],
+    [drawingRoute, drawingPlayerId, canvasData, onChange, onSelectPlayer, motionMode, onMotionPlayerSelect, finishCurrentRoute],
   );
-
-  /** Finish the current route being drawn — detect route type and clear state */
-  const finishCurrentRoute = useCallback(() => {
-    if (!drawingPlayerId) return;
-
-    // Auto-detect route type from shape
-    const route = canvasData.routes.find(
-      (r) => r.playerId === drawingPlayerId,
-    );
-    if (route && route.waypoints.length >= 2) {
-      const detectedType = detectRouteType(route.waypoints);
-      onChange({
-        ...canvasData,
-        routes: canvasData.routes.map((r) =>
-          r.playerId === drawingPlayerId
-            ? { ...r, routeType: detectedType }
-            : r,
-        ),
-      });
-    }
-
-    setDrawingPlayerId(null);
-    setCursorPos(null);
-  }, [drawingPlayerId, canvasData, onChange]);
 
   /** Handle keyboard events for finishing routes and undo */
   useEffect(() => {
@@ -531,7 +519,7 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
                   }
                   ghostPosition={
                     isAnimating
-                      ? prevPositionsRef.current.get(player.id)
+                      ? prevPositions.get(player.id)
                       : undefined
                   }
                 />
