@@ -7,7 +7,7 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Build, animate, and share football plays.",
     start_url: "/",
     display: "standalone",
-    background_color: "#0a0a14",
+    background_color: "#071412",
     theme_color: "#0f766e",
     icons: [
       { src: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },

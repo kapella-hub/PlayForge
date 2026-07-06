@@ -188,7 +188,7 @@ textarea {
 /* Selection */
 ::selection {
   background: color-mix(in srgb, var(--ring) 28%, transparent);
-  color: var(--primary-foreground);
+  color: var(--foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {

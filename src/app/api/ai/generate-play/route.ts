@@ -58,6 +58,9 @@ export async function POST(req: Request) {
     const message =
       error instanceof Error ? error.message : "Failed to generate play";
     const status = message.includes("ANTHROPIC_API_KEY") ? 503 : 500;
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json(
+      { error: "Play generation failed. Please try again." },
+      { status },
+    );
   }
 }
