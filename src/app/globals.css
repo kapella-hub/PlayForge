@@ -46,6 +46,17 @@
   --primary-emphasis: #5eead4;
   --offense: #3b82f6;
   --defense: #ef4444;
+  --surface-1-from: rgba(255, 255, 255, 0.05);
+  --surface-1-to: rgba(255, 255, 255, 0.02);
+  --surface-2-from: rgba(15, 29, 26, 0.98);
+  --surface-2-to: rgba(8, 17, 15, 0.98);
+  --body-gradient:
+    radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 28%),
+    radial-gradient(circle at 85% 15%, rgba(217, 119, 6, 0.1), transparent 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 28%),
+    linear-gradient(135deg, #071412 0%, #0b1b17 45%, #081311 100%);
+  --body-grid-color: rgba(255, 255, 255, 0.025);
+  --body-grid-mask: linear-gradient(180deg, rgba(0, 0, 0, 0.42), transparent 72%);
 }
 
 .light {
@@ -68,6 +79,17 @@
   --primary-emphasis: #0f766e;
   --offense: #2563eb;
   --defense: #dc2626;
+  --surface-1-from: rgba(255, 255, 255, 0.92);
+  --surface-1-to: rgba(255, 255, 255, 0.72);
+  --surface-2-from: rgba(255, 255, 255, 0.96);
+  --surface-2-to: rgba(240, 244, 236, 0.92);
+  --body-gradient:
+    radial-gradient(circle at top left, rgba(15, 118, 110, 0.08), transparent 30%),
+    radial-gradient(circle at 85% 15%, rgba(180, 83, 9, 0.06), transparent 26%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.5), transparent 30%),
+    linear-gradient(135deg, #f4f5ef 0%, #eef2e9 45%, #f4f5ef 100%);
+  --body-grid-color: rgba(16, 32, 29, 0.045);
+  --body-grid-mask: linear-gradient(180deg, rgba(0, 0, 0, 0.06), transparent 72%);
 }
 
 html {
@@ -80,11 +102,7 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-image:
-    radial-gradient(circle at top left, rgba(20, 184, 166, 0.12), transparent 28%),
-    radial-gradient(circle at 85% 15%, rgba(217, 119, 6, 0.1), transparent 24%),
-    linear-gradient(180deg, rgba(255, 255, 255, 0.02), transparent 28%),
-    linear-gradient(135deg, #071412 0%, #0b1b17 45%, #081311 100%);
+  background-image: var(--body-gradient);
   background-attachment: fixed;
 }
 
@@ -94,10 +112,18 @@ body::before {
   inset: 0;
   pointer-events: none;
   background-image:
-    linear-gradient(rgba(255, 255, 255, 0.025) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px);
+    linear-gradient(var(--body-grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--body-grid-color) 1px, transparent 1px);
   background-size: 72px 72px;
-  mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.42), transparent 72%);
+  mask-image: var(--body-grid-mask);
+}
+
+.surface-1 {
+  background-image: linear-gradient(180deg, var(--surface-1-from), var(--surface-1-to));
+}
+
+.surface-2 {
+  background-image: linear-gradient(180deg, var(--surface-2-from), var(--surface-2-to));
 }
 
 h1, h2, h3, [data-display="true"] {
@@ -161,8 +187,8 @@ textarea {
 
 /* Selection */
 ::selection {
-  background: rgba(20, 184, 166, 0.28);
-  color: white;
+  background: color-mix(in srgb, var(--ring) 28%, transparent);
+  color: var(--primary-foreground);
 }
 
 @media (prefers-reduced-motion: reduce) {
