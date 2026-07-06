@@ -24,9 +24,9 @@ function saveNotifications(notifications: Notification[]) {
 }
 
 const TYPE_COLOR: Record<string, string> = {
-  player_inactive: "bg-amber-400",
-  quiz_due: "bg-red-400",
-  game_plan: "bg-indigo-400",
+  player_inactive: "bg-warning",
+  quiz_due: "bg-destructive",
+  game_plan: "bg-primary",
 };
 
 export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
@@ -102,12 +102,12 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
     <Popover.Root open={open} onOpenChange={handleOpenChange}>
       <Popover.Trigger asChild>
         <button
-          className="relative flex h-8 w-8 items-center justify-center rounded-md text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white"
+          className="relative flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           aria-label={`Notifications${unreadCount > 0 ? `, ${unreadCount} unread` : ""}`}
         >
           <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold text-white">
+            <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-destructive text-[9px] font-bold text-white">
               {unreadCount > 9 ? "9+" : unreadCount}
             </span>
           )}
@@ -120,7 +120,7 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
           sideOffset={12}
           align="end"
           className={cn(
-            "z-50 w-80 rounded-xl border border-zinc-800 bg-zinc-950/95 shadow-2xl backdrop-blur-xl",
+            "z-50 w-80 rounded-xl border border-border bg-card shadow-2xl backdrop-blur-xl",
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
             "data-[side=right]:slide-in-from-left-2 data-[side=left]:slide-in-from-right-2",
@@ -129,12 +129,12 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
           )}
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-            <span className="text-sm font-semibold text-white">Notifications</span>
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <span className="text-sm font-semibold text-foreground">Notifications</span>
             {notifications.length > 0 && (
               <button
                 onClick={clearAll}
-                className="text-[11px] text-zinc-500 transition-colors hover:text-zinc-300"
+                className="text-[11px] text-muted-foreground transition-colors hover:text-foreground"
               >
                 Clear all
               </button>
@@ -144,7 +144,7 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
           {/* List */}
           <div className="max-h-80 overflow-y-auto">
             {notifications.length === 0 ? (
-              <div className="px-4 py-8 text-center text-xs text-zinc-600">
+              <div className="px-4 py-8 text-center text-xs text-muted-foreground">
                 No notifications
               </div>
             ) : (
@@ -154,22 +154,22 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
                   href={n.href ?? "#"}
                   onClick={() => { markRead(n.id); setOpen(false); }}
                   className={cn(
-                    "block border-b border-zinc-800/50 px-4 py-3 transition-colors hover:bg-zinc-800/40",
-                    !n.read && "bg-indigo-950/20",
+                    "block border-b border-border/50 px-4 py-3 transition-colors hover:bg-secondary",
+                    !n.read && "bg-primary/10",
                   )}
                 >
                   <div className="flex items-start gap-2.5">
                     <span
                       className={cn(
                         "mt-1.5 h-2 w-2 shrink-0 rounded-full",
-                        !n.read ? (TYPE_COLOR[n.type] ?? "bg-emerald-400") : "bg-zinc-600",
+                        !n.read ? (TYPE_COLOR[n.type] ?? "bg-primary") : "bg-muted",
                       )}
                     />
                     <div className="min-w-0 flex-1">
-                      <p className={cn("text-xs font-medium", n.read ? "text-zinc-400" : "text-white")}>
+                      <p className={cn("text-xs font-medium", n.read ? "text-muted-foreground" : "text-foreground")}>
                         {n.title}
                       </p>
-                      <p className="mt-0.5 line-clamp-2 text-[11px] text-zinc-500">
+                      <p className="mt-0.5 line-clamp-2 text-[11px] text-muted-foreground">
                         {n.message}
                       </p>
                     </div>
@@ -179,7 +179,7 @@ export function NotificationBell({ incoming }: { incoming?: Notification[] }) {
             )}
           </div>
 
-          <Popover.Arrow className="fill-zinc-800" />
+          <Popover.Arrow className="fill-border" />
         </Popover.Content>
       </Popover.Portal>
     </Popover.Root>

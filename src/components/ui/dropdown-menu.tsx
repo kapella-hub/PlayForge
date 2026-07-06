@@ -19,7 +19,7 @@ export function DropdownMenu({
           sideOffset={4}
           align="end"
           className={cn(
-            "z-50 min-w-[160px] overflow-hidden rounded-xl border border-zinc-700/60 bg-zinc-900/95 py-1 shadow-xl backdrop-blur-xl",
+            "z-50 min-w-[160px] overflow-hidden rounded-xl border border-border bg-card py-1 shadow-xl backdrop-blur-xl",
             // CSS entry/exit animations via Radix data-state
             "data-[state=open]:animate-in data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95",
             "data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95",
@@ -53,8 +53,8 @@ export function DropdownItem({
       className={cn(
         "flex w-full cursor-default select-none items-center gap-2 px-3 py-1.5 text-sm outline-none transition-colors",
         variant === "destructive"
-          ? "text-red-400 data-[highlighted]:bg-red-500/10 data-[highlighted]:text-red-300"
-          : "text-zinc-300 data-[highlighted]:bg-zinc-800 data-[highlighted]:text-white",
+          ? "text-destructive data-[highlighted]:bg-destructive/10 data-[highlighted]:text-destructive"
+          : "text-secondary-foreground data-[highlighted]:bg-secondary data-[highlighted]:text-foreground",
       )}
     >
       {asChild ? children : <span className="flex items-center gap-2">{children}</span>}
@@ -64,13 +64,13 @@ export function DropdownItem({
 
 // ── Separator ───────────────────────────────────────────────────────────────
 export function DropdownSeparator() {
-  return <Radix.Separator className="my-1 h-px bg-zinc-800" />;
+  return <Radix.Separator className="my-1 h-px bg-border" />;
 }
 
 // ── Label ───────────────────────────────────────────────────────────────────
 export function DropdownLabel({ children }: { children: React.ReactNode }) {
   return (
-    <Radix.Label className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-zinc-500">
+    <Radix.Label className="px-3 py-1.5 text-[11px] font-semibold uppercase tracking-widest text-muted-foreground">
       {children}
     </Radix.Label>
   );
