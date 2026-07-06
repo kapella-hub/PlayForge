@@ -4,6 +4,7 @@ import type { CanvasPlayer, Route } from "@/engine/types";
 import { X, Trash2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion, AnimatePresence } from "framer-motion";
+import { ROUTE_TYPE_GROUPS, normalizeRouteType } from "@/engine/route-types";
 
 interface AssignmentPanelProps {
   player: CanvasPlayer | null;
@@ -14,25 +15,6 @@ interface AssignmentPanelProps {
   onUpdateRouteTypeName?: (playerId: string, routeType: string) => void;
   onMirror?: () => void;
 }
-
-const routeGroups = [
-  {
-    label: "Short",
-    routes: ["Flat", "Slant", "Drag"],
-  },
-  {
-    label: "Medium",
-    routes: ["In", "Out", "Curl", "Dig"],
-  },
-  {
-    label: "Deep",
-    routes: ["Post", "Corner", "Go", "Seam"],
-  },
-  {
-    label: "Other",
-    routes: ["Screen", "Block", "Wheel", "Comeback"],
-  },
-] as const;
 
 /** Visual line style button showing actual line rendering */
 function LineStyleButton({
@@ -198,14 +180,16 @@ export function AssignmentPanel({
                   Route Type
                 </label>
                 <div className="space-y-2">
-                  {routeGroups.map((group) => (
+                  {ROUTE_TYPE_GROUPS.map((group) => (
                     <div key={group.label}>
                       <span className="mb-1 block text-[10px] text-muted-foreground/70">
                         {group.label}
                       </span>
                       <div className="flex flex-wrap gap-1">
                         {group.routes.map((rt) => {
-                          const isActive = route.routeType === rt;
+                          const isActive =
+                            route.routeType !== undefined &&
+                            normalizeRouteType(route.routeType) === rt;
                           return (
                             <button
                               key={rt}

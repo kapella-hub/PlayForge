@@ -64,4 +64,18 @@ describe("AssignmentPanel", () => {
     fireEvent.click(screen.getByRole("button", { name: /mirror/i }));
     expect(onMirror).toHaveBeenCalledTimes(1);
   });
+
+  it("marks the pill active for a legacy lowercase routeType", () => {
+    render(
+      <AssignmentPanel
+        player={player}
+        route={{ ...route, routeType: "slant" }}
+        onClose={() => {}}
+        onDeleteRoute={() => {}}
+        onUpdateRouteType={() => {}}
+      />,
+    );
+    const slant = screen.getByRole("button", { name: "Slant" });
+    expect(slant.className).toContain("bg-primary");
+  });
 });
