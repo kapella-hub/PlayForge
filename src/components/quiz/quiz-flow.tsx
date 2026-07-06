@@ -163,7 +163,15 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
   );
 }
 
-function ScoreCountUp({ value, reduced }: { value: number; reduced: boolean }) {
+function ScoreCountUp({
+  value,
+  reduced,
+  start,
+}: {
+  value: number;
+  reduced: boolean;
+  start: boolean;
+}) {
   const count = useMotionValue(reduced ? value : 0);
   const text = useTransform(count, (v) => `${Math.round(v)}%`);
 
@@ -172,9 +180,10 @@ function ScoreCountUp({ value, reduced }: { value: number; reduced: boolean }) {
       count.set(value);
       return;
     }
+    if (!start) return;
     const controls = animate(count, value, { duration: 1, ease: "easeOut" });
     return () => controls.stop();
-  }, [count, value, reduced]);
+  }, [count, value, reduced, start]);
 
   return <motion.span>{text}</motion.span>;
 }
@@ -182,6 +191,7 @@ function ScoreCountUp({ value, reduced }: { value: number; reduced: boolean }) {
 function QuizCelebration({ reward }: { reward: Reward }) {
   const reduced = useReducedMotion() === true;
   const isPerfect = reward.scorePercent === 100;
+  const [startCount, setStartCount] = useState(false);
 
   const container = {
     hidden: {},
@@ -236,12 +246,13 @@ function QuizCelebration({ reward }: { reward: Reward }) {
 
       <motion.p
         variants={item}
+        onAnimationComplete={() => setStartCount(true)}
         className={cn(
           "text-5xl font-bold",
           isPerfect ? "text-accent" : "text-foreground",
         )}
       >
-        <ScoreCountUp value={reward.scorePercent} reduced={reduced} />
+        <ScoreCountUp value={reward.scorePercent} reduced={reduced} start={startCount} />
       </motion.p>
 
       <motion.p variants={item} className="text-sm text-muted-foreground">
