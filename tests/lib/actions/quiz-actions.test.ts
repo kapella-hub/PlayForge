@@ -10,7 +10,7 @@ vi.mock("@/lib/db", () => {
   };
   return {
     db: {
-      quiz: { update: vi.fn(), delete: vi.fn() },
+      quiz: { update: vi.fn(), delete: vi.fn(), findUnique: vi.fn() },
       $transaction: vi.fn(async (fn: (t: unknown) => unknown) => fn(tx)),
       __tx: tx,
     },
@@ -18,6 +18,7 @@ vi.mock("@/lib/db", () => {
 });
 vi.mock("@/lib/authz", () => ({
   requireQuizAccess: vi.fn(),
+  requireOrgAccess: vi.fn(),
   AuthzError: class AuthzError extends Error {},
 }));
 // Importing quiz-actions.ts pulls in @/lib/auth (NextAuth inits on import) via
@@ -27,9 +28,9 @@ vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 // relative `./progress-actions` import, so vitest intercepts it.
 vi.mock("@/lib/actions/progress-actions", () => ({ recordQuizScore: vi.fn() }));
 
-import { updateQuiz, deleteQuiz } from "@/lib/actions/quiz-actions";
+import { updateQuiz, deleteQuiz, getPlayerQuiz } from "@/lib/actions/quiz-actions";
 import { db } from "@/lib/db";
-import { requireQuizAccess, AuthzError } from "@/lib/authz";
+import { requireQuizAccess, requireOrgAccess, AuthzError } from "@/lib/authz";
 import { recordQuizScore } from "@/lib/actions/progress-actions";
 
 const mockedRequire = vi.mocked(requireQuizAccess);
@@ -121,5 +122,44 @@ describe("submitQuizAttempt (transactional)", () => {
     });
 
     expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith("p1", 1, tx);
+  });
+});
+
+describe("getPlayerQuiz", () => {
+  it("strips the answer key: options carry only text, no correct/correctAnswer/correctZone", async () => {
+    vi.mocked(requireOrgAccess).mockResolvedValue({} as never);
+    vi.mocked(db.quiz.findUnique).mockResolvedValue({
+      id: "q1",
+      orgId: "o1",
+      name: "Coverages",
+      questions: [
+        {
+          id: "qq1",
+          questionType: "multiple_choice",
+          questionText: "Which coverage?",
+          options: [
+            { text: "Cover 2", correct: true },
+            { text: "Cover 3", correct: false },
+          ],
+          correctAnswer: "Cover 2",
+          correctZone: { x: 1 },
+          play: { name: "Smash", formation: "Trips" },
+        },
+      ],
+    } as never);
+
+    const quiz = await getPlayerQuiz("q1");
+
+    expect(vi.mocked(requireOrgAccess)).toHaveBeenCalledWith("o1");
+    const question = quiz!.questions[0];
+    expect(question.options).toEqual([{ text: "Cover 2" }, { text: "Cover 3" }]);
+    expect(question.options![0]).not.toHaveProperty("correct");
+    expect(question).not.toHaveProperty("correctAnswer");
+    expect(question).not.toHaveProperty("correctZone");
+  });
+
+  it("returns null when the quiz does not exist", async () => {
+    vi.mocked(db.quiz.findUnique).mockResolvedValue(null as never);
+    expect(await getPlayerQuiz("nope")).toBeNull();
   });
 });

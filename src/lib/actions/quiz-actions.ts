@@ -40,6 +40,41 @@ export async function getQuiz(id: string) {
   return quiz;
 }
 
+export async function getPlayerQuiz(id: string) {
+  const quiz = await db.quiz.findUnique({
+    where: { id },
+    include: {
+      questions: {
+        include: {
+          play: { select: { name: true, formation: true } },
+        },
+        orderBy: { sortOrder: "asc" },
+      },
+    },
+  });
+  if (!quiz) return null;
+  await requireOrgAccess(quiz.orgId);
+
+  return {
+    id: quiz.id,
+    name: quiz.name,
+    questions: quiz.questions.map((q) => {
+      const options = q.options as
+        | { text: string; correct: boolean }[]
+        | null;
+      return {
+        id: q.id,
+        questionType: q.questionType,
+        questionText: q.questionText,
+        options: options ? options.map((o) => ({ text: o.text })) : null,
+        play: q.play
+          ? { name: q.play.name, formation: q.play.formation }
+          : null,
+      };
+    }),
+  };
+}
+
 export async function getPlayerQuizzes(orgId: string) {
   await requireOrgAccess(orgId);
   return db.quiz.findMany({
