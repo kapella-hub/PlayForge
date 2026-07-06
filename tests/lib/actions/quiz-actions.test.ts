@@ -30,6 +30,7 @@ vi.mock("@/lib/actions/progress-actions", () => ({ recordQuizScore: vi.fn() }));
 import { updateQuiz, deleteQuiz } from "@/lib/actions/quiz-actions";
 import { db } from "@/lib/db";
 import { requireQuizAccess, AuthzError } from "@/lib/authz";
+import { recordQuizScore } from "@/lib/actions/progress-actions";
 
 const mockedRequire = vi.mocked(requireQuizAccess);
 
@@ -100,5 +101,25 @@ describe("submitQuizAttempt (transactional)", () => {
     expect(result).toEqual({ xpEarned: 0, newBadges: [] });
     // the attempt write went through the tx client, not the root db
     expect((db as unknown as { __tx: { quizAttempt: { create: ReturnType<typeof vi.fn> } } }).__tx.quizAttempt.create).toHaveBeenCalledTimes(1);
+  });
+
+  it("passes the tx client (not db) into recordQuizScore", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as { __tx: { quiz: { findUnique: ReturnType<typeof vi.fn> } } }).__tx;
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [{ id: "qq1", playId: "p1" }],
+    });
+
+    await submitQuizAttempt({
+      quizId: "q1",
+      answers: [{ questionId: "qq1", answer: "a", correct: true }],
+    });
+
+    expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith("p1", 1, tx);
   });
 });
