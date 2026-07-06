@@ -192,13 +192,13 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
       <div className="mb-6 flex items-center gap-4">
         <Link
           href="/quizzes"
-          className="rounded-lg p-2 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+          className="rounded-lg p-2 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-white">Create Quiz</h1>
-          <p className="text-sm text-zinc-500">
+          <h1 className="text-2xl font-bold text-foreground">Create Quiz</h1>
+          <p className="text-sm text-muted-foreground">
             Build a quiz to test your players&apos; football knowledge.
           </p>
         </div>
@@ -211,7 +211,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
         </CardHeader>
         <CardContent className="space-y-4 pt-0 sm:pt-0">
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
               Quiz Name
             </label>
             <Input
@@ -221,7 +221,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
             />
           </div>
           <div>
-            <label className="mb-1 block text-xs font-medium text-zinc-400">
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">
               Due Date (optional)
             </label>
             <Input
@@ -235,7 +235,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
       {/* Questions */}
       <div className="mb-4 flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-white">
+        <h2 className="text-lg font-semibold text-foreground">
           Questions ({questions.length})
         </h2>
         <div className="flex gap-2">
@@ -266,10 +266,10 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
       {/* Question list */}
       {questions.length === 0 && !showCustomForm && !showPlayForm && (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-16">
-          <FileQuestion className="mb-3 h-10 w-10 text-zinc-700" />
-          <p className="text-sm text-zinc-500">No questions yet</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16">
+          <FileQuestion className="mb-3 h-10 w-10 text-muted-foreground/60" />
+          <p className="text-sm text-muted-foreground">No questions yet</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Add questions from plays or create custom knowledge questions.
           </p>
         </div>
@@ -282,18 +282,18 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
               <div className="flex items-start gap-3">
                 {/* Drag handle + order controls */}
                 <div className="flex flex-col items-center gap-0.5 pt-0.5">
-                  <GripVertical className="h-4 w-4 text-zinc-600" />
+                  <GripVertical className="h-4 w-4 text-muted-foreground/70" />
                   <button
                     onClick={() => moveQuestion(i, "up")}
                     disabled={i === 0}
-                    className="rounded p-0.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30"
+                    className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85 disabled:opacity-30"
                   >
                     <ChevronUp className="h-3.5 w-3.5" />
                   </button>
                   <button
                     onClick={() => moveQuestion(i, "down")}
                     disabled={i === questions.length - 1}
-                    className="rounded p-0.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300 disabled:opacity-30"
+                    className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85 disabled:opacity-30"
                   >
                     <ChevronDown className="h-3.5 w-3.5" />
                   </button>
@@ -302,7 +302,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                 {/* Question content */}
                 <div className="min-w-0 flex-1">
                   <div className="mb-1.5 flex items-center gap-2">
-                    <span className="text-xs font-medium text-zinc-500">
+                    <span className="text-xs font-medium text-muted-foreground">
                       Q{i + 1}
                     </span>
                     <Badge
@@ -312,7 +312,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                       {q.source === "play" ? "Play" : q.category ?? "Custom"}
                     </Badge>
                   </div>
-                  <p className="mb-2 text-sm text-zinc-200">{q.questionText}</p>
+                  <p className="mb-2 text-sm text-foreground">{q.questionText}</p>
 
                   {/* Preview toggle */}
                   {previewIndex === i ? (
@@ -323,14 +323,14 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                           className={cn(
                             "flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs",
                             oi === q.correctIndex
-                              ? "bg-emerald-500/10 text-emerald-400"
-                              : "bg-zinc-800/50 text-zinc-400",
+                              ? "bg-success/10 text-success"
+                              : "bg-secondary text-muted-foreground",
                           )}
                         >
                           {oi === q.correctIndex && (
                             <CheckCircle2 className="h-3.5 w-3.5 shrink-0" />
                           )}
-                          <span className="mr-2 font-medium text-zinc-500">
+                          <span className="mr-2 font-medium text-muted-foreground">
                             {String.fromCharCode(65 + oi)}.
                           </span>
                           {opt}
@@ -346,14 +346,14 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                     onClick={() =>
                       setPreviewIndex(previewIndex === i ? null : i)
                     }
-                    className="rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+                    className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
                     title="Preview"
                   >
                     <Eye className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => removeQuestion(q.id)}
-                    className="rounded-md p-1.5 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-red-400"
+                    className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-destructive"
                     title="Remove"
                   >
                     <Trash2 className="h-4 w-4" />
@@ -367,14 +367,14 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
       {/* ── Play Question Form ── */}
       {showPlayForm && (
-        <Card className="mt-4 border-emerald-500/30">
+        <Card className="mt-4 border-primary/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Add Question from Play</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-0 sm:pt-0">
             {/* Play selector */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Select Play
               </label>
               <Select
@@ -392,7 +392,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
             {/* Question template */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Question Template
               </label>
               <div className="flex flex-wrap gap-2">
@@ -403,8 +403,8 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                     className={cn(
                       "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                       selectedTemplate === i
-                        ? "bg-indigo-500/20 text-indigo-300"
-                        : "bg-zinc-800 text-zinc-500 hover:text-zinc-300",
+                        ? "bg-primary/10 text-primary-emphasis"
+                        : "bg-secondary text-muted-foreground hover:text-foreground/85",
                     )}
                   >
                     {t.label}
@@ -415,7 +415,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
             {/* Answer options */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Answer Options (mark correct)
               </label>
               <div className="space-y-2">
@@ -426,8 +426,8 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                       className={cn(
                         "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-colors",
                         playCorrect === i
-                          ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
-                          : "border-zinc-700 text-zinc-500 hover:border-zinc-500",
+                          ? "border-success bg-success/10 text-success"
+                          : "border-border text-muted-foreground hover:border-border",
                       )}
                     >
                       {String.fromCharCode(65 + i)}
@@ -469,14 +469,14 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
       {/* ── Custom Question Form ── */}
       {showCustomForm && (
-        <Card className="mt-4 border-emerald-500/30">
+        <Card className="mt-4 border-primary/30">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm">Add Custom Question</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4 pt-0 sm:pt-0">
             {/* Category */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Category
               </label>
               <div className="flex flex-wrap gap-1.5">
@@ -487,8 +487,8 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                     className={cn(
                       "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors",
                       customCategory === cat.value
-                        ? "bg-indigo-500/20 text-indigo-300"
-                        : "bg-zinc-800 text-zinc-500 hover:text-zinc-300",
+                        ? "bg-primary/10 text-primary-emphasis"
+                        : "bg-secondary text-muted-foreground hover:text-foreground/85",
                     )}
                   >
                     {cat.label}
@@ -499,7 +499,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
             {/* Question text */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Question
               </label>
               <Input
@@ -511,7 +511,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
             {/* Answer options */}
             <div>
-              <label className="mb-1 block text-xs font-medium text-zinc-400">
+              <label className="mb-1 block text-xs font-medium text-muted-foreground">
                 Answer Options (mark correct)
               </label>
               <div className="space-y-2">
@@ -522,8 +522,8 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
                       className={cn(
                         "flex h-6 w-6 shrink-0 items-center justify-center rounded-full border text-[10px] font-bold transition-colors",
                         customCorrect === i
-                          ? "border-emerald-500 bg-emerald-500/20 text-emerald-400"
-                          : "border-zinc-700 text-zinc-500 hover:border-zinc-500",
+                          ? "border-success bg-success/10 text-success"
+                          : "border-border text-muted-foreground hover:border-border",
                       )}
                     >
                       {String.fromCharCode(65 + i)}
@@ -567,8 +567,8 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
 
       {/* Save bar */}
       {questions.length > 0 && (
-        <div className="mt-6 flex items-center justify-between rounded-xl border border-zinc-800 bg-zinc-900/80 p-4">
-          <p className="text-xs text-zinc-500">
+        <div className="mt-6 flex items-center justify-between rounded-xl border border-border bg-card p-4">
+          <p className="text-xs text-muted-foreground">
             {questions.length} question{questions.length !== 1 ? "s" : ""} ready
           </p>
           <Button
