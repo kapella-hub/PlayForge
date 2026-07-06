@@ -3,35 +3,44 @@
 import { useState } from "react";
 import { Check, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface Option {
-  text: string;
-  correct: boolean;
-}
+import { checkAnswer } from "@/lib/actions/quiz-actions";
 
 interface MultipleChoiceProps {
+  questionId: string;
   questionText: string;
-  options: Option[];
+  options: { text: string }[];
   onAnswer: (correct: boolean, answer: string) => void;
-  showResult: boolean;
 }
 
 const LABELS = ["A", "B", "C", "D"] as const;
 
 export function MultipleChoice({
+  questionId,
   questionText,
   options,
   onAnswer,
-  showResult,
 }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<number | null>(null);
+  const [checking, setChecking] = useState(false);
+  const [result, setResult] = useState<{
+    correct: boolean;
+    correctText: string | null;
+  } | null>(null);
 
-  function handleSelect(index: number) {
-    if (showResult) return;
+  async function handleSelect(index: number) {
+    if (checking || result !== null) return;
     setSelected(index);
-    const option = options[index];
-    onAnswer(option.correct, option.text);
+    setChecking(true);
+    try {
+      const res = await checkAnswer(questionId, options[index].text);
+      setResult(res);
+      onAnswer(res.correct, options[index].text);
+    } finally {
+      setChecking(false);
+    }
   }
+
+  const locked = checking || result !== null;
 
   return (
     <div className="space-y-4">
@@ -40,14 +49,14 @@ export function MultipleChoice({
       <div className="space-y-2">
         {options.map((option, i) => {
           const isSelected = selected === i;
-          const isCorrect = option.correct;
+          const isCorrectOption = result?.correctText === option.text;
 
           let variant = "border-border bg-secondary hover:border-border";
-          if (showResult && isSelected && isCorrect) {
+          if (result && isSelected && result.correct) {
             variant = "border-success bg-success/30";
-          } else if (showResult && isSelected && !isCorrect) {
+          } else if (result && isSelected && !result.correct) {
             variant = "border-destructive bg-destructive/30";
-          } else if (showResult && isCorrect) {
+          } else if (result && isCorrectOption) {
             variant = "border-success/50 bg-success/20";
           }
 
@@ -55,12 +64,13 @@ export function MultipleChoice({
             <button
               key={i}
               type="button"
-              disabled={showResult}
+              disabled={locked}
               onClick={() => handleSelect(i)}
               className={cn(
                 "flex w-full items-center gap-3 rounded-lg border p-3 text-left transition-colors",
                 variant,
-                showResult && "cursor-default",
+                locked && "cursor-default",
+                checking && isSelected && "opacity-70",
               )}
             >
               <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-secondary text-xs font-semibold text-foreground/85">
@@ -69,10 +79,10 @@ export function MultipleChoice({
               <span className="flex-1 text-sm text-foreground">
                 {option.text}
               </span>
-              {showResult && isSelected && isCorrect && (
+              {result && isSelected && result.correct && (
                 <Check className="h-4 w-4 text-success" />
               )}
-              {showResult && isSelected && !isCorrect && (
+              {result && isSelected && !result.correct && (
                 <X className="h-4 w-4 text-destructive" />
               )}
             </button>

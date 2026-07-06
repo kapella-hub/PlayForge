@@ -12,8 +12,7 @@ interface QuizQuestion {
   id: string;
   questionType: string;
   questionText: string;
-  options: { text: string; correct: boolean }[] | null;
-  correctAnswer: string | null;
+  options: { text: string }[] | null;
   play: { name: string; formation: string } | null;
 }
 
@@ -142,10 +141,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
     );
   }
 
-  const options = (question?.options ?? []) as {
-    text: string;
-    correct: boolean;
-  }[];
+  const options = (question?.options ?? []) as { text: string }[];
 
   return (
     <div className="space-y-6">
@@ -168,10 +164,11 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
       {/* Question */}
       {question && (
         <MultipleChoice
+          key={question.id}
+          questionId={question.id}
           questionText={question.questionText}
           options={options}
           onAnswer={handleAnswer}
-          showResult={showResult}
         />
       )}
 

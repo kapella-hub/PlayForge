@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import { auth } from "@/lib/auth";
-import { getQuiz } from "@/lib/actions/quiz-actions";
+import { getPlayerQuiz } from "@/lib/actions/quiz-actions";
 import { AuthzError } from "@/lib/authz";
 import { QuizFlow } from "@/components/quiz/quiz-flow";
 import { FileQuestion } from "lucide-react";
@@ -18,7 +18,7 @@ export default async function QuizDetailPage({
   const { id } = await params;
   let quiz;
   try {
-    quiz = await getQuiz(id);
+    quiz = await getPlayerQuiz(id);
   } catch (e) {
     if (e instanceof AuthzError) notFound();
     throw e;
@@ -37,24 +37,9 @@ export default async function QuizDetailPage({
     );
   }
 
-  const questions = quiz.questions.map((q) => ({
-    id: q.id,
-    questionType: q.questionType,
-    questionText: q.questionText,
-    options: q.options as { text: string; correct: boolean }[] | null,
-    correctAnswer: q.correctAnswer,
-    play: q.play
-      ? { name: q.play.name, formation: q.play.formation }
-      : null,
-  }));
-
   return (
     <div>
-      <QuizFlow
-        quizId={quiz.id}
-        quizName={quiz.name}
-        questions={questions}
-      />
+      <QuizFlow quizId={quiz.id} quizName={quiz.name} questions={quiz.questions} />
     </div>
   );
 }
