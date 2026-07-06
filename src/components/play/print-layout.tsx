@@ -41,7 +41,7 @@ function WristbandLayout({ plays }: { plays: PlayPrintData[] }) {
   return (
     <div className="print-area">
       {/* Screen-only info */}
-      <p className="mb-4 text-xs text-zinc-500 print:hidden">
+      <p className="mb-4 text-xs text-muted-foreground print:hidden">
         Wristband layout -- {plays.length} play(s) across {pages.length} card(s).
         Press Ctrl+P to print.
       </p>
@@ -101,7 +101,7 @@ function WristbandLayout({ plays }: { plays: PlayPrintData[] }) {
 function PlaybookLayout({ plays }: { plays: PlayPrintData[] }) {
   return (
     <div className="print-area">
-      <p className="mb-4 text-xs text-zinc-500 print:hidden">
+      <p className="mb-4 text-xs text-muted-foreground print:hidden">
         Playbook layout -- {plays.length} play(s), one per page. Press Ctrl+P to
         print.
       </p>

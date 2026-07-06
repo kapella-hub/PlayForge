@@ -103,13 +103,13 @@ export function RoutePicker({ onSelectRoute, isOpen, onClose }: RoutePickerProps
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl border border-zinc-700/60 bg-zinc-900 shadow-2xl">
+      <div className="flex max-h-[80vh] w-full max-w-lg flex-col rounded-2xl border border-border/60 bg-card shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
-          <h2 className="text-sm font-semibold text-zinc-100">Route Library</h2>
+        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+          <h2 className="text-sm font-semibold text-foreground">Route Library</h2>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
           >
             <X className="h-4 w-4" />
           </button>
@@ -117,13 +117,13 @@ export function RoutePicker({ onSelectRoute, isOpen, onClose }: RoutePickerProps
 
         {/* Search */}
         <div className="relative px-5 pt-3">
-          <Search className="absolute left-7.5 top-1/2 h-3.5 w-3.5 translate-y-0 text-zinc-500" />
+          <Search className="absolute left-7.5 top-1/2 h-3.5 w-3.5 translate-y-0 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search routes..."
-            className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/50 py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder:text-zinc-600 outline-none transition-colors focus:border-indigo-500/50"
+            className="w-full rounded-lg border border-border/50 bg-secondary py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-primary/50"
           />
         </div>
 
@@ -138,8 +138,8 @@ export function RoutePicker({ onSelectRoute, isOpen, onClose }: RoutePickerProps
                 activeTab === tab.key ||
                   (tab.key === "screen" &&
                     (activeTab === "screen" || activeTab === "block"))
-                  ? "bg-indigo-500/20 text-indigo-300"
-                  : "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300",
+                  ? "bg-primary/20 text-primary-emphasis"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground/85",
               )}
             >
               {tab.key === "screen" ? "Screen / Block" : tab.label}
@@ -153,21 +153,21 @@ export function RoutePicker({ onSelectRoute, isOpen, onClose }: RoutePickerProps
             <button
               key={route.id}
               onClick={() => onSelectRoute(route)}
-              className="group flex items-start gap-3 rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 text-left transition-all hover:-translate-y-0.5 hover:border-zinc-700 hover:bg-zinc-800/60 hover:shadow-lg"
+              className="group flex items-start gap-3 rounded-xl border border-border bg-card p-3 text-left transition-all hover:-translate-y-0.5 hover:shadow-lg"
             >
               <RoutePreview offsets={route.offsets} />
               <div className="min-w-0 flex-1">
-                <span className="block truncate text-xs font-medium text-zinc-200 group-hover:text-white">
+                <span className="block truncate text-xs font-medium text-foreground group-hover:text-foreground">
                   {route.name}
                 </span>
-                <span className="mt-0.5 block text-[10px] leading-snug text-zinc-500">
+                <span className="mt-0.5 block text-[10px] leading-snug text-muted-foreground">
                   {route.description}
                 </span>
               </div>
             </button>
           ))}
           {routes.length === 0 && (
-            <p className="col-span-2 py-8 text-center text-xs text-zinc-600">
+            <p className="col-span-2 py-8 text-center text-xs text-muted-foreground/70">
               No routes found
             </p>
           )}

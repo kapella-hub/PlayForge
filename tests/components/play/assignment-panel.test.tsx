@@ -30,7 +30,7 @@ describe("AssignmentPanel", () => {
       />,
     );
     const slant = screen.getByRole("button", { name: "Slant" });
-    expect(slant.className).toContain("bg-indigo-600");
+    expect(slant.className).toContain("bg-primary");
   });
 
   it("writes the Capitalized routeType when a pill is clicked", () => {

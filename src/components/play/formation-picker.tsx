@@ -103,18 +103,18 @@ export function FormationPicker({
       {/* Header */}
       <div className="flex items-center justify-between px-1 pb-3">
         <div>
-          <h3 className="text-sm font-semibold text-zinc-200">
+          <h3 className="text-sm font-semibold text-foreground">
             {side === "offense" ? "Offense" : "Defense"} Formations
           </h3>
           {formatLabel && side === "offense" && (
-            <p className="mt-0.5 text-[10px] text-zinc-500">
+            <p className="mt-0.5 text-[10px] text-muted-foreground">
               Showing {formatLabel} formations
             </p>
           )}
         </div>
         <button
           onClick={onClose}
-          className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+          className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
         >
           <X className="h-4 w-4" />
         </button>
@@ -122,13 +122,13 @@ export function FormationPicker({
 
       {/* Search filter */}
       <div className="relative mb-3">
-        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-zinc-500" />
+        <Search className="absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Filter..."
-          className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/50 py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder:text-zinc-600 outline-none transition-colors focus:border-indigo-500/50"
+          className="w-full rounded-lg border border-border/50 bg-secondary py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-primary/50"
         />
       </div>
 
@@ -143,8 +143,8 @@ export function FormationPicker({
               className={cn(
                 "group flex flex-col items-center gap-1.5 rounded-xl border p-2.5 transition-all",
                 isSelected
-                  ? "border-indigo-500/60 bg-indigo-500/10 shadow-[0_0_12px_rgba(99,102,241,0.15)]"
-                  : "border-zinc-800 bg-zinc-900/50 hover:-translate-y-0.5 hover:border-zinc-700 hover:bg-zinc-800/60 hover:shadow-lg",
+                  ? "border-primary/60 bg-primary/10 shadow-[0_0_12px_rgba(15,118,110,0.15)]"
+                  : "border-border bg-card hover:-translate-y-0.5 hover:shadow-lg",
               )}
             >
               <FormationMinimap
@@ -155,13 +155,13 @@ export function FormationPicker({
                 <span
                   className={cn(
                     "truncate text-[11px] font-medium",
-                    isSelected ? "text-indigo-300" : "text-zinc-400 group-hover:text-zinc-200",
+                    isSelected ? "text-primary-emphasis" : "text-muted-foreground group-hover:text-foreground",
                   )}
                 >
                   {f.name}
                 </span>
                 {isSelected && (
-                  <Check className="h-3 w-3 shrink-0 text-indigo-400" />
+                  <Check className="h-3 w-3 shrink-0 text-primary-emphasis" />
                 )}
               </div>
             </button>
@@ -170,7 +170,7 @@ export function FormationPicker({
       </div>
 
       {formations.length === 0 && (
-        <p className="py-6 text-center text-xs text-zinc-600">
+        <p className="py-6 text-center text-xs text-muted-foreground/70">
           No formations found
         </p>
       )}

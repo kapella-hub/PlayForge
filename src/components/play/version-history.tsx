@@ -67,17 +67,17 @@ export function VersionHistory({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 16 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="absolute bottom-4 right-4 top-20 z-30 flex w-72 flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-zinc-900/95 shadow-2xl backdrop-blur-xl"
+          className="absolute bottom-4 right-4 top-20 z-30 flex w-72 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl backdrop-blur-xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
-            <div className="flex items-center gap-2 text-sm font-semibold text-zinc-100">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
+            <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
               <Clock className="h-4 w-4" />
               Version History
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
             >
               <X className="h-4 w-4" />
             </button>
@@ -87,10 +87,10 @@ export function VersionHistory({
           <div className="flex-1 overflow-y-auto p-2">
             {loading ? (
               <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-zinc-500" />
+                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
               </div>
             ) : versions.length === 0 ? (
-              <div className="py-8 text-center text-xs text-zinc-500">
+              <div className="py-8 text-center text-xs text-muted-foreground">
                 No versions yet. Save changes to create versions.
               </div>
             ) : (
@@ -105,15 +105,15 @@ export function VersionHistory({
                     }
                     className={`cursor-pointer rounded-lg border px-3 py-2.5 transition-colors ${
                       previewId === version.id
-                        ? "border-indigo-500/50 bg-indigo-500/10"
-                        : "border-transparent hover:bg-zinc-800/80"
+                        ? "border-primary/50 bg-primary/10"
+                        : "border-transparent hover:bg-secondary"
                     }`}
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-zinc-200">
+                      <span className="text-xs font-medium text-foreground">
                         Version {version.version}
                         {idx === 0 && (
-                          <span className="ml-2 rounded bg-indigo-600/20 px-1.5 py-0.5 text-[10px] text-indigo-400">
+                          <span className="ml-2 rounded bg-primary/20 px-1.5 py-0.5 text-[10px] text-primary-emphasis">
                             Latest
                           </span>
                         )}
@@ -125,7 +125,7 @@ export function VersionHistory({
                             handleRestore(version);
                           }}
                           disabled={restoring}
-                          className="flex items-center gap-1 rounded-md bg-indigo-600 px-2 py-1 text-[10px] font-medium text-white transition-colors hover:bg-indigo-500 disabled:opacity-50"
+                          className="flex items-center gap-1 rounded-md bg-primary px-2 py-1 text-[10px] font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                         >
                           {restoring ? (
                             <Loader2 className="h-3 w-3 animate-spin" />
@@ -136,12 +136,12 @@ export function VersionHistory({
                         </button>
                       )}
                     </div>
-                    <div className="mt-1 text-[10px] text-zinc-500">
+                    <div className="mt-1 text-[10px] text-muted-foreground">
                       {formatDate(version.createdAt)} by{" "}
                       {version.createdBy.name ?? version.createdBy.email}
                     </div>
                     {version.notes && (
-                      <div className="mt-1 text-[10px] text-zinc-400 italic">
+                      <div className="mt-1 text-[10px] text-muted-foreground italic">
                         {version.notes}
                       </div>
                     )}

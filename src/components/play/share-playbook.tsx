@@ -73,12 +73,12 @@ export function SharePlaybook({
   }
 
   return (
-    <div className="rounded-lg border border-zinc-800 bg-[#111122] p-4 space-y-4">
+    <div className="rounded-lg border border-border bg-card p-4 space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-white">Share Playbook</h3>
+        <h3 className="text-sm font-semibold text-foreground">Share Playbook</h3>
         <button
           onClick={() => setOpen(false)}
-          className="text-zinc-500 hover:text-zinc-300"
+          className="text-muted-foreground hover:text-foreground/85"
         >
           <X className="h-4 w-4" />
         </button>
@@ -101,29 +101,29 @@ export function SharePlaybook({
         </Button>
       </div>
 
-      {error && <p className="text-xs text-red-400">{error}</p>}
+      {error && <p className="text-xs text-destructive">{error}</p>}
 
       {shares.length > 0 && (
         <div className="space-y-2">
-          <p className="text-[11px] font-medium uppercase tracking-wider text-zinc-500">
+          <p className="text-[11px] font-medium uppercase tracking-wider text-muted-foreground">
             Shared with
           </p>
           {shares.map((share) => (
             <div
               key={share.id}
-              className="flex items-center justify-between rounded-md bg-zinc-800/50 px-3 py-2"
+              className="flex items-center justify-between rounded-md bg-secondary px-3 py-2"
             >
               <div>
-                <p className="text-xs font-medium text-white">
+                <p className="text-xs font-medium text-foreground">
                   {share.sharedWith.name}
                 </p>
-                <p className="text-[11px] text-zinc-500">
+                <p className="text-[11px] text-muted-foreground">
                   {share.sharedWith.slug}
                 </p>
               </div>
               <button
                 onClick={() => handleRevoke(share.id)}
-                className="text-xs text-red-400 hover:text-red-300"
+                className="text-xs text-destructive hover:text-destructive/90"
                 disabled={isPending}
               >
                 Revoke

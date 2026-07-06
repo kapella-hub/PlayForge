@@ -87,19 +87,19 @@ export function AIGenerator({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: -16 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="absolute bottom-4 left-4 top-20 z-30 flex w-80 flex-col overflow-hidden rounded-2xl border border-white/[0.06] bg-zinc-900/95 shadow-2xl backdrop-blur-xl"
+          className="absolute bottom-4 left-4 top-20 z-30 flex w-80 flex-col overflow-hidden rounded-2xl border border-border bg-card shadow-2xl backdrop-blur-xl"
         >
           {/* Header */}
-          <div className="flex items-center justify-between border-b border-zinc-800 px-4 py-3">
+          <div className="flex items-center justify-between border-b border-border px-4 py-3">
             <div className="flex items-center gap-2">
-              <Sparkles className="h-4 w-4 text-violet-400" />
-              <h2 className="text-sm font-semibold text-zinc-100">
+              <Sparkles className="h-4 w-4 text-accent" />
+              <h2 className="text-sm font-semibold text-foreground">
                 AI Play Generator
               </h2>
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
             >
               <X className="h-4 w-4" />
             </button>
@@ -109,7 +109,7 @@ export function AIGenerator({
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {/* Description input */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
                 Describe your play
               </label>
               <textarea
@@ -117,7 +117,7 @@ export function AIGenerator({
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="e.g., Play action bootleg with corner route and flat..."
                 rows={3}
-                className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/80 px-3 py-2 text-sm text-white placeholder-zinc-600 outline-none transition-colors focus:border-violet-500/50 resize-none"
+                className="w-full rounded-lg border border-border/50 bg-secondary px-3 py-2 text-sm text-foreground placeholder-muted-foreground/70 outline-none transition-colors focus:border-primary/50 resize-none"
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
                     handleGenerate();
@@ -128,7 +128,7 @@ export function AIGenerator({
 
             {/* Formation selector */}
             <div>
-              <label className="mb-1.5 block text-xs font-medium text-zinc-400">
+              <label className="mb-1.5 block text-xs font-medium text-muted-foreground">
                 Formation (optional)
               </label>
               <Select
@@ -148,7 +148,7 @@ export function AIGenerator({
             <button
               onClick={handleGenerate}
               disabled={loading || !description.trim()}
-              className="flex w-full items-center justify-center gap-2 rounded-lg bg-violet-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-violet-500/25 transition-colors hover:bg-violet-500 disabled:pointer-events-none disabled:opacity-50"
+              className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-colors hover:bg-primary/90 disabled:pointer-events-none disabled:opacity-50"
             >
               {loading ? (
                 <>
@@ -165,7 +165,7 @@ export function AIGenerator({
 
             {/* Error */}
             {error && (
-              <div className="rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-xs text-red-400">
+              <div className="rounded-lg border border-destructive/20 bg-destructive/10 px-3 py-2 text-xs text-destructive">
                 {error}
               </div>
             )}
@@ -177,12 +177,12 @@ export function AIGenerator({
                 animate={{ opacity: 1, y: 0 }}
                 className="space-y-3"
               >
-                <div className="rounded-lg border border-emerald-500/20 bg-emerald-500/10 px-3 py-2">
-                  <div className="flex items-center gap-1.5 text-xs font-medium text-emerald-400">
+                <div className="rounded-lg border border-success/20 bg-success/10 px-3 py-2">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-success">
                     <Check className="h-3.5 w-3.5" />
                     Play generated
                   </div>
-                  <p className="mt-1 text-[10px] text-zinc-400">
+                  <p className="mt-1 text-[10px] text-muted-foreground">
                     {result.players.length} players, {result.routes.length}{" "}
                     routes
                     {result.meta.formation
@@ -192,7 +192,7 @@ export function AIGenerator({
                 </div>
                 <button
                   onClick={handleApply}
-                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-emerald-500/25 transition-colors hover:bg-emerald-500"
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-medium text-primary-foreground shadow-lg shadow-primary/25 transition-colors hover:bg-primary/90"
                 >
                   Apply to Canvas
                 </button>
@@ -202,7 +202,7 @@ export function AIGenerator({
             {/* Example prompts */}
             {!result && !loading && (
               <div>
-                <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-zinc-600">
+                <p className="mb-2 text-[10px] font-medium uppercase tracking-wider text-muted-foreground/70">
                   Try these
                 </p>
                 <div className="space-y-1.5">
@@ -210,7 +210,7 @@ export function AIGenerator({
                     <button
                       key={prompt}
                       onClick={() => setDescription(prompt)}
-                      className="block w-full rounded-md px-2.5 py-1.5 text-left text-xs text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-zinc-200"
+                      className="block w-full rounded-md px-2.5 py-1.5 text-left text-xs text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
                     >
                       &ldquo;{prompt}&rdquo;
                     </button>
@@ -221,13 +221,13 @@ export function AIGenerator({
           </div>
 
           {/* Footer hint */}
-          <div className="border-t border-zinc-800 px-4 py-2">
-            <p className="text-[10px] text-zinc-600">
-              <kbd className="rounded bg-zinc-800 px-1 py-0.5 text-zinc-500">
+          <div className="border-t border-border px-4 py-2">
+            <p className="text-[10px] text-muted-foreground/70">
+              <kbd className="rounded bg-secondary px-1 py-0.5 text-muted-foreground">
                 {"\u2318"}Enter
               </kbd>{" "}
               to generate &middot;{" "}
-              <kbd className="rounded bg-zinc-800 px-1 py-0.5 text-zinc-500">
+              <kbd className="rounded bg-secondary px-1 py-0.5 text-muted-foreground">
                 A
               </kbd>{" "}
               to toggle panel

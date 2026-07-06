@@ -72,7 +72,7 @@ export function PlayViewer({ canvasData, className, autoPlay = false, highlightP
       {/* Download button */}
       <button
         onClick={handleExport}
-        className="absolute right-2 top-2 z-10 rounded-md bg-zinc-900/70 p-1.5 text-zinc-400 backdrop-blur-sm transition-colors hover:bg-zinc-800 hover:text-white"
+        className="absolute right-2 top-2 z-10 rounded-md bg-card/70 p-1.5 text-muted-foreground backdrop-blur-sm transition-colors hover:bg-secondary hover:text-foreground"
         title="Download as PNG"
       >
         <Download className="h-3.5 w-3.5" />

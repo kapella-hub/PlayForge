@@ -23,6 +23,7 @@ function categoryLabel(cat: string): string {
     .join(" ");
 }
 
+// play-type categorical palette — tokenize as --category-* in Phase 3 (allowlisted in Phase 2 gates)
 /** Badge color by play type */
 function playTypeBadge(type: PlayTemplate["playType"]): string {
   switch (type) {
@@ -64,13 +65,13 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
 
   return (
     <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-zinc-700/60 bg-zinc-900 shadow-2xl">
+      <div className="flex max-h-[85vh] w-full max-w-2xl flex-col rounded-2xl border border-border/60 bg-card shadow-2xl">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-zinc-800 px-5 py-3">
-          <h2 className="text-sm font-semibold text-zinc-100">Play Library</h2>
+        <div className="flex items-center justify-between border-b border-border px-5 py-3">
+          <h2 className="text-sm font-semibold text-foreground">Play Library</h2>
           <button
             onClick={onClose}
-            className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
           >
             <X className="h-4 w-4" />
           </button>
@@ -78,13 +79,13 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
 
         {/* Search */}
         <div className="relative px-5 pt-3">
-          <Search className="absolute left-7.5 top-1/2 h-3.5 w-3.5 translate-y-0 text-zinc-500" />
+          <Search className="absolute left-7.5 top-1/2 h-3.5 w-3.5 translate-y-0 text-muted-foreground" />
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search plays..."
-            className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/50 py-1.5 pl-8 pr-3 text-xs text-zinc-200 placeholder:text-zinc-600 outline-none transition-colors focus:border-indigo-500/50"
+            className="w-full rounded-lg border border-border/50 bg-secondary py-1.5 pl-8 pr-3 text-xs text-foreground placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-primary/50"
           />
         </div>
 
@@ -95,8 +96,8 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
             className={cn(
               "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
               activeCategory === null
-                ? "bg-indigo-500/20 text-indigo-300"
-                : "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300",
+                ? "bg-primary/20 text-primary-emphasis"
+                : "text-muted-foreground hover:bg-secondary hover:text-foreground/85",
             )}
           >
             All
@@ -108,8 +109,8 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
               className={cn(
                 "rounded-lg px-3 py-1 text-xs font-medium transition-colors",
                 activeCategory === cat
-                  ? "bg-indigo-500/20 text-indigo-300"
-                  : "text-zinc-500 hover:bg-zinc-800 hover:text-zinc-300",
+                  ? "bg-primary/20 text-primary-emphasis"
+                  : "text-muted-foreground hover:bg-secondary hover:text-foreground/85",
               )}
             >
               {categoryLabel(cat)}
@@ -122,16 +123,16 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
           {plays.map((play) => (
             <div
               key={play.id}
-              className="group flex flex-col justify-between rounded-xl border border-zinc-800 bg-zinc-900/50 p-3 transition-all hover:border-zinc-700 hover:bg-zinc-800/60 hover:shadow-lg"
+              className="group flex flex-col justify-between rounded-xl border border-border bg-card p-3 transition-all hover:shadow-lg"
             >
               <div>
-                <span className="block truncate text-xs font-semibold text-zinc-200 group-hover:text-white">
+                <span className="block truncate text-xs font-semibold text-foreground group-hover:text-foreground">
                   {play.name}
                 </span>
-                <span className="mt-0.5 block text-[10px] text-zinc-500">
+                <span className="mt-0.5 block text-[10px] text-muted-foreground">
                   {play.formation}
                 </span>
-                <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-zinc-500">
+                <p className="mt-1 line-clamp-2 text-[10px] leading-snug text-muted-foreground">
                   {play.description}
                 </p>
               </div>
@@ -146,7 +147,7 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
                 </span>
                 <button
                   onClick={() => onImportPlay(play)}
-                  className="flex items-center gap-1 rounded-md bg-indigo-500/20 px-2 py-1 text-[10px] font-medium text-indigo-300 transition-colors hover:bg-indigo-500/30"
+                  className="flex items-center gap-1 rounded-md bg-primary/20 px-2 py-1 text-[10px] font-medium text-primary-emphasis transition-colors hover:bg-primary/30"
                 >
                   <Download className="h-3 w-3" />
                   Import
@@ -155,7 +156,7 @@ export function PlayLibrary({ onImportPlay, isOpen, onClose }: PlayLibraryProps)
             </div>
           ))}
           {plays.length === 0 && (
-            <p className="col-span-full py-8 text-center text-xs text-zinc-600">
+            <p className="col-span-full py-8 text-center text-xs text-muted-foreground/70">
               No plays found
             </p>
           )}

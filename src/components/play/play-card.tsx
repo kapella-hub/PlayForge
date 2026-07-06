@@ -54,9 +54,9 @@ export function PlayCard({
   return (
     <div className="relative">
       <Link href={`/designer?playId=${id}`}>
-        <Card className="transition-colors hover:border-zinc-700">
+        <Card className="transition-colors">
           {/* Thumbnail area */}
-          <div className="flex h-36 items-center justify-center rounded-t-xl bg-green-900/30">
+          <div className="flex h-36 items-center justify-center rounded-t-xl bg-secondary">
             {thumbnailUrl ? (
               <img
                 src={thumbnailUrl}
@@ -64,14 +64,14 @@ export function PlayCard({
                 className="h-full w-full rounded-t-xl object-cover"
               />
             ) : (
-              <span className="text-xs text-zinc-600">No preview</span>
+              <span className="text-xs text-muted-foreground/70">No preview</span>
             )}
           </div>
 
           <CardContent className="p-3">
-            <h3 className="truncate text-sm font-semibold text-white">{name}</h3>
+            <h3 className="truncate text-sm font-semibold text-foreground">{name}</h3>
             <div className="mt-1.5 flex items-center gap-2">
-              <span className="text-xs text-zinc-500">{formation}</span>
+              <span className="text-xs text-muted-foreground">{formation}</span>
               <Badge variant="outline" className="text-[10px]">
                 {playType.replace("_", " ")}
               </Badge>
@@ -85,7 +85,7 @@ export function PlayCard({
         <DropdownMenu
           trigger={
             <button
-              className="rounded-md bg-zinc-900/70 p-1 text-zinc-400 backdrop-blur-sm transition-colors hover:bg-zinc-800 hover:text-white"
+              className="rounded-md bg-card/70 p-1 text-muted-foreground backdrop-blur-sm transition-colors hover:bg-secondary hover:text-foreground"
               aria-label="Play actions"
             >
               <MoreVertical className="h-4 w-4" />
@@ -93,7 +93,7 @@ export function PlayCard({
           }
         >
           <DropdownItem asChild>
-            <Link href={`/designer?playId=${id}`} className="flex items-center gap-2 px-3 py-1.5 text-sm text-zinc-300 outline-none transition-colors hover:bg-zinc-800 hover:text-white">
+            <Link href={`/designer?playId=${id}`} className="flex items-center gap-2 px-3 py-1.5 text-sm text-foreground/85 outline-none transition-colors hover:bg-secondary hover:text-foreground">
               <Pencil className="h-3.5 w-3.5" />
               Edit
             </Link>

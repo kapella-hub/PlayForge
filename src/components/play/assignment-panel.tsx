@@ -52,8 +52,8 @@ function LineStyleButton({
       className={cn(
         "flex flex-col items-center gap-1 rounded-lg border px-3 py-2 transition-all",
         active
-          ? "border-indigo-500/60 bg-indigo-500/10"
-          : "border-zinc-700/50 bg-zinc-800/50 hover:border-zinc-600",
+          ? "border-primary/60 bg-primary/10"
+          : "border-border/50 bg-secondary hover:border-border",
       )}
     >
       <svg width="36" height="8" viewBox="0 0 36 8">
@@ -93,7 +93,7 @@ function LineStyleButton({
       <span
         className={cn(
           "text-[10px] font-medium",
-          active ? "text-indigo-300" : "text-zinc-500",
+          active ? "text-primary-emphasis" : "text-muted-foreground",
         )}
       >
         {label}
@@ -120,7 +120,7 @@ export function AssignmentPanel({
           animate={{ opacity: 1, x: 0 }}
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="flex flex-col gap-4 rounded-2xl border border-white/[0.06] bg-zinc-900/90 p-4 shadow-2xl backdrop-blur-xl"
+          className="flex flex-col gap-4 rounded-2xl border border-border bg-card p-4 shadow-2xl backdrop-blur-xl"
         >
           {/* ── Player identity ── */}
           <div className="flex items-start justify-between">
@@ -128,26 +128,26 @@ export function AssignmentPanel({
               {/* Colored player circle */}
               <div
                 className={cn(
-                  "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-white shadow-lg",
+                  "flex h-10 w-10 items-center justify-center rounded-full text-sm font-bold text-primary-foreground shadow-lg",
                   player.side === "offense"
-                    ? "bg-blue-600 shadow-blue-500/25"
-                    : "bg-red-600 shadow-red-500/25",
+                    ? "bg-offense shadow-offense/25"
+                    : "bg-defense shadow-defense/25",
                 )}
               >
                 {player.label}
               </div>
               <div>
-                <div className="text-sm font-semibold text-white">
+                <div className="text-sm font-semibold text-foreground">
                   {player.label}
                 </div>
-                <div className="flex items-center gap-1.5 text-[11px] text-zinc-500">
+                <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
                   <span>{player.id}</span>
-                  <span className="text-zinc-700">&middot;</span>
+                  <span className="text-muted-foreground/60">&middot;</span>
                   <span
                     className={
                       player.side === "offense"
-                        ? "text-blue-400"
-                        : "text-red-400"
+                        ? "text-offense"
+                        : "text-defense"
                     }
                   >
                     {player.side}
@@ -157,7 +157,7 @@ export function AssignmentPanel({
             </div>
             <button
               onClick={onClose}
-              className="rounded-md p-1.5 text-zinc-600 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+              className="rounded-md p-1.5 text-muted-foreground/70 transition-colors hover:bg-secondary hover:text-foreground/85"
             >
               <X className="h-4 w-4" />
             </button>
@@ -167,7 +167,7 @@ export function AssignmentPanel({
             <>
               {/* ── Line style ── */}
               <div>
-                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Line Style
                 </label>
                 <div className="grid grid-cols-3 gap-1.5">
@@ -194,13 +194,13 @@ export function AssignmentPanel({
 
               {/* ── Route type pills ── */}
               <div>
-                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-zinc-500">
+                <label className="mb-2 block text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
                   Route Type
                 </label>
                 <div className="space-y-2">
                   {routeGroups.map((group) => (
                     <div key={group.label}>
-                      <span className="mb-1 block text-[10px] text-zinc-600">
+                      <span className="mb-1 block text-[10px] text-muted-foreground/70">
                         {group.label}
                       </span>
                       <div className="flex flex-wrap gap-1">
@@ -213,8 +213,8 @@ export function AssignmentPanel({
                               className={cn(
                                 "rounded-full px-2.5 py-1 text-[11px] font-medium transition-all",
                                 isActive
-                                  ? "bg-indigo-600 text-white"
-                                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200",
+                                  ? "bg-primary text-primary-foreground"
+                                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground",
                               )}
                             >
                               {rt}
@@ -228,7 +228,7 @@ export function AssignmentPanel({
               </div>
 
               {/* Waypoints info */}
-              <div className="rounded-lg bg-zinc-800/50 px-3 py-2 text-xs text-zinc-500">
+              <div className="rounded-lg bg-secondary px-3 py-2 text-xs text-muted-foreground">
                 {route.waypoints.length} waypoint
                 {route.waypoints.length !== 1 ? "s" : ""} drawn
               </div>
@@ -237,14 +237,14 @@ export function AssignmentPanel({
               <div className="flex gap-2">
                 <button
                   onClick={onDeleteRoute}
-                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-red-500/20 bg-red-500/5 px-3 py-2 text-xs font-medium text-red-400 transition-colors hover:bg-red-500/10"
+                  className="flex flex-1 items-center justify-center gap-1.5 rounded-lg border border-destructive/20 bg-destructive/5 px-3 py-2 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                   Clear Route
                 </button>
                 <button
                   onClick={onMirror}
-                  className="flex items-center justify-center gap-1.5 rounded-lg border border-zinc-700/50 bg-zinc-800/50 px-3 py-2 text-xs font-medium text-zinc-400 transition-colors hover:bg-zinc-800"
+                  className="flex items-center justify-center gap-1.5 rounded-lg border border-border/50 bg-secondary px-3 py-2 text-xs font-medium text-muted-foreground transition-colors hover:bg-secondary/80"
                   title="Mirror to opposite side"
                 >
                   <Copy className="h-3.5 w-3.5" />
@@ -253,9 +253,9 @@ export function AssignmentPanel({
               </div>
             </>
           ) : (
-            <div className="rounded-xl border border-dashed border-zinc-800 px-4 py-6 text-center">
-              <p className="text-xs text-zinc-500">
-                Press <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-zinc-400">D</kbd>{" "}
+            <div className="rounded-xl border border-dashed border-border px-4 py-6 text-center">
+              <p className="text-xs text-muted-foreground">
+                Press <kbd className="rounded bg-secondary px-1.5 py-0.5 text-muted-foreground">D</kbd>{" "}
                 to enter drawing mode, then click on the field to draw a route.
               </p>
             </div>

@@ -212,19 +212,19 @@ export function AnimationControls({
   const progress = animationData.duration > 0 ? (time / animationData.duration) * 100 : 0;
 
   return (
-    <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-white/[0.08] bg-zinc-950/80 px-5 py-3 shadow-2xl backdrop-blur-xl">
+    <div className="pointer-events-auto flex items-center gap-3 rounded-2xl border border-border bg-card px-5 py-3 shadow-2xl backdrop-blur-xl">
       {/* Transport controls */}
       <div className="flex items-center gap-1">
         <button
           onClick={handleJumpToStart}
-          className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           title="Jump to start"
         >
           <SkipBack className="h-4 w-4" />
         </button>
         <button
           onClick={handleStepBack}
-          className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           title="Step back 0.1s"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -232,7 +232,7 @@ export function AnimationControls({
 
         <button
           onClick={handlePlayPause}
-          className="mx-1 flex h-9 w-9 items-center justify-center rounded-full bg-indigo-600 text-white shadow-lg shadow-indigo-500/30 transition-all hover:bg-indigo-500 hover:shadow-indigo-500/50"
+          className="mx-1 flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg shadow-primary/30 transition-all hover:bg-primary/90 hover:shadow-primary/50"
           title={isPlaying ? "Pause (Space)" : "Play (Space)"}
         >
           {isPlaying ? (
@@ -244,14 +244,14 @@ export function AnimationControls({
 
         <button
           onClick={handleStepForward}
-          className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           title="Step forward 0.1s"
         >
           <ChevronRight className="h-4 w-4" />
         </button>
         <button
           onClick={handleJumpToEnd}
-          className="rounded-lg p-1.5 text-zinc-400 transition-colors hover:bg-white/10 hover:text-white"
+          className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground"
           title="Jump to end"
         >
           <SkipForward className="h-4 w-4" />
@@ -262,10 +262,10 @@ export function AnimationControls({
       <div className="relative flex flex-1 items-center gap-3">
         <div className="relative flex-1">
           {/* Track background */}
-          <div className="h-1.5 w-full rounded-full bg-zinc-700/60">
+          <div className="h-1.5 w-full rounded-full bg-secondary">
             {/* Filled portion */}
             <div
-              className="h-full rounded-full bg-gradient-to-r from-indigo-500 to-indigo-400 transition-[width] duration-75"
+              className="h-full rounded-full bg-gradient-to-r from-primary to-primary-emphasis transition-[width] duration-75"
               style={{ width: `${progress}%` }}
             />
           </div>
@@ -281,13 +281,13 @@ export function AnimationControls({
           />
           {/* Thumb indicator */}
           <div
-            className="pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-indigo-500 shadow-md"
+            className="pointer-events-none absolute top-1/2 h-3.5 w-3.5 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-foreground bg-primary shadow-md"
             style={{ left: `${progress}%` }}
           />
         </div>
 
         {/* Time display */}
-        <span className="min-w-[80px] text-right font-mono text-xs text-zinc-400">
+        <span className="min-w-[80px] text-right font-mono text-xs text-muted-foreground">
           {time.toFixed(1)}s / {animationData.duration.toFixed(1)}s
         </span>
       </div>

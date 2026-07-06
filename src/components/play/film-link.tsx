@@ -41,16 +41,16 @@ export function FilmLinkEditor({
 
   return (
     <div className="space-y-2">
-      <label className="text-xs font-medium text-zinc-400">Film URL</label>
+      <label className="text-xs font-medium text-muted-foreground">Film URL</label>
       <input
         type="url"
         value={filmUrl}
         onChange={(e) => onFilmUrlChange(e.target.value)}
         placeholder="https://youtube.com/watch?v=..."
-        className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/80 px-3 py-2 text-sm text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-indigo-500/50"
+        className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-ring"
       />
 
-      <label className="text-xs font-medium text-zinc-400">
+      <label className="text-xs font-medium text-muted-foreground">
         Timestamp (MM:SS)
       </label>
       <input
@@ -59,7 +59,7 @@ export function FilmLinkEditor({
         onChange={(e) => setTsInput(e.target.value)}
         onBlur={handleTimestampBlur}
         placeholder="2:34"
-        className="w-full rounded-lg border border-zinc-700/50 bg-zinc-800/80 px-3 py-2 text-sm text-zinc-200 outline-none placeholder:text-zinc-600 focus:border-indigo-500/50"
+        className="w-full rounded-lg border border-border bg-secondary px-3 py-2 text-sm text-foreground outline-none placeholder:text-muted-foreground/70 focus:border-ring"
       />
 
       {filmUrl && (
@@ -67,7 +67,7 @@ export function FilmLinkEditor({
           href={previewUrl}
           target="_blank"
           rel="noopener noreferrer"
-          className="inline-flex items-center gap-1.5 text-xs font-medium text-indigo-400 hover:text-indigo-300"
+          className="inline-flex items-center gap-1.5 text-xs font-medium text-primary-emphasis hover:text-primary"
         >
           <Film className="h-3.5 w-3.5" />
           {filmTimestamp
@@ -97,7 +97,7 @@ export function FilmLinkDisplay({
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-400 hover:text-indigo-300"
+      className="inline-flex items-center gap-1.5 text-sm font-medium text-primary-emphasis hover:text-primary"
     >
       <ExternalLink className="h-4 w-4" />
       {filmTimestamp
