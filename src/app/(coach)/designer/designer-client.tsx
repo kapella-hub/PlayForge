@@ -32,6 +32,12 @@ import { generateKeyframes } from "@/engine/animation-engine";
 import { exportPlayAsImage, getStageDataURL } from "@/engine/export";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
 import {
+  NUDGE_STEP,
+  NUDGE_STEP_SHIFT,
+  isNewNudgeBurst,
+  nudgePlayers,
+} from "@/engine/nudge";
+import {
   scopedDraftKey,
   isOwnDraftKey,
   findLatestOwnDraftKey,
@@ -196,6 +202,9 @@ export function DesignerClient({ userId }: { userId: string }) {
   const undoRef = useRef<CanvasData[]>([]);
   const redoRef = useRef<CanvasData[]>([]);
 
+  /** Timestamp (ms) of the last arrow nudge, for undo-burst coalescing. */
+  const lastNudgeAtRef = useRef(0);
+
   const pushHistory = useCallback((data: CanvasData) => {
     undoRef.current = [...undoRef.current.slice(-49), data];
     redoRef.current = []; // clear redo on new action
@@ -258,6 +267,24 @@ export function DesignerClient({ userId }: { userId: string }) {
     setCanvasData(mirrorPlay(canvasData));
     setDirty(true);
   }, [canvasData, pushHistory]);
+
+  const nudge = useCallback(
+    (dx: number, dy: number) => {
+      if (previewMode || !selectedPlayerId) return;
+      const now = Date.now();
+      // Start a new undo entry only when a burst begins (>800ms gap).
+      if (isNewNudgeBurst(now, lastNudgeAtRef.current)) {
+        pushHistory(canvasData);
+      }
+      lastNudgeAtRef.current = now; // ref write in an event handler: lint-safe
+      setCanvasData({
+        ...canvasData,
+        players: nudgePlayers(canvasData.players, selectedPlayerId, dx, dy),
+      });
+      setDirty(true);
+    },
+    [previewMode, selectedPlayerId, canvasData, pushHistory],
+  );
 
   const handleSave = useCallback(async () => {
     setSaving(true);
@@ -622,6 +649,14 @@ export function DesignerClient({ userId }: { userId: string }) {
       },
       ignoreInputs: true,
     },
+    { key: "ArrowUp", handler: () => nudge(0, -NUDGE_STEP), ignoreInputs: true },
+    { key: "ArrowDown", handler: () => nudge(0, NUDGE_STEP), ignoreInputs: true },
+    { key: "ArrowLeft", handler: () => nudge(-NUDGE_STEP, 0), ignoreInputs: true },
+    { key: "ArrowRight", handler: () => nudge(NUDGE_STEP, 0), ignoreInputs: true },
+    { key: "ArrowUp", shift: true, handler: () => nudge(0, -NUDGE_STEP_SHIFT), ignoreInputs: true },
+    { key: "ArrowDown", shift: true, handler: () => nudge(0, NUDGE_STEP_SHIFT), ignoreInputs: true },
+    { key: "ArrowLeft", shift: true, handler: () => nudge(-NUDGE_STEP_SHIFT, 0), ignoreInputs: true },
+    { key: "ArrowRight", shift: true, handler: () => nudge(NUDGE_STEP_SHIFT, 0), ignoreInputs: true },
   ]);
 
   const selectedPlayer =
@@ -908,6 +943,7 @@ export function DesignerClient({ userId }: { userId: string }) {
                 canvasData={canvasData}
                 onFrameUpdate={handleAnimationFrame}
                 isVisible={previewMode}
+                autoPlay
               />
             </motion.div>
           )}
