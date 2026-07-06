@@ -35,20 +35,20 @@ export function MultipleChoice({
 
   return (
     <div className="space-y-4">
-      <p className="text-lg font-medium text-white">{questionText}</p>
+      <p className="text-lg font-medium text-foreground">{questionText}</p>
 
       <div className="space-y-2">
         {options.map((option, i) => {
           const isSelected = selected === i;
           const isCorrect = option.correct;
 
-          let variant = "border-zinc-800 bg-zinc-900/50 hover:border-zinc-600";
+          let variant = "border-border bg-secondary hover:border-border";
           if (showResult && isSelected && isCorrect) {
-            variant = "border-green-700 bg-green-900/30";
+            variant = "border-success bg-success/30";
           } else if (showResult && isSelected && !isCorrect) {
-            variant = "border-red-700 bg-red-900/30";
+            variant = "border-destructive bg-destructive/30";
           } else if (showResult && isCorrect) {
-            variant = "border-green-700/50 bg-green-900/20";
+            variant = "border-success/50 bg-success/20";
           }
 
           return (
@@ -63,17 +63,17 @@ export function MultipleChoice({
                 showResult && "cursor-default",
               )}
             >
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-zinc-800 text-xs font-semibold text-zinc-300">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-secondary text-xs font-semibold text-foreground/85">
                 {LABELS[i]}
               </span>
-              <span className="flex-1 text-sm text-zinc-200">
+              <span className="flex-1 text-sm text-foreground">
                 {option.text}
               </span>
               {showResult && isSelected && isCorrect && (
-                <Check className="h-4 w-4 text-green-400" />
+                <Check className="h-4 w-4 text-success" />
               )}
               {showResult && isSelected && !isCorrect && (
-                <X className="h-4 w-4 text-red-400" />
+                <X className="h-4 w-4 text-destructive" />
               )}
             </button>
           );

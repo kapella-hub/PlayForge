@@ -60,10 +60,10 @@ export function TimeGreeting({ name }: { name?: string | null }) {
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold text-white sm:text-4xl">
+      <h1 className="text-3xl font-semibold text-foreground sm:text-4xl">
         {greeting}{greeting && name ? `, ${name}` : ""}
       </h1>
-      <p className="mt-1 text-sm text-zinc-400">Team overview, install momentum, and next actions.</p>
+      <p className="mt-1 text-sm text-muted-foreground">Team overview, install momentum, and next actions.</p>
     </div>
   );
 }

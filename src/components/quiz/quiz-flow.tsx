@@ -84,34 +84,34 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
 
     return (
       <div className="flex flex-col items-center gap-6 py-12 text-center">
-        <CheckCircle2 className="h-16 w-16 text-green-400" />
-        <h2 className="text-2xl font-bold text-white">Quiz Complete!</h2>
-        <p className="text-4xl font-bold text-white">{scorePercent}%</p>
-        <p className="text-sm text-zinc-400">
+        <CheckCircle2 className="h-16 w-16 text-success" />
+        <h2 className="text-2xl font-bold text-foreground">Quiz Complete!</h2>
+        <p className="text-4xl font-bold text-foreground">{scorePercent}%</p>
+        <p className="text-sm text-muted-foreground">
           {correctCount} of {supportedCount} correct
         </p>
 
         {reward && reward.xpEarned > 0 && (
-          <p className="text-sm font-semibold text-indigo-400">
+          <p className="text-sm font-semibold text-accent">
             +{reward.xpEarned} XP
           </p>
         )}
 
         {reward && reward.newBadges.length > 0 && (
           <div className="w-full max-w-xs space-y-2">
-            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500">
+            <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground">
               New badge{reward.newBadges.length !== 1 ? "s" : ""}
             </p>
             <div className="flex flex-col gap-2">
               {reward.newBadges.map((badge) => (
                 <div
                   key={badge.id}
-                  className="flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-900/60 px-4 py-2 text-left"
+                  className="flex items-center gap-3 rounded-lg border border-border bg-secondary px-4 py-2 text-left"
                 >
                   <span className="text-2xl">{badge.icon}</span>
                   <div>
-                    <p className="text-sm font-medium text-white">{badge.name}</p>
-                    <p className="text-xs text-zinc-500">{badge.description}</p>
+                    <p className="text-sm font-medium text-foreground">{badge.name}</p>
+                    <p className="text-xs text-muted-foreground">{badge.description}</p>
                   </div>
                 </div>
               ))}
@@ -131,7 +131,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
     // Auto-advance past non-multiple-choice questions
     return (
       <div className="space-y-4 py-8 text-center">
-        <p className="text-sm text-zinc-400">
+        <p className="text-sm text-muted-foreground">
           Question type &quot;{question.questionType}&quot; is not yet
           supported.
         </p>
@@ -151,16 +151,16 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
     <div className="space-y-6">
       {/* Header */}
       <div className="space-y-2">
-        <h2 className="text-lg font-semibold text-white">{quizName}</h2>
-        <p className="text-xs text-zinc-500">
+        <h2 className="text-lg font-semibold text-foreground">{quizName}</h2>
+        <p className="text-xs text-muted-foreground">
           Question {currentIndex + 1} of {totalQuestions}
         </p>
       </div>
 
       {/* Progress bar */}
-      <div className="h-1.5 w-full overflow-hidden rounded-full bg-zinc-800">
+      <div className="h-1.5 w-full overflow-hidden rounded-full bg-secondary">
         <div
-          className="h-full rounded-full bg-blue-500 transition-all"
+          className="h-full rounded-full bg-primary transition-all"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -177,7 +177,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
 
       {/* Submit error */}
       {submitError && (
-        <div className="rounded-lg border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-400">
+        <div className="rounded-lg border border-destructive/30 bg-destructive/10 px-4 py-3 text-sm text-destructive">
           {submitError}
         </div>
       )}

@@ -149,9 +149,9 @@ export function GamePlanPlayList({
   return (
     <div className="space-y-3">
       {plays.length === 0 ? (
-        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-zinc-800 py-16">
-          <p className="text-sm text-zinc-500">No plays in this game plan</p>
-          <p className="mt-1 text-xs text-zinc-600">
+        <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border py-16">
+          <p className="text-sm text-muted-foreground">No plays in this game plan</p>
+          <p className="mt-1 text-xs text-muted-foreground/70">
             Add plays to build your game plan.
           </p>
         </div>
@@ -159,19 +159,18 @@ export function GamePlanPlayList({
         plays.map((play, index) => (
           <Card
             key={play.id}
-            className="transition-colors hover:border-zinc-700"
           >
             <CardContent className="flex items-center gap-4 p-4">
               {/* Order number */}
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-zinc-800 text-sm font-bold text-zinc-300">
+              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-secondary text-sm font-bold text-foreground/85">
                 {index + 1}
               </div>
 
               {/* Grip icon */}
-              <GripVertical className="h-4 w-4 shrink-0 text-zinc-600" />
+              <GripVertical className="h-4 w-4 shrink-0 text-muted-foreground/70" />
 
               {/* Thumbnail */}
-              <div className="flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-green-900/30">
+              <div className="flex h-12 w-16 shrink-0 items-center justify-center rounded-lg bg-secondary">
                 {play.thumbnailUrl ? (
                   <img
                     src={play.thumbnailUrl}
@@ -179,17 +178,17 @@ export function GamePlanPlayList({
                     className="h-full w-full rounded-lg object-cover"
                   />
                 ) : (
-                  <span className="text-[9px] text-zinc-600">No preview</span>
+                  <span className="text-[9px] text-muted-foreground/70">No preview</span>
                 )}
               </div>
 
               {/* Play info */}
               <div className="min-w-0 flex-1">
-                <h3 className="truncate text-sm font-semibold text-white">
+                <h3 className="truncate text-sm font-semibold text-foreground">
                   {play.name}
                 </h3>
                 <div className="mt-0.5 flex items-center gap-2">
-                  <span className="text-xs text-zinc-500">
+                  <span className="text-xs text-muted-foreground">
                     {play.formation}
                   </span>
                   <Badge variant="outline" className="text-[10px]">
@@ -203,7 +202,7 @@ export function GamePlanPlayList({
                 <button
                   onClick={() => movePlay(index, "up")}
                   disabled={index === 0 || isPending}
-                  className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                  className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
                   title="Move up"
                 >
                   <ArrowUp className="h-4 w-4" />
@@ -211,7 +210,7 @@ export function GamePlanPlayList({
                 <button
                   onClick={() => movePlay(index, "down")}
                   disabled={index === plays.length - 1 || isPending}
-                  className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-zinc-800 hover:text-white disabled:pointer-events-none disabled:opacity-30"
+                  className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground disabled:pointer-events-none disabled:opacity-30"
                   title="Move down"
                 >
                   <ArrowDown className="h-4 w-4" />
@@ -219,7 +218,7 @@ export function GamePlanPlayList({
                 <button
                   onClick={() => handleRemove(play.playId)}
                   disabled={isPending}
-                  className="rounded-md p-1.5 text-zinc-400 transition-colors hover:bg-red-900/30 hover:text-red-400 disabled:pointer-events-none disabled:opacity-30"
+                  className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-destructive/30 hover:text-destructive disabled:pointer-events-none disabled:opacity-30"
                   title="Remove from game plan"
                 >
                   <X className="h-4 w-4" />
@@ -235,18 +234,18 @@ export function GamePlanPlayList({
         <Card>
           <CardContent className="p-4">
             <div className="mb-3 flex items-center justify-between">
-              <h3 className="text-sm font-semibold text-zinc-200">
+              <h3 className="text-sm font-semibold text-foreground">
                 Add a Play
               </h3>
               <button
                 onClick={() => setShowPicker(false)}
-                className="rounded-md p-1 text-zinc-500 transition-colors hover:bg-zinc-800 hover:text-zinc-300"
+                className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-secondary hover:text-foreground/85"
               >
                 <X className="h-4 w-4" />
               </button>
             </div>
             {availablePlays.length === 0 ? (
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted-foreground">
                 All plays are already in this game plan.
               </p>
             ) : (
@@ -256,18 +255,18 @@ export function GamePlanPlayList({
                     key={play.id}
                     onClick={() => handleAdd(play.id)}
                     disabled={isPending}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-zinc-800 disabled:opacity-50"
+                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-left transition-colors hover:bg-secondary disabled:opacity-50"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm text-zinc-200">
+                      <p className="truncate text-sm text-foreground">
                         {play.name}
                       </p>
-                      <p className="text-xs text-zinc-500">
+                      <p className="text-xs text-muted-foreground">
                         {play.formation} &middot;{" "}
                         {play.playType.replace("_", " ")}
                       </p>
                     </div>
-                    <Plus className="h-4 w-4 shrink-0 text-zinc-500" />
+                    <Plus className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>
                 ))}
               </div>
@@ -277,7 +276,7 @@ export function GamePlanPlayList({
       ) : (
         <button
           onClick={() => setShowPicker(true)}
-          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-zinc-700 py-3 text-sm text-zinc-400 transition-colors hover:border-zinc-600 hover:text-zinc-300"
+          className="flex w-full items-center justify-center gap-2 rounded-xl border border-dashed border-border py-3 text-sm text-muted-foreground transition-colors hover:border-border hover:text-foreground/85"
         >
           {isPending ? (
             <Loader2 className="h-4 w-4 animate-spin" />

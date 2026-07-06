@@ -14,7 +14,7 @@ interface InstallTrackerProps {
 export function InstallTracker({ gamePlanName, plays }: InstallTrackerProps) {
   if (plays.length === 0) {
     return (
-      <div className="rounded-xl border border-zinc-800 bg-zinc-900/50 p-8 text-center text-zinc-500">
+      <div className="rounded-xl border border-border bg-card p-8 text-center text-muted-foreground">
         No plays in the active game plan.
       </div>
     );
@@ -22,7 +22,7 @@ export function InstallTracker({ gamePlanName, plays }: InstallTrackerProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-medium text-zinc-400">{gamePlanName}</h3>
+      <h3 className="text-sm font-medium text-muted-foreground">{gamePlanName}</h3>
       <div className="space-y-3">
         {plays.map((play) => {
           const viewedPct =
@@ -37,41 +37,41 @@ export function InstallTracker({ gamePlanName, plays }: InstallTrackerProps) {
           return (
             <div
               key={play.playName}
-              className="rounded-lg border border-zinc-800 bg-zinc-900/50 p-4"
+              className="rounded-lg border border-border bg-card p-4"
             >
               <div className="mb-2">
-                <span className="text-sm font-medium text-zinc-100">
+                <span className="text-sm font-medium text-foreground">
                   {play.playName}
                 </span>
-                <span className="ml-2 text-xs text-zinc-500">
+                <span className="ml-2 text-xs text-muted-foreground">
                   {play.formation}
                 </span>
               </div>
               <div className="space-y-2">
                 <div>
-                  <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
                     <span>Viewed</span>
                     <span>
                       {play.viewedCount}/{play.totalPlayers} ({viewedPct}%)
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-zinc-800">
+                  <div className="h-2 rounded-full bg-secondary">
                     <div
-                      className="h-2 rounded-full bg-blue-500 transition-all"
+                      className="h-2 rounded-full bg-primary transition-all"
                       style={{ width: `${viewedPct}%` }}
                     />
                   </div>
                 </div>
                 <div>
-                  <div className="flex justify-between text-xs text-zinc-400 mb-1">
+                  <div className="flex justify-between text-xs text-muted-foreground mb-1">
                     <span>Quiz Passed</span>
                     <span>
                       {play.quizPassedCount}/{play.totalPlayers} ({quizPct}%)
                     </span>
                   </div>
-                  <div className="h-2 rounded-full bg-zinc-800">
+                  <div className="h-2 rounded-full bg-secondary">
                     <div
-                      className="h-2 rounded-full bg-green-500 transition-all"
+                      className="h-2 rounded-full bg-success transition-all"
                       style={{ width: `${quizPct}%` }}
                     />
                   </div>

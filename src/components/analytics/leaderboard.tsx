@@ -16,9 +16,9 @@ const POSITION_GROUPS = [
 ] as const;
 
 const RANK_STYLES: Record<number, { icon: typeof Trophy; color: string; bg: string }> = {
-  1: { icon: Trophy, color: "text-yellow-400", bg: "bg-yellow-400/10" },
-  2: { icon: Medal, color: "text-zinc-300", bg: "bg-zinc-300/10" },
-  3: { icon: Award, color: "text-amber-600", bg: "bg-amber-600/10" },
+  1: { icon: Trophy, color: "text-accent", bg: "bg-accent/10" },
+  2: { icon: Medal, color: "text-foreground/85", bg: "bg-foreground/10" },
+  3: { icon: Award, color: "text-accent", bg: "bg-accent/10" },
 };
 
 interface LeaderboardProps {
@@ -43,7 +43,7 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
     <div>
       {/* Filter bar */}
       <div className="mb-4 flex items-center gap-2">
-        <Filter className="h-4 w-4 text-zinc-500" />
+        <Filter className="h-4 w-4 text-muted-foreground" />
         <div className="flex flex-wrap gap-1">
           {POSITION_GROUPS.map((group) => (
             <button
@@ -51,8 +51,8 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
               onClick={() => setFilter(group)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 filter === group
-                  ? "bg-indigo-600 text-white"
-                  : "bg-zinc-800 text-zinc-400 hover:bg-zinc-700 hover:text-zinc-200"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-secondary text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
               }`}
             >
               {group}
@@ -65,7 +65,7 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
       <div className="overflow-x-auto">
         <table className="w-full text-left text-sm">
           <thead>
-            <tr className="border-b border-zinc-800 text-xs text-zinc-500">
+            <tr className="border-b border-border text-xs text-muted-foreground">
               <th className="w-12 py-2 pr-2">#</th>
               <th className="py-2 pr-4">Player</th>
               <th className="py-2 pr-4">Position</th>
@@ -79,7 +79,7 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
               <tr>
                 <td
                   colSpan={6}
-                  className="py-8 text-center text-xs text-zinc-500"
+                  className="py-8 text-center text-xs text-muted-foreground"
                 >
                   No players found for this position group.
                 </td>
@@ -90,7 +90,7 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
                 return (
                   <tr
                     key={entry.userId}
-                    className={`border-b border-zinc-800/50 transition-colors hover:bg-zinc-800/30 ${
+                    className={`border-b border-border/50 transition-colors hover:bg-secondary/30 ${
                       isPending ? "opacity-50" : ""
                     }`}
                   >
@@ -104,7 +104,7 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
                           />
                         </span>
                       ) : (
-                        <span className="pl-2 text-xs text-zinc-500">
+                        <span className="pl-2 text-xs text-muted-foreground">
                           {entry.rank}
                         </span>
                       )}
@@ -112,14 +112,14 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
                     <td className="py-2.5 pr-4">
                       <span
                         className={`text-sm font-medium ${
-                          entry.rank <= 3 ? "text-white" : "text-zinc-300"
+                          entry.rank <= 3 ? "text-foreground" : "text-foreground/85"
                         }`}
                       >
                         {entry.name}
                       </span>
                     </td>
                     <td className="py-2.5 pr-4">
-                      <span className="rounded-full bg-zinc-800 px-2 py-0.5 text-[10px] font-medium text-zinc-400">
+                      <span className="rounded-full bg-secondary px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
                         {entry.positionGroup ?? "N/A"}
                       </span>
                     </td>
@@ -127,21 +127,21 @@ export function Leaderboard({ orgId, initialData }: LeaderboardProps) {
                       <span
                         className={`text-sm font-semibold ${
                           entry.rank === 1
-                            ? "text-yellow-400"
+                            ? "text-accent"
                             : entry.rank === 2
-                              ? "text-zinc-300"
+                              ? "text-foreground/85"
                               : entry.rank === 3
-                                ? "text-amber-600"
-                                : "text-zinc-300"
+                                ? "text-accent"
+                                : "text-foreground/85"
                         }`}
                       >
                         {entry.compositeScore}
                       </span>
                     </td>
-                    <td className="py-2.5 pr-4 text-right text-xs text-zinc-400">
+                    <td className="py-2.5 pr-4 text-right text-xs text-muted-foreground">
                       {entry.playsMastered}
                     </td>
-                    <td className="py-2.5 text-right text-xs text-zinc-400">
+                    <td className="py-2.5 text-right text-xs text-muted-foreground">
                       {entry.quizAverage}%
                     </td>
                   </tr>

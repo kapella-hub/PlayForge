@@ -76,8 +76,8 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
         <CardTitle>Invite Code</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4 pt-0 sm:pt-0">
-        <div className="rounded-lg bg-zinc-800 p-4 text-center">
-          <span className="font-mono text-3xl font-bold tracking-widest text-white">
+        <div className="rounded-lg bg-secondary p-4 text-center">
+          <span className="font-mono text-3xl font-bold tracking-widest text-foreground">
             {code}
           </span>
         </div>
@@ -213,7 +213,7 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
           </Button>
 
           {showQR && qrDataUrl && (
-            <div className="flex flex-col items-center gap-3 rounded-lg bg-zinc-800/50 p-4">
+            <div className="flex flex-col items-center gap-3 rounded-lg bg-secondary p-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={qrDataUrl}
@@ -222,7 +222,7 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
                 height={200}
                 className="rounded-lg"
               />
-              <p className="text-xs text-zinc-500">
+              <p className="text-xs text-muted-foreground">
                 Scan to join your team instantly
               </p>
               <Button variant="outline" size="sm" onClick={handleDownloadQR}>
@@ -245,7 +245,7 @@ export function InviteCodeCard({ code: initialCode, orgId }: InviteCodeCardProps
           )}
         </div>
 
-        <p className="text-xs text-zinc-500">
+        <p className="text-xs text-muted-foreground">
           Share this code with players so they can join your team.
           Regenerating will invalidate the previous code.
         </p>
