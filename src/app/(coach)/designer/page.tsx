@@ -27,6 +27,7 @@ import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
 import { getPlay, createPlay, updatePlay } from "@/lib/actions/play-actions";
 import { deserializeCanvas } from "@/engine/serialization";
 import { useToast } from "@/components/ui/toast";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 import { generateKeyframes } from "@/engine/animation-engine";
 import { exportPlayAsImage, getStageDataURL } from "@/engine/export";
 import { useKeyboardShortcuts } from "@/lib/use-keyboard-shortcuts";
@@ -824,28 +825,17 @@ export default function DesignerPage() {
               className="absolute inset-x-3 bottom-3 top-24 z-30 overflow-hidden rounded-[24px] border border-white/[0.08] bg-zinc-950/95 p-4 shadow-2xl backdrop-blur-xl sm:left-4 sm:right-auto sm:w-72"
             >
               {/* Side toggle */}
-              <div className="mb-3 flex rounded-lg bg-zinc-800/80 p-0.5">
-                <button
-                  onClick={() => setSide("offense")}
-                  className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    side === "offense"
-                      ? "bg-emerald-600 text-white"
-                      : "text-zinc-400 hover:text-zinc-200"
-                  }`}
-                >
-                  Offense
-                </button>
-                <button
-                  onClick={() => setSide("defense")}
-                  className={`flex-1 rounded-md px-3 py-1.5 text-xs font-medium transition-colors ${
-                    side === "defense"
-                      ? "bg-emerald-600 text-white"
-                      : "text-zinc-400 hover:text-zinc-200"
-                  }`}
-                >
-                  Defense
-                </button>
-              </div>
+              <SegmentedControl
+                size="sm"
+                ariaLabel="Formation side"
+                className="mb-3 w-full"
+                value={side}
+                onChange={setSide}
+                options={[
+                  { value: "offense", label: "Offense" },
+                  { value: "defense", label: "Defense" },
+                ]}
+              />
 
               <FormationPicker
                 side={side}
@@ -1007,28 +997,17 @@ export default function DesignerPage() {
           </DialogHeader>
 
           {/* Mode selector */}
-          <div className="mb-4 flex rounded-lg bg-zinc-800/80 p-0.5">
-            <button
-              onClick={() => setPrintMode("playbook")}
-              className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
-                printMode === "playbook"
-                  ? "bg-emerald-600 text-white"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              Playbook
-            </button>
-            <button
-              onClick={() => setPrintMode("wristband")}
-              className={`flex-1 rounded-md px-4 py-2 text-xs font-medium transition-colors ${
-                printMode === "wristband"
-                  ? "bg-emerald-600 text-white"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              Wristband
-            </button>
-          </div>
+          <SegmentedControl
+            size="md"
+            ariaLabel="Print mode"
+            className="mb-4 w-full"
+            value={printMode}
+            onChange={setPrintMode}
+            options={[
+              { value: "playbook", label: "Playbook" },
+              { value: "wristband", label: "Wristband" },
+            ]}
+          />
 
           {/* Preview info */}
           <div className="mb-4 rounded-xl border border-zinc-800 bg-zinc-900/50 p-4">

@@ -12,6 +12,7 @@ import {
 import type { AnimationData, CanvasData } from "@/engine/types";
 import type { AnimationState } from "@/engine/animation-engine";
 import { getAnimationFrame } from "@/engine/animation-engine";
+import { SegmentedControl } from "@/components/ui/segmented-control";
 
 interface AnimationControlsProps {
   animationData: AnimationData;
@@ -292,21 +293,17 @@ export function AnimationControls({
       </div>
 
       {/* Speed controls */}
-      <div className="flex items-center gap-0.5 rounded-lg bg-zinc-800/60 p-0.5">
-        {[0.5, 1, 2].map((s) => (
-          <button
-            key={s}
-            onClick={() => handleSpeedChange(s)}
-            className={`rounded-md px-2.5 py-1 text-xs font-medium transition-colors ${
-              speed === s
-                ? "bg-indigo-600 text-white"
-                : "text-zinc-400 hover:text-zinc-200"
-            }`}
-          >
-            {s}x
-          </button>
-        ))}
-      </div>
+      <SegmentedControl
+        size="sm"
+        ariaLabel="Playback speed"
+        value={String(speed)}
+        onChange={(v) => handleSpeedChange(Number(v))}
+        options={[
+          { value: "0.5", label: "0.5x" },
+          { value: "1", label: "1x" },
+          { value: "2", label: "2x" },
+        ]}
+      />
     </div>
   );
 }
