@@ -29,9 +29,9 @@ interface ToastAPI {
 const ToastContext = createContext<ToastAPI | null>(null);
 
 const variantStyles: Record<ToastVariant, string> = {
-  success: "border-green-500/30 bg-green-500/10 text-green-400",
-  error: "border-red-500/30 bg-red-500/10 text-red-400",
-  info: "border-indigo-500/30 bg-indigo-500/10 text-indigo-400",
+  success: "border-success/30 bg-success/10 text-success",
+  error: "border-destructive/30 bg-destructive/10 text-destructive",
+  info: "border-primary/30 bg-primary/10 text-primary-emphasis",
 };
 
 const variantIcons: Record<ToastVariant, typeof CheckCircle2> = {
