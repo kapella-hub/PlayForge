@@ -44,6 +44,7 @@ export function SegmentedControl<T extends string>({
       return;
     }
     e.preventDefault();
+    e.stopPropagation();
     onChange(options[next].value);
     const buttons =
       containerRef.current?.querySelectorAll<HTMLButtonElement>('[role="radio"]');

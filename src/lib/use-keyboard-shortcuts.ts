@@ -9,6 +9,8 @@ export interface KeyboardShortcut {
   meta?: boolean;
   /** Require Shift */
   shift?: boolean;
+  /** Require Alt/Option */
+  alt?: boolean;
   /** Handler function */
   handler: () => void;
   /** If true, do not fire when user is typing in an input/textarea */
@@ -48,11 +50,12 @@ export function useKeyboardShortcuts(shortcuts: KeyboardShortcut[]) {
         ? e.metaKey || e.ctrlKey
         : !e.metaKey && !e.ctrlKey;
       const shiftMatch = shortcut.shift ? e.shiftKey : !e.shiftKey;
+      const altMatch = shortcut.alt ? e.altKey : !e.altKey;
       const keyMatch =
         e.key.toLowerCase() === shortcut.key.toLowerCase() ||
         e.key === shortcut.key;
 
-      if (keyMatch && metaMatch && shiftMatch) {
+      if (keyMatch && metaMatch && shiftMatch && altMatch) {
         if (shortcut.ignoreInputs && isInput) continue;
 
         e.preventDefault();
