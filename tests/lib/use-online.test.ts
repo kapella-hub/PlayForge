@@ -1,6 +1,6 @@
-import { describe, it, expect, afterEach } from "vitest";
+import { describe, it, expect, afterEach, vi } from "vitest";
 import { act, renderHook } from "@testing-library/react";
-import { useOnline } from "@/lib/use-online";
+import { useOnline, getServerSnapshot } from "@/lib/use-online";
 
 function setOnLine(value: boolean) {
   Object.defineProperty(navigator, "onLine", { configurable: true, value });
@@ -31,5 +31,25 @@ describe("useOnline", () => {
       window.dispatchEvent(new Event("online"));
     });
     expect(result.current).toBe(true);
+  });
+
+  it("removes event listeners on unmount", () => {
+    const addListenerSpy = vi.spyOn(window, "addEventListener");
+    const removeListenerSpy = vi.spyOn(window, "removeEventListener");
+
+    const { unmount } = renderHook(() => useOnline());
+    expect(addListenerSpy).toHaveBeenCalledWith("online", expect.any(Function));
+    expect(addListenerSpy).toHaveBeenCalledWith("offline", expect.any(Function));
+
+    unmount();
+    expect(removeListenerSpy).toHaveBeenCalledWith("online", expect.any(Function));
+    expect(removeListenerSpy).toHaveBeenCalledWith("offline", expect.any(Function));
+
+    addListenerSpy.mockRestore();
+    removeListenerSpy.mockRestore();
+  });
+
+  it("getServerSnapshot returns true", () => {
+    expect(getServerSnapshot()).toBe(true);
   });
 });

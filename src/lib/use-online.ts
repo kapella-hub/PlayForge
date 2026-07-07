@@ -1,6 +1,8 @@
+"use client";
+
 import { useSyncExternalStore } from "react";
 
-function subscribe(callback: () => void): () => void {
+export function subscribe(callback: () => void): () => void {
   window.addEventListener("online", callback);
   window.addEventListener("offline", callback);
   return () => {
@@ -9,11 +11,12 @@ function subscribe(callback: () => void): () => void {
   };
 }
 
-function getSnapshot(): boolean {
+export function getSnapshot(): boolean {
   return navigator.onLine;
 }
 
-function getServerSnapshot(): boolean {
+export function getServerSnapshot(): boolean {
+  // SSR renders as online; hydration corrects to actual navigator.onLine
   return true;
 }
 
