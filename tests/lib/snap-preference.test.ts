@@ -32,4 +32,28 @@ describe("snap-preference", () => {
     localStorage.setItem(snapPreferenceKey("u1"), "garbage");
     expect(loadSnapPreference("u1")).toBe(true);
   });
+
+  it("returns true when getItem throws", () => {
+    const originalGetItem = Storage.prototype.getItem;
+    try {
+      Storage.prototype.getItem = () => {
+        throw new Error("quota exceeded");
+      };
+      expect(loadSnapPreference("u1")).toBe(true);
+    } finally {
+      Storage.prototype.getItem = originalGetItem;
+    }
+  });
+
+  it("does not throw when setItem throws", () => {
+    const originalSetItem = Storage.prototype.setItem;
+    try {
+      Storage.prototype.setItem = () => {
+        throw new Error("quota exceeded");
+      };
+      expect(() => saveSnapPreference("u1", false)).not.toThrow();
+    } finally {
+      Storage.prototype.setItem = originalSetItem;
+    }
+  });
 });
