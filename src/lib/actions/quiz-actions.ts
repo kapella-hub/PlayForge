@@ -157,7 +157,7 @@ export async function createQuiz(data: {
 
 export async function addQuizQuestion(data: {
   quizId: string;
-  playId: string;
+  playId?: string;
   questionType: QuestionType;
   questionText: string;
   options?: unknown;
@@ -170,7 +170,8 @@ export async function addQuizQuestion(data: {
   return db.quizQuestion.create({
     data: {
       quizId: data.quizId,
-      playId: data.playId,
+      // Custom/knowledge questions have no play; "" would violate the FK.
+      playId: data.playId || null,
       questionType: data.questionType,
       questionText: data.questionText,
       options: data.options ?? undefined,
@@ -253,6 +254,8 @@ export async function submitQuizAttempt(data: {
       const playScores = new Map<string, { correct: number; total: number }>();
       for (const question of quiz.questions) {
         if (question.questionType !== "multiple_choice") continue;
+        // Custom/knowledge questions (no play) score the quiz, not a play's SM-2.
+        if (!question.playId) continue;
         const existing = playScores.get(question.playId) ?? {
           correct: 0,
           total: 0,

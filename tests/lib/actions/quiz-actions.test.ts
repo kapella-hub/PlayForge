@@ -14,7 +14,7 @@ vi.mock("@/lib/db", () => {
   return {
     db: {
       quiz: { update: vi.fn(), delete: vi.fn(), findUnique: vi.fn() },
-      quizQuestion: { findUnique: vi.fn() },
+      quizQuestion: { findUnique: vi.fn(), create: vi.fn() },
       $transaction: vi.fn(async (fn: (t: unknown) => unknown) => fn(tx)),
       __tx: tx,
     },
@@ -32,7 +32,7 @@ vi.mock("@/lib/auth", () => ({ auth: vi.fn() }));
 // relative `./progress-actions` import, so vitest intercepts it.
 vi.mock("@/lib/actions/progress-actions", () => ({ recordQuizScore: vi.fn() }));
 
-import { updateQuiz, deleteQuiz, getQuiz, getPlayerQuiz, checkAnswer } from "@/lib/actions/quiz-actions";
+import { updateQuiz, deleteQuiz, getQuiz, getPlayerQuiz, checkAnswer, addQuizQuestion } from "@/lib/actions/quiz-actions";
 import { db } from "@/lib/db";
 import { requireQuizAccess, requireOrgAccess, AuthzError } from "@/lib/authz";
 import { recordQuizScore } from "@/lib/actions/progress-actions";
@@ -89,6 +89,124 @@ describe("deleteQuiz", () => {
 
     await expect(deleteQuiz("q1")).rejects.toBeInstanceOf(AuthzError);
     expect(db.quiz.delete).not.toHaveBeenCalled();
+  });
+});
+
+describe("submitQuizAttempt (custom questions)", () => {
+  it("scores custom (null-playId) questions in the total but never feeds them to per-play SM-2", async () => {
+    const { submitQuizAttempt } = await import("@/lib/actions/quiz-actions");
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+    const tx = (db as unknown as {
+      __tx: { quiz: { findUnique: ReturnType<typeof vi.fn> } };
+    }).__tx;
+    tx.quiz.findUnique.mockResolvedValueOnce({
+      id: "q1",
+      questions: [
+        {
+          id: "qq1",
+          playId: null, // custom knowledge question
+          questionType: "multiple_choice",
+          options: [{ text: "Hydrate", correct: true }],
+        },
+        {
+          id: "qq2",
+          playId: "p1",
+          questionType: "multiple_choice",
+          options: [{ text: "Trips", correct: true }],
+        },
+      ],
+    });
+
+    const result = await submitQuizAttempt({
+      quizId: "q1",
+      answers: [
+        { questionId: "qq1", answer: "Hydrate" },
+        { questionId: "qq2", answer: "Trips" },
+      ],
+    });
+
+    // Both questions count toward the overall server-graded score…
+    expect(result.scorePercent).toBe(100);
+    expect(result.supportedCount).toBe(2);
+    // …but only the play-linked question drives SM-2 mastery.
+    expect(vi.mocked(recordQuizScore)).toHaveBeenCalledTimes(1);
+    expect(vi.mocked(recordQuizScore)).toHaveBeenCalledWith(
+      "p1",
+      1,
+      expect.anything(),
+    );
+    expect(vi.mocked(recordQuizScore)).not.toHaveBeenCalledWith(
+      null,
+      expect.anything(),
+      expect.anything(),
+    );
+  });
+});
+
+describe("addQuizQuestion", () => {
+  it("stores null playId for custom/knowledge questions (no play link)", async () => {
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+
+    await addQuizQuestion({
+      quizId: "q1",
+      questionType: "multiple_choice",
+      questionText: "How much water should you drink on game day?",
+      options: [{ text: "A lot", correct: true }],
+      correctAnswer: "A lot",
+      sortOrder: 0,
+    });
+
+    expect(vi.mocked(db.quizQuestion.create)).toHaveBeenCalledWith({
+      data: expect.objectContaining({ playId: null }),
+    });
+  });
+
+  it("normalizes an empty-string playId to null (never writes a broken FK)", async () => {
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+
+    await addQuizQuestion({
+      quizId: "q1",
+      playId: "",
+      questionType: "multiple_choice",
+      questionText: "Custom question",
+      options: [{ text: "Yes", correct: true }],
+      correctAnswer: "Yes",
+      sortOrder: 0,
+    });
+
+    expect(vi.mocked(db.quizQuestion.create)).toHaveBeenCalledWith({
+      data: expect.objectContaining({ playId: null }),
+    });
+  });
+
+  it("keeps a real playId for play-linked questions", async () => {
+    mockedRequire.mockResolvedValue({
+      quiz: { id: "q1" },
+      membership: { userId: "u1" },
+    } as never);
+
+    await addQuizQuestion({
+      quizId: "q1",
+      playId: "p1",
+      questionType: "multiple_choice",
+      questionText: "What formation?",
+      options: [{ text: "Trips", correct: true }],
+      correctAnswer: "Trips",
+      sortOrder: 0,
+    });
+
+    expect(vi.mocked(db.quizQuestion.create)).toHaveBeenCalledWith({
+      data: expect.objectContaining({ playId: "p1" }),
+    });
   });
 });
 

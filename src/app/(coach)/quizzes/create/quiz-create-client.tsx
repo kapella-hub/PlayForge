@@ -165,7 +165,7 @@ export function QuizCreateClient({ orgId }: QuizCreateClientProps) {
         const q = questions[i];
         await addQuizQuestion({
           quizId: quiz.id,
-          playId: q.playId ?? "",
+          playId: q.playId,
           questionType: "multiple_choice",
           questionText: q.questionText,
           options: q.options.map((text, idx) => ({

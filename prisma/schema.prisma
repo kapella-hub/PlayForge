@@ -266,7 +266,7 @@ model Quiz {
 model QuizQuestion {
   id            String       @id @default(cuid())
   quizId        String
-  playId        String
+  playId        String? // null for custom/knowledge questions (rules, nutrition, ...) not tied to a play
   questionType  QuestionType
   questionText  String
   options       Json?
@@ -274,8 +274,8 @@ model QuizQuestion {
   correctAnswer String?
   sortOrder     Int
 
-  quiz Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  play Play @relation(fields: [playId], references: [id], onDelete: Cascade)
+  quiz Quiz  @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  play Play? @relation(fields: [playId], references: [id], onDelete: Cascade)
 }
 
 model QuizAttempt {
