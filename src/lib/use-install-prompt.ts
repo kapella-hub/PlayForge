@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useSyncExternalStore, useState } from "react";
 
 const DISMISS_PREFIX = "playforge-install-dismissed:";
 
@@ -49,17 +49,21 @@ export interface InstallPromptState {
 export function useInstallPrompt(userId: string): InstallPromptState {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [canInstall, setCanInstall] = useState(false);
-  const [showIosHint, setShowIosHint] = useState(false);
 
-  // Compute iOS hint on mount and when userId changes
-  useEffect(() => {
-    const nav = navigator as Navigator & { standalone?: boolean };
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setShowIosHint(
-      isIosSafariNonStandalone(nav.userAgent, nav.standalone) &&
-        !isInstallDismissed(userId),
-    );
-  }, [userId]);
+  // SSR-safe client flag: server render yields false, client render yields true.
+  // Allows deriving client-only state during render without setState-in-effect.
+  const mounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+
+  // Derive client-only values during render, re-computing on userId change and dismissal
+  const nav = typeof window === "undefined" ? null : (navigator as Navigator & { standalone?: boolean });
+  const showIosHint =
+    mounted && nav
+      ? isIosSafariNonStandalone(nav.userAgent, nav.standalone) && !isInstallDismissed(userId)
+      : false;
 
   // Subscribe to beforeinstallprompt event
   useEffect(() => {
@@ -85,7 +89,6 @@ export function useInstallPrompt(userId: string): InstallPromptState {
   function dismiss(): void {
     dismissInstall(userId);
     setCanInstall(false);
-    setShowIosHint(false);
   }
 
   return { canInstall, showIosHint, promptInstall, dismiss };

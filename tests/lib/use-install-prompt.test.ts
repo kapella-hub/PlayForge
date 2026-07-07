@@ -23,6 +23,30 @@ describe("install dismissal (userId-scoped)", () => {
     expect(isInstallDismissed("u1")).toBe(true);
     expect(isInstallDismissed("u2")).toBe(false);
   });
+
+  it("returns false when getItem throws", () => {
+    const originalGetItem = Storage.prototype.getItem;
+    try {
+      Storage.prototype.getItem = () => {
+        throw new Error("quota exceeded");
+      };
+      expect(isInstallDismissed("u1")).toBe(false);
+    } finally {
+      Storage.prototype.getItem = originalGetItem;
+    }
+  });
+
+  it("does not throw when setItem throws", () => {
+    const originalSetItem = Storage.prototype.setItem;
+    try {
+      Storage.prototype.setItem = () => {
+        throw new Error("quota exceeded");
+      };
+      expect(() => dismissInstall("u1")).not.toThrow();
+    } finally {
+      Storage.prototype.setItem = originalSetItem;
+    }
+  });
 });
 
 describe("isIosSafariNonStandalone", () => {
