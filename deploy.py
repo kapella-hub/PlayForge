@@ -183,8 +183,14 @@ def main() -> None:
         print("  .env.production already exists — keeping existing secrets.")
 
     # ── 6. Build & start ──────────────────────────────────────────────────────
-    print("\n[6/7] Building Docker image (this takes a few minutes) …")
+    print("\n[6/7] Building Docker images (this takes a few minutes) …")
+    # `docker compose build` does NOT build services behind a profile, so the
+    # `migrate` service (profiles: [migration]) would keep a stale image and
+    # silently skip new migrations ("No pending migrations"). Build both the
+    # default services AND the migrate image explicitly.
     ssh_run(client, f"cd {APP_DIR} && docker compose build 2>&1")
+    ssh_run(client,
+        f"cd {APP_DIR} && docker compose --profile migration build migrate 2>&1")
 
     print("  Starting services …")
     ssh_run(client, f"cd {APP_DIR} && docker compose up -d 2>&1")
@@ -193,9 +199,16 @@ def main() -> None:
     print("\n[7/7] Running Prisma migrations …")
     # Wait a moment for the DB container to be ready
     time.sleep(8)
-    ssh_run(client,
+    migrate_out = ssh_run(client,
         f"cd {APP_DIR} && docker compose --profile migration run --rm migrate 2>&1",
         check=False)
+    # Guard against the stale-image failure mode: a successful run applies
+    # migrations or explicitly reports the DB is already current.
+    if ("successfully applied" not in migrate_out
+            and "No pending migrations" not in migrate_out
+            and "already in sync" not in migrate_out):
+        print("  WARNING: migration output was not a recognized success — "
+              "verify the schema on the VPS before trusting this deploy.")
 
     client.close()
 
