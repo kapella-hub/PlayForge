@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Manrope, Sora } from "next/font/google";
 import { ToastProvider } from "@/components/ui/toast";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SwRegister } from "@/components/pwa/sw-register";
 import { themeInitScript } from "@/lib/theme-script";
 import "./globals.css";
 
@@ -21,6 +22,7 @@ export const metadata: Metadata = {
     "Build, animate, and share football plays. Help your team learn with interactive quizzes and spaced repetition.",
   other: {
     "apple-mobile-web-app-capable": "yes",
+    "mobile-web-app-capable": "yes",
     "apple-mobile-web-app-status-bar-style": "black-translucent",
   },
 };
@@ -42,7 +44,10 @@ export default function RootLayout({
       <body className={`${manrope.variable} ${sora.variable} font-sans antialiased`}>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
         <ThemeProvider>
-          <ToastProvider>{children}</ToastProvider>
+          <ToastProvider>
+            <SwRegister />
+            {children}
+          </ToastProvider>
         </ThemeProvider>
       </body>
     </html>

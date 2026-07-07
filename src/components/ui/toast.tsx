@@ -13,16 +13,22 @@ import { cn } from "@/lib/utils";
 
 type ToastVariant = "success" | "error" | "info";
 
+interface ToastAction {
+  label: string;
+  onClick: () => void;
+}
+
 interface Toast {
   id: string;
   message: string;
   variant: ToastVariant;
+  action?: ToastAction;
 }
 
 interface ToastAPI {
-  success: (message: string) => void;
-  error: (message: string) => void;
-  info: (message: string) => void;
+  success: (message: string, action?: ToastAction) => void;
+  error: (message: string, action?: ToastAction) => void;
+  info: (message: string, action?: ToastAction) => void;
   dismiss: (id: string) => void;
 }
 
@@ -50,18 +56,18 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const addToast = useCallback(
-    (message: string, variant: ToastVariant) => {
+    (message: string, variant: ToastVariant, action?: ToastAction) => {
       const id = `toast-${++toastCounter}`;
-      setToasts((prev) => [...prev, { id, message, variant }]);
-      setTimeout(() => dismiss(id), 3000);
+      setToasts((prev) => [...prev, { id, message, variant, action }]);
+      if (!action) setTimeout(() => dismiss(id), 3000);
     },
     [dismiss]
   );
 
   const api: ToastAPI = {
-    success: (msg) => addToast(msg, "success"),
-    error: (msg) => addToast(msg, "error"),
-    info: (msg) => addToast(msg, "info"),
+    success: (msg, action) => addToast(msg, "success", action),
+    error: (msg, action) => addToast(msg, "error", action),
+    info: (msg, action) => addToast(msg, "info", action),
     dismiss,
   };
 
@@ -91,6 +97,17 @@ export function ToastProvider({ children }: { children: ReactNode }) {
               >
                 <Icon className="h-4 w-4 flex-shrink-0" />
                 <span className="text-sm font-medium">{toast.message}</span>
+                {toast.action && (
+                  <button
+                    onClick={() => {
+                      toast.action?.onClick();
+                      dismiss(toast.id);
+                    }}
+                    className="ml-1 shrink-0 rounded-md border border-current px-2 py-0.5 text-xs font-semibold transition-opacity hover:opacity-80"
+                  >
+                    {toast.action.label}
+                  </button>
+                )}
                 <button
                   onClick={() => dismiss(toast.id)}
                   aria-label="Dismiss notification"
