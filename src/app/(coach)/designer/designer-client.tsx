@@ -25,7 +25,7 @@ import { mirrorPlay } from "@/engine/mirror";
 import { getFormationById } from "@/engine/constants";
 import { applyRouteTemplate, getRouteById } from "@/engine/routes-library";
 import { getPlay, createPlay, updatePlay } from "@/lib/actions/play-actions";
-import { deserializeCanvas } from "@/engine/serialization";
+import { deserializeCanvas, applyVersionRestore } from "@/engine/serialization";
 import { useToast } from "@/components/ui/toast";
 import { SegmentedControl } from "@/components/ui/segmented-control";
 import { generateKeyframes } from "@/engine/animation-engine";
@@ -950,10 +950,15 @@ export function DesignerClient({ userId }: { userId: string }) {
             playId={searchParams.get("playId")!}
             isOpen={versionHistoryOpen}
             onClose={() => setVersionHistoryOpen(false)}
-            onRestore={(canvasData) => {
-              const canvas = normalizeCanvasRouteTypes(deserializeCanvas(canvasData));
-              pushHistory(canvasData as CanvasData);
-              setCanvasData(canvas);
+            onRestore={(restored) => {
+              // Snapshot the CURRENT canvas so one undo returns to pre-restore
+              // work (a shadowed param here used to push the incoming version).
+              const { historyEntry, nextCanvas } = applyVersionRestore(
+                canvasData,
+                restored,
+              );
+              pushHistory(historyEntry);
+              setCanvasData(nextCanvas);
               setDirty(true);
             }}
           />

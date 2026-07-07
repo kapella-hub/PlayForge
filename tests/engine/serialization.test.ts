@@ -51,3 +51,44 @@ describe("serialization", () => {
     expect(deserializeCanvas("not-json").players).toEqual([]);
   });
 });
+
+// ── applyVersionRestore ────────────────────────────────────────────
+
+import { applyVersionRestore } from "@/engine/serialization";
+
+describe("applyVersionRestore", () => {
+  const current: CanvasData = {
+    players: [{ id: "QB", label: "QB", x: 111, y: 222, side: "offense" }],
+    routes: [],
+    motions: [],
+    meta: { formation: "trips", playType: "pass", side: "offense" },
+  };
+
+  it("snapshots the CURRENT canvas for undo, not the incoming version", () => {
+    const incoming = JSON.stringify({
+      players: [{ id: "QB", label: "QB", x: 500, y: 400, side: "offense" }],
+      routes: [],
+      motions: [],
+      meta: { formation: "shotgun-2x2", playType: "pass", side: "offense" },
+    });
+
+    const { historyEntry, nextCanvas } = applyVersionRestore(current, incoming);
+
+    // Undo-after-restore must return to the pre-restore work.
+    expect(historyEntry).toBe(current);
+    expect(nextCanvas.players[0].x).toBe(500);
+    expect(nextCanvas).not.toBe(current);
+  });
+
+  it("heals legacy lowercase routeTypes in the restored canvas", () => {
+    const incoming = JSON.stringify({
+      players: [{ id: "X", label: "X", x: 300, y: 300, side: "offense" }],
+      routes: [{ playerId: "X", waypoints: [{ x: 0, y: 0 }], routeType: "slant" }],
+      motions: [],
+      meta: { formation: "trips", playType: "pass", side: "offense" },
+    });
+
+    const { nextCanvas } = applyVersionRestore(current, incoming);
+    expect(nextCanvas.routes[0].routeType).toBe("Slant");
+  });
+});

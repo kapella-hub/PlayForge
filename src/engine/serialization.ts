@@ -1,4 +1,5 @@
 import type { CanvasData, AnimationData } from "./types";
+import { normalizeCanvasRouteTypes } from "./route-types";
 
 export function createEmptyCanvasData(): CanvasData {
   return {
@@ -71,4 +72,21 @@ export function deserializeAnimation(json: unknown): AnimationData {
   } catch {
     return createEmptyAnimationData();
   }
+}
+
+/**
+ * Apply a version-history restore: the CURRENT canvas becomes the undo
+ * snapshot (so one undo returns to pre-restore work), and the incoming
+ * serialized version is deserialized + route-type-healed for display.
+ * Fixes the shadowed-parameter bug where the incoming version was pushed
+ * to history instead of the current canvas.
+ */
+export function applyVersionRestore(
+  current: CanvasData,
+  incoming: unknown,
+): { historyEntry: CanvasData; nextCanvas: CanvasData } {
+  return {
+    historyEntry: current,
+    nextCanvas: normalizeCanvasRouteTypes(deserializeCanvas(incoming)),
+  };
 }

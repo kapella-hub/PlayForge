@@ -98,7 +98,7 @@ Phase 3c (`phase-3c-designer`, spec `docs/superpowers/specs/2026-07-06-phase3c-d
 - Bare arrow keys are swallowed designer-wide even with nothing selected (pre-existing keyboard-hook matching order).
 - PlayCanvas wiring has no unit coverage (jsdom can't run Konva) — snap math is unit-tested; the wiring is browser-QA-only. A Playwright e2e harness would close this class.
 - Unreproducible anomaly (2× observed): large x+y jump during <20ms nudges right after drag+panel-open; no mechanism found (final reviewer hypothesis: may share a root with a swallowed dragend — Konva-node/state divergence corrected as one jump on the next render). Watch for recurrence.
-- **VersionHistory `onRestore` pushes the incoming canvasData to history instead of the current canvas** (pre-existing, plan-excluded): undo-after-restore can't return to pre-restore work — loses user state; deserves its own fix.
+- ~~VersionHistory onRestore history bug~~ **RESOLVED** (`fix/version-restore-history`): the callback parameter shadowed the component canvasData state, pushing the raw incoming version to history instead of the current canvas. Extracted a pure, tested `applyVersionRestore` helper — undo-after-restore now returns to pre-restore work, and the restored canvas is route-type-healed.
 - Re-entering preview during the prior instance's ~200ms exit fade briefly lets stale frames past the Stop ref guard (cosmetic, narrow window).
 - `findLatestOwnDraftKey`'s lexicographic sort mis-orders variable-length timestamps (unreachable via generated keys — 13-digit until 2286; hand-crafted keys only).
 - Legacy draft adoption assigns all pre-scoping drafts to whichever user opens the designer first on a shared browser (accepted trade-off: drafts preserved > perfectly attributed).
