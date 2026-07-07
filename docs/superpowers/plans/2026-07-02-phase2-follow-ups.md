@@ -109,7 +109,7 @@ Phase 3d (`phase-3d-mobile`, spec `docs/superpowers/specs/2026-07-07-phase3d-mob
 
 ### Still open (newly deferred by Phase 3d reviews/QA)
 
-- **Quiz-create 500 on a fresh org** (QA find, pre-existing backend bug, out of 3d scope): empty due-date + no game plan reproducibly 500s at /quizzes/create — needs a proper fix + route test.
+- ~~Quiz-create 500 on a fresh org~~ **RESOLVED** (`fix/quiz-create-500`, a74014b): root cause was the custom/knowledge-question feature vs. a required `QuizQuestion.playId` FK — the client masked missing playIds as `""` (guaranteed P2003). `playId` is now optional; custom questions score the quiz total but never feed per-play SM-2; verified against the real DB.
 - SW cache writes not wrapped in `event.waitUntil` — a terminated SW can drop a cache write (robustness; brief-prescribed shape).
 - Version-agreement regex isn't declaration-anchored (a decoy `SW_VERSION = N` comment before the real declaration could false-match).
 - ToastProvider's context value is a fresh object per render → sw-register's effect re-runs per toast (idempotent-safe; ref-capture cleanup).
