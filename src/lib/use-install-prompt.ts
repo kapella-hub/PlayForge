@@ -49,6 +49,7 @@ export interface InstallPromptState {
 export function useInstallPrompt(userId: string): InstallPromptState {
   const [deferred, setDeferred] = useState<BeforeInstallPromptEvent | null>(null);
   const [canInstall, setCanInstall] = useState(false);
+  const [isDismissed, setIsDismissed] = useState(false);
 
   // SSR-safe client flag: server render yields false, client render yields true.
   // Allows deriving client-only state during render without setState-in-effect.
@@ -61,7 +62,7 @@ export function useInstallPrompt(userId: string): InstallPromptState {
   // Derive client-only values during render, re-computing on userId change and dismissal
   const nav = typeof window === "undefined" ? null : (navigator as Navigator & { standalone?: boolean });
   const showIosHint =
-    mounted && nav
+    mounted && nav && !isDismissed
       ? isIosSafariNonStandalone(nav.userAgent, nav.standalone) && !isInstallDismissed(userId)
       : false;
 
@@ -89,6 +90,7 @@ export function useInstallPrompt(userId: string): InstallPromptState {
   function dismiss(): void {
     dismissInstall(userId);
     setCanInstall(false);
+    setIsDismissed(true);
   }
 
   return { canInstall, showIosHint, promptInstall, dismiss };

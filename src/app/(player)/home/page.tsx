@@ -17,6 +17,7 @@ import {
   AnimatedProgressBar,
   PulseWrapper,
 } from "@/components/player/player-home-client";
+import { InstallCard } from "@/components/pwa/install-card";
 
 export const dynamic = "force-dynamic";
 
@@ -107,6 +108,8 @@ export default async function PlayerHomePage() {
           )}
         </div>
       </PlayerCard>
+
+      <InstallCard userId={session.user.id} />
 
       {!hasContent ? (
         <PlayerCard>
