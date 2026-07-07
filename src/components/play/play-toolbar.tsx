@@ -22,6 +22,7 @@ import {
   Shield,
   History,
   MoreHorizontal,
+  Magnet,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { GAME_FORMATS, type GameFormat } from "@/engine/constants";
@@ -43,6 +44,8 @@ interface PlayToolbarProps {
   previewMode: boolean;
   onTogglePreview: () => void;
   hasFormation: boolean;
+  snapEnabled: boolean;
+  onToggleSnap: () => void;
   // ── history ──
   onUndo: () => void;
   onRedo: () => void;
@@ -91,6 +94,8 @@ export function PlayToolbar({
   previewMode,
   onTogglePreview,
   hasFormation,
+  snapEnabled,
+  onToggleSnap,
   onUndo,
   onRedo,
   canUndo,
@@ -230,6 +235,23 @@ export function PlayToolbar({
         <IconButton icon={<Undo2 className="h-4 w-4" />} onClick={onUndo} disabled={!canUndo} tooltip="Undo (⌘Z)" />
         <IconButton icon={<Redo2 className="h-4 w-4" />} onClick={onRedo} disabled={!canRedo} tooltip="Redo (⌘⇧Z)" />
       </div>
+
+      <div className="h-4 w-px shrink-0 bg-border" />
+      <button
+        type="button"
+        onClick={onToggleSnap}
+        aria-pressed={snapEnabled}
+        title="Snap to align (Alt to bypass)"
+        className={cn(
+          "flex shrink-0 items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium transition-all",
+          snapEnabled
+            ? "bg-primary text-primary-foreground"
+            : "text-muted-foreground hover:text-foreground",
+        )}
+      >
+        <Magnet className="h-3.5 w-3.5" />
+        <span className="hidden sm:inline">Snap</span>
+      </button>
 
       {/* ── Spacer ── */}
       <div className="flex-1" />

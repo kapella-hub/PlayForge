@@ -45,6 +45,7 @@ import {
   type DraftStorage,
 } from "@/lib/draft-storage";
 import { normalizeCanvasRouteTypes } from "@/engine/route-types";
+import { loadSnapPreference, saveSnapPreference } from "@/lib/snap-preference";
 import type { CanvasData, FormationTemplate, Route, AnimationData, MotionPath } from "@/engine/types";
 import type { AnimationState } from "@/engine/animation-engine";
 import type { PlayCanvasHandle } from "@/engine/play-canvas";
@@ -117,6 +118,19 @@ export function DesignerClient({ userId }: { userId: string }) {
   // Coverage overlay state
   const [coverageOverlay, setCoverageOverlay] = useState<string>("");
   const canvasRef = useRef<PlayCanvasHandle>(null);
+
+  // Snap-to-align preference (default ON; loaded once on mount, persisted on toggle)
+  const [snapEnabled, setSnapEnabled] = useState(true);
+  useEffect(() => {
+    setSnapEnabled(loadSnapPreference(userId));
+  }, [userId]);
+  const toggleSnap = useCallback(() => {
+    setSnapEnabled((prev) => {
+      const next = !prev;
+      saveSnapPreference(userId, next);
+      return next;
+    });
+  }, [userId]);
 
   // Draft restore state
   const [draftKey, setDraftKey] = useState<string | null>(null);
@@ -729,6 +743,8 @@ export function DesignerClient({ userId }: { userId: string }) {
             previewMode={previewMode}
             onTogglePreview={handleTogglePreview}
             hasFormation={hasFormation}
+            snapEnabled={snapEnabled}
+            onToggleSnap={toggleSnap}
             onSave={handleSave}
             onUndo={handleUndo}
             onRedo={handleRedo}
@@ -836,6 +852,7 @@ export function DesignerClient({ userId }: { userId: string }) {
               motionPlayerId={motionPlayerId}
               onMotionPlayerSelect={setMotionPlayerId}
               coverageOverlay={coverageOverlay || undefined}
+              snapEnabled={snapEnabled}
             />
           ) : (
             /* Empty state */

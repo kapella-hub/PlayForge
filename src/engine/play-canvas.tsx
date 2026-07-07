@@ -37,6 +37,8 @@ interface PlayCanvasProps {
   highlightPlayerId?: string;
   /** Coverage scheme id to overlay on the field */
   coverageOverlay?: string;
+  /** Whether drag snapping is active; Alt still momentarily bypasses when true. Default ON. */
+  snapEnabled?: boolean;
 }
 
 export interface PlayCanvasHandle {
@@ -62,6 +64,7 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
   onMotionPlayerSelect,
   highlightPlayerId,
   coverageOverlay,
+  snapEnabled = true,
 }, ref) {
   const isAnimating = !!animationState;
   const containerRef = useRef<HTMLDivElement>(null);
@@ -177,7 +180,7 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
       const player = canvasData.players.find((p) => p.id === id);
       if (!player) return pos;
       const { x, y, guides } = computeSnap(id, proposed, canvasData.players, {
-        altHeld: altHeldRef.current,
+        altHeld: altHeldRef.current || !snapEnabled,
         preDragY: player.y,
       });
       if (!guidesEqual(activeGuidesRef.current, guides)) {
@@ -186,7 +189,7 @@ export const PlayCanvas = forwardRef<PlayCanvasHandle, PlayCanvasProps>(function
       }
       return { x: x * scaleX, y: y * scaleY };
     },
-    [scaleX, scaleY, canvasData.players],
+    [scaleX, scaleY, canvasData.players, snapEnabled],
   );
 
   const handlePlayerDragEnd = useCallback(
