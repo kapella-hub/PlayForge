@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership, isCoachRole } from "@/lib/membership";
 import { PlayerTabs } from "@/components/layout/player-tabs";
 import { UserMenu } from "@/components/layout/user-menu";
+import { OfflinePill } from "@/components/pwa/offline-pill";
 import { NotificationBell } from "@/components/ui/notification-bell";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { PageTransition } from "@/components/ui/page-transition";
@@ -59,6 +60,7 @@ export default async function PlayerLayout({
           <p className="hidden text-xs text-muted-foreground sm:block">Player install and review</p>
         </div>
         <div className="flex items-center gap-2">
+          <OfflinePill />
           <NotificationBell userId={session.user.id} incoming={notifications} />
           <ThemeToggle />
           <UserMenu user={session.user} />

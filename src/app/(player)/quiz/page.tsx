@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 import { getUserMembership } from "@/lib/membership";
 import { getPlayerQuizzes } from "@/lib/actions/quiz-actions";
 import { QuizCard } from "@/components/quiz/quiz-card";
+import { OfflineQuizGate } from "@/components/quiz/offline-quiz-gate";
 import { FileQuestion } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -34,19 +35,21 @@ export default async function PlayerQuizPage() {
           </p>
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-3">
-          {quizzes.map((quiz) => (
-            <QuizCard
-              key={quiz.id}
-              id={quiz.id}
-              name={quiz.name}
-              questionCount={quiz._count.questions}
-              dueDate={quiz.dueDate}
-              gamePlanName={quiz.gamePlan?.name}
-              href={`/quiz/${quiz.id}`}
-            />
-          ))}
-        </div>
+        <OfflineQuizGate>
+          <div className="grid grid-cols-1 gap-3">
+            {quizzes.map((quiz) => (
+              <QuizCard
+                key={quiz.id}
+                id={quiz.id}
+                name={quiz.name}
+                questionCount={quiz._count.questions}
+                dueDate={quiz.dueDate}
+                gamePlanName={quiz.gamePlan?.name}
+                href={`/quiz/${quiz.id}`}
+              />
+            ))}
+          </div>
+        </OfflineQuizGate>
       )}
     </div>
   );

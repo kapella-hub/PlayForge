@@ -14,6 +14,8 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { MultipleChoice } from "./multiple-choice";
 import { submitQuizAttempt } from "@/lib/actions/quiz-actions";
+import { useOnline } from "@/lib/use-online";
+import { QuizOfflineBanner } from "./quiz-offline-banner";
 
 interface QuizQuestion {
   id: string;
@@ -44,6 +46,7 @@ interface Reward {
 }
 
 export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
+  const online = useOnline();
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState<Answer[]>([]);
   const [showResult, setShowResult] = useState(false);
@@ -109,6 +112,8 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
 
   return (
     <div className="space-y-6">
+      {!online && <QuizOfflineBanner />}
+
       {/* Header */}
       <div className="space-y-2">
         <h2 className="text-lg font-semibold text-foreground">{quizName}</h2>
@@ -133,6 +138,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
           questionText={question.questionText}
           options={options}
           onAnswer={handleAnswer}
+          disabled={!online}
         />
       )}
 
@@ -146,7 +152,7 @@ export function QuizFlow({ quizId, quizName, questions }: QuizFlowProps) {
       {/* Next button */}
       {showResult && (
         <div className="flex justify-end">
-          <Button onClick={handleNext} disabled={submitting}>
+          <Button onClick={handleNext} disabled={submitting || !online}>
             {submitting ? (
               "Submitting..."
             ) : currentIndex < totalQuestions - 1 ? (

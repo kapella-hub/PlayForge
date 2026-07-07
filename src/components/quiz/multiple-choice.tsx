@@ -10,6 +10,7 @@ interface MultipleChoiceProps {
   questionText: string;
   options: { text: string }[];
   onAnswer: (answer: string) => void;
+  disabled?: boolean;
 }
 
 const LABELS = ["A", "B", "C", "D"] as const;
@@ -19,6 +20,7 @@ export function MultipleChoice({
   questionText,
   options,
   onAnswer,
+  disabled = false,
 }: MultipleChoiceProps) {
   const [selected, setSelected] = useState<number | null>(null);
   const [checking, setChecking] = useState(false);
@@ -29,7 +31,7 @@ export function MultipleChoice({
   const [error, setError] = useState<string | null>(null);
 
   async function handleSelect(index: number) {
-    if (checking || result !== null) return;
+    if (disabled || checking || result !== null) return;
     setError(null);
     setSelected(index);
     setChecking(true);
@@ -44,7 +46,7 @@ export function MultipleChoice({
     }
   }
 
-  const locked = checking || result !== null;
+  const locked = disabled || checking || result !== null;
 
   return (
     <div className="space-y-4">
