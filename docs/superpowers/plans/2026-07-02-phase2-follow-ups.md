@@ -102,4 +102,22 @@ Phase 3c (`phase-3c-designer`, spec `docs/superpowers/specs/2026-07-06-phase3c-d
 - Re-entering preview during the prior instance's ~200ms exit fade briefly lets stale frames past the Stop ref guard (cosmetic, narrow window).
 - `findLatestOwnDraftKey`'s lexicographic sort mis-orders variable-length timestamps (unreachable via generated keys — 13-digit until 2286; hand-crafted keys only).
 - Legacy draft adoption assigns all pre-scoping drafts to whichever user opens the designer first on a shared browser (accepted trade-off: drafts preserved > perfectly attributed).
+
+## Phase 3d resolution (2026-07-07)
+
+Phase 3d (`phase-3d-mobile`, spec `docs/superpowers/specs/2026-07-07-phase3d-mobile-pwa-design.md`) shipped the offline player PWA — the program's final phase. **Resolved:** no service worker at all (hand-rolled SW: navigation network-first→cache→/offline, static cache-first, SWR assets, versioned caches, update toast with first-install guard); offline states (pill, quiz gating — quizzes stay online-only by design, the 3b grading boundary); install experience (Chromium prompt + iOS hint, user-scoped dismissal); deprecated apple-meta warning; touch snapping bypass (magnet toggle, persisted per user — closes the 3c deferral).
+
+### Still open (newly deferred by Phase 3d reviews/QA)
+
+- **Quiz-create 500 on a fresh org** (QA find, pre-existing backend bug, out of 3d scope): empty due-date + no game plan reproducibly 500s at /quizzes/create — needs a proper fix + route test.
+- SW cache writes not wrapped in `event.waitUntil` — a terminated SW can drop a cache write (robustness; brief-prescribed shape).
+- Version-agreement regex isn't declaration-anchored (a decoy `SW_VERSION = N` comment before the real declaration could false-match).
+- ToastProvider's context value is a fresh object per render → sw-register's effect re-runs per toast (idempotent-safe; ref-capture cleanup).
+- use-install-prompt: dismissal tracked via state + localStorage re-read (unify later); Chromium canInstall branch has no unit test (real event verified in QA).
+- `output: standalone` + `next start` warning — works, but deploy docs should say `node .next/standalone/server.js`, AND standalone deploys must copy `public/` (now including `sw.js`) and `.next/static` next to server.js or the SW 404s and the PWA silently degrades.
+- Shared-device residual (after the sign-out cache clear): logging in as a DIFFERENT user without a prior sign-out doesn't clear the previous user's pages cache — fix via a last-userId marker in SwRegister that clears on mismatch.
+- Quiz-flow's unsupported-question Skip branch: no offline banner, Skip enabled offline, and submitError never renders there (pre-existing) — a failed last-question submit is invisible on that branch.
+- OfflineQuizGate blocks pointer only — keyboard users can Tab+Enter into a quiz link offline (degrades to a route error; no data risk).
+- Pages cache is unbounded (spec-sanctioned; only assets are trimmed) — add a max-entries sweep if storage pressure ever shows.
+- Going offline immediately after the very first visit can yield an unstyled /offline (CSS caches only after the SW claims) — accepted best-effort.
 - Carried from earlier triage, still open: mastery-from-viewing redesign; client-trusted quiz grading; streak XP on the quiz finish screen; `--category-*` tokens; SVG viz palette; dialog unit tests beyond ConfirmDialog; `@custom-variant dark` revisit (end of Phase 3); leaderboard gold+bronze both accent; routes-library vs assignment-panel vocabulary; rapid double-reorder last-write-wins; special_teams badge treatment.
