@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { LogOut, Lock } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { ChangePasswordDialog } from "@/components/account/change-password-dialog";
+import { pagesCacheName } from "@/lib/sw/strategies";
 
 interface UserMenuProps {
   user: {
@@ -29,6 +30,15 @@ export function UserMenu({ user }: UserMenuProps) {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  async function handleSignOut() {
+    // Best-effort: a shared device must never be left showing a signed-out
+    // user's cached pages, but cache cleanup must never block sign-out.
+    if (typeof window !== "undefined" && "caches" in window) {
+      await caches.delete(pagesCacheName()).catch(() => {});
+    }
+    signOut({ callbackUrl: "/login" });
+  }
 
   const initials = user.name
     ? user.name
@@ -72,7 +82,7 @@ export function UserMenu({ user }: UserMenuProps) {
               Change password
             </button>
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })}
+              onClick={handleSignOut}
               className="flex w-full items-center gap-2 px-4 py-2.5 text-sm text-muted-foreground hover:bg-secondary hover:text-foreground"
             >
               <LogOut className="h-4 w-4" />
