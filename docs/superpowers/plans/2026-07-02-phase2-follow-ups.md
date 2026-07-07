@@ -86,4 +86,20 @@ Phase 3b (`phase-3b-engagement`, spec `docs/superpowers/specs/2026-07-06-phase3b
 - Authz resolver timing side-channel (unknown = 1 query, foreign = 3, same error) — pre-existing across authz.ts.
 - Join route: membership-unique P2002 (double-submit join) returns the email-exists copy — right status, wrong message (distinguish via `error.meta.target`). [carried from 3a]
 - Minor test/type hygiene: dead `findUnique` mock in recordPlayView test; quiz-score (4,4) duplicate-path test; `InputJsonValue` double-cast could be a type-alias cast.
+
+## Phase 3c resolution (2026-07-06)
+
+Phase 3c (`phase-3c-designer`, spec `docs/superpowers/specs/2026-07-06-phase3c-designer-design.md`) added precision placement and cleared the designer fixes. **Resolved:** drag snapping + alignment guides (via `dragBoundFunc`; the first dragmove-override implementation was inert in real browsers — caught by QA); arrow-key nudge with burst-coalesced undo and field-bounds clamping; preview auto-play (Preview/Play label confusion); user-scoped draft keys with one-time legacy adoption; canonical route-type vocabulary + legacy-case healing on load (pills highlight); preview-Stop stuck-frame bug (pre-existing, fixed in-phase). The `n()` rename item was a grep artifact (struck from spec).
+
+### Still open (newly deferred by Phase 3c reviews/QA)
+
+- PlayerNode `draggable` isn't gated on `readOnly` — visual-only dragging possible in preview (commit path is gated; cosmetic). Escape doesn't cancel an in-flight Konva drag.
+- Touch drags have no Alt equivalent — snapping can't be bypassed on touch (acceptable until 3d mobile work; revisit there).
+- Bare arrow keys are swallowed designer-wide even with nothing selected (pre-existing keyboard-hook matching order).
+- PlayCanvas wiring has no unit coverage (jsdom can't run Konva) — snap math is unit-tested; the wiring is browser-QA-only. A Playwright e2e harness would close this class.
+- Unreproducible anomaly (2× observed): large x+y jump during <20ms nudges right after drag+panel-open; no mechanism found (final reviewer hypothesis: may share a root with a swallowed dragend — Konva-node/state divergence corrected as one jump on the next render). Watch for recurrence.
+- **VersionHistory `onRestore` pushes the incoming canvasData to history instead of the current canvas** (pre-existing, plan-excluded): undo-after-restore can't return to pre-restore work — loses user state; deserves its own fix.
+- Re-entering preview during the prior instance's ~200ms exit fade briefly lets stale frames past the Stop ref guard (cosmetic, narrow window).
+- `findLatestOwnDraftKey`'s lexicographic sort mis-orders variable-length timestamps (unreachable via generated keys — 13-digit until 2286; hand-crafted keys only).
+- Legacy draft adoption assigns all pre-scoping drafts to whichever user opens the designer first on a shared browser (accepted trade-off: drafts preserved > perfectly attributed).
 - Carried from earlier triage, still open: mastery-from-viewing redesign; client-trusted quiz grading; streak XP on the quiz finish screen; `--category-*` tokens; SVG viz palette; dialog unit tests beyond ConfirmDialog; `@custom-variant dark` revisit (end of Phase 3); leaderboard gold+bronze both accent; routes-library vs assignment-panel vocabulary; rapid double-reorder last-write-wins; special_teams badge treatment.
